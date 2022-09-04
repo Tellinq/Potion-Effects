@@ -77,6 +77,7 @@ public class PotionEffects extends BasicHud {
         GlStateManager.pushMatrix();
 //        GlStateManager.scale(getScale(), getScale(), 1);
         for (PotionEffect effect : potionEffects) {
+            PotionEffectsConfig.EffectConfig effectSetting = getEffectSetting(effect);
             Potion potion = Potion.potionTypes[effect.getPotionID()];
             if (!potion.shouldRender(effect)) continue;
 
@@ -85,15 +86,15 @@ public class PotionEffects extends BasicHud {
 
             GlStateManager.color(1f, 1f, 1f, 1f);
 
-            if (PotionEffectsConfig.global.icon) {
+            if (effectSetting.icon) {
                 mc.getTextureManager().bindTexture(EFFECTS_RESOURCE);
                 mc.ingameGUI.drawTexturedModalRect(iconX, (y + yOff) / getScale(), potion.getStatusIconIndex() % 8 * 18, 198 + potion.getStatusIconIndex() / 8 * 18, 18, 18);
                 xOff = ICON_SIZE * getScale();
                 this.width = Math.max(this.width, xOff / getScale());
             }
 
-            if (PotionEffectsConfig.global.effectName) {
-                if (PotionEffectsConfig.global.icon)
+            if (effectSetting.effectName) {
+                if (effectSetting.icon)
                     xOff = (ICON_SIZE + 4) * getScale();
 
                 StringBuilder titleSb = new StringBuilder();
@@ -102,9 +103,9 @@ public class PotionEffects extends BasicHud {
 //                if (titleTextUnderline.get()) titleSb.append(EnumChatFormatting.UNDERLINE);
                 titleSb.append(I18n.format(potion.getName()));
                 int amplifier = Math.max(1, effect.getAmplifier() + 1);
-                if (PotionEffectsConfig.global.amplifier && (amplifier != 1 || PotionEffectsConfig.global.levelOne)) {
+                if (effectSetting.amplifier && (amplifier != 1 || effectSetting.levelOne)) {
                     titleSb.append(" ");
-                    if (!PotionEffectsConfig.global.romanNumerals) titleSb.append(amplifierNumerals(amplifier));
+                    if (!effectSetting.romanNumerals) titleSb.append(amplifierNumerals(amplifier));
                     else titleSb.append(amplifier);
                 }
                 String builtTitle = titleSb.toString();
@@ -116,17 +117,17 @@ public class PotionEffects extends BasicHud {
                 titleX /= getScale();
 
                 float titleY = y + yOff;
-                if (!PotionEffectsConfig.global.duration)
+                if (!effectSetting.duration)
                     titleY += mc.fontRendererObj.FONT_HEIGHT / 2f;
                 titleY /= getScale();
 
 
-                RenderManager.drawScaledString(builtTitle, titleX, titleY, PotionEffectsConfig.global.nameColor.getRGB(), RenderManager.TextType.SHADOW, scale);
+                RenderManager.drawScaledString(builtTitle, titleX, titleY, effectSetting.nameColor.getRGB(), RenderManager.TextType.SHADOW, scale);
 
             }
 
-            if (PotionEffectsConfig.global.duration) {
-                if (PotionEffectsConfig.global.icon)
+            if (effectSetting.duration) {
+                if (effectSetting.icon)
                     xOff = (ICON_SIZE + 4) * getScale();
 
                 StringBuilder timeSb = new StringBuilder();
@@ -143,12 +144,12 @@ public class PotionEffects extends BasicHud {
                 timeX /= getScale();
 
                 float timeY = y + yOff + (mc.fontRendererObj.FONT_HEIGHT) + 1;
-                if (!PotionEffectsConfig.global.effectName)
+                if (!effectSetting.effectName)
                     timeY -= mc.fontRendererObj.FONT_HEIGHT / 2f;
                 timeY /= getScale();
 
-                if (effect.getDuration() / 20f > PotionEffectsConfig.global.blinkDuration || effect.getDuration() % (50 - PotionEffectsConfig.global.blinkSpeed) <= (50 - PotionEffectsConfig.global.blinkSpeed) / 2f) {
-                    RenderManager.drawScaledString(builtTime, timeX, timeY, PotionEffectsConfig.global.durationColor.getRGB(), RenderManager.TextType.SHADOW, scale);
+                if (effect.getDuration() / 20f > effectSetting.blinkDuration || effect.getDuration() % (50 - effectSetting.blinkSpeed) <= (50 - effectSetting.blinkSpeed) / 2f) {
+                    RenderManager.drawScaledString(builtTime, timeX, timeY, effectSetting.durationColor.getRGB(), RenderManager.TextType.SHADOW, scale);
                 }
             }
 
@@ -167,6 +168,48 @@ public class PotionEffects extends BasicHud {
                     .replace("VIV", "IX").replace("XXXXX", "L").replace("XXXX", "XL")
                     .replace("LL", "C").replace("LXL", "XC").replace("CCCCC", "D")
                     .replace("CCCC", "CD").replace("DD", "M").replace("DCD", "CM");
+    }
+
+    public PotionEffectsConfig.EffectConfig getEffectSetting(PotionEffect effect) {
+        if (effect.getPotionID() == Potion.moveSpeed.id) {
+            return PotionEffectsConfig.speed;
+        } else if (effect.getPotionID() == Potion.moveSlowdown.id) {
+            return PotionEffectsConfig.slowness;
+        } else if (effect.getPotionID() == Potion.digSpeed.id) {
+            return PotionEffectsConfig.haste;
+        } else if (effect.getPotionID() == Potion.digSlowdown.id) {
+            return PotionEffectsConfig.miningFatigue;
+        } else if (effect.getPotionID() == Potion.damageBoost.id) {
+            return PotionEffectsConfig.strength;
+        } else if (effect.getPotionID() == Potion.jump.id) {
+            return PotionEffectsConfig.jumpBoost;
+        } else if (effect.getPotionID() == Potion.confusion.id) {
+            return PotionEffectsConfig.nausea;
+        } else if (effect.getPotionID() == Potion.regeneration.id) {
+            return PotionEffectsConfig.regeneration;
+        } else if (effect.getPotionID() == Potion.resistance.id) {
+            return PotionEffectsConfig.resistance;
+        } else if (effect.getPotionID() == Potion.fireResistance.id) {
+            return PotionEffectsConfig.fireResistance;
+        } else if (effect.getPotionID() == Potion.waterBreathing.id) {
+            return PotionEffectsConfig.waterBreathing;
+        } else if (effect.getPotionID() == Potion.invisibility.id) {
+            return PotionEffectsConfig.invisibility;
+        } else if (effect.getPotionID() == Potion.blindness.id) {
+            return PotionEffectsConfig.blindness;
+        } else if (effect.getPotionID() == Potion.nightVision.id) {
+            return PotionEffectsConfig.nightVision;
+        } else if (effect.getPotionID() == Potion.hunger.id) {
+            return PotionEffectsConfig.hunger;
+        } else if (effect.getPotionID() == Potion.poison.id) {
+            return PotionEffectsConfig.poison;
+        } else if (effect.getPotionID() == Potion.wither.id) {
+            return PotionEffectsConfig.wither;
+        } else if (effect.getPotionID() == Potion.absorption.id) {
+            return PotionEffectsConfig.absorption;
+        } else {
+            return PotionEffectsConfig.global;
+        }
     }
 
     @Override

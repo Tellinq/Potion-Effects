@@ -42,23 +42,138 @@ public class PotionEffectsConfig extends Config {
     )
     public static EffectConfig global = new EffectConfig("Global");
 
-//    @Page(
-//            name = "Speed",
-//            location = PageLocation.BOTTOM
-//    )
-//    public static EffectConfig speed = new EffectConfig("Speed");
-//
-//    @Page(
-//            name = "Slowness",
-//            location = PageLocation.BOTTOM
-//    )
-//    public static EffectConfig slowness = new EffectConfig("Slowness");
-//
-//    @Page(
-//            name = "Strength",
-//            location = PageLocation.BOTTOM
-//    )
-//    public static EffectConfig strength = new EffectConfig("Strength");
+    @Page(
+            name = "Speed",
+            location = PageLocation.BOTTOM,
+            category = "Effects"
+    )
+    public static EffectConfig speed = new EffectConfig("Speed");
+
+    @Page(
+            name = "Slowness",
+            location = PageLocation.BOTTOM,
+            category = "Effects"
+    )
+    public static EffectConfig slowness = new EffectConfig("Slowness");
+
+    @Page(
+            name = "Haste",
+            location = PageLocation.BOTTOM,
+            category = "Effects"
+    )
+    public static EffectConfig haste = new EffectConfig("Haste");
+
+    @Page(
+            name = "Mining Fatigue",
+            location = PageLocation.BOTTOM,
+            category = "Effects"
+    )
+    public static EffectConfig miningFatigue = new EffectConfig("Mining Fatigue");
+
+    @Page(
+            name = "Strength",
+            location = PageLocation.BOTTOM,
+            category = "Effects"
+    )
+    public static EffectConfig strength = new EffectConfig("Strength");
+
+    @Page(
+            name = "Jump Boost",
+            location = PageLocation.BOTTOM,
+            category = "Effects"
+    )
+    public static EffectConfig jumpBoost = new EffectConfig("Jump Boost");
+
+    @Page(
+            name = "Nausea",
+            location = PageLocation.BOTTOM,
+            category = "Effects"
+    )
+    public static EffectConfig nausea = new EffectConfig("Nausea");
+
+    @Page(
+            name = "Regeneration",
+            location = PageLocation.BOTTOM,
+            category = "Effects"
+    )
+    public static EffectConfig regeneration = new EffectConfig("Regeneration");
+
+    @Page(
+            name = "Resistance",
+            location = PageLocation.BOTTOM,
+            category = "Effects"
+    )
+    public static EffectConfig resistance = new EffectConfig("Resistance");
+
+    @Page(
+            name = "Fire Resistance",
+            location = PageLocation.BOTTOM,
+            category = "Effects"
+    )
+    public static EffectConfig fireResistance = new EffectConfig("Fire Resistance");
+
+    @Page(
+            name = "Water Breathing",
+            location = PageLocation.BOTTOM,
+            category = "Effects"
+    )
+    public static EffectConfig waterBreathing = new EffectConfig("Water Breathing");
+
+    @Page(
+            name = "Invisibility",
+            location = PageLocation.BOTTOM,
+            category = "Effects"
+    )
+    public static EffectConfig invisibility = new EffectConfig("Invisibility");
+
+    @Page(
+            name = "Blindness",
+            location = PageLocation.BOTTOM,
+            category = "Effects"
+    )
+    public static EffectConfig blindness = new EffectConfig("Blindness");
+
+    @Page(
+            name = "Night Vision",
+            location = PageLocation.BOTTOM,
+            category = "Effects"
+    )
+    public static EffectConfig nightVision = new EffectConfig("Night Vision");
+
+    @Page(
+            name = "Hunger",
+            location = PageLocation.BOTTOM,
+            category = "Effects"
+    )
+    public static EffectConfig hunger = new EffectConfig("Hunger");
+
+    @Page(
+            name = "Weakness",
+            location = PageLocation.BOTTOM,
+            category = "Effects"
+    )
+    public static EffectConfig weakness = new EffectConfig("Weakness");
+
+    @Page(
+            name = "Poison",
+            location = PageLocation.BOTTOM,
+            category = "Effects"
+    )
+    public static EffectConfig poison = new EffectConfig("Poison");
+
+    @Page(
+            name = "Wither",
+            location = PageLocation.BOTTOM,
+            category = "Effects"
+    )
+    public static EffectConfig wither = new EffectConfig("Wither");
+
+    @Page(
+            name = "Absorption",
+            location = PageLocation.BOTTOM,
+            category = "Effects"
+    )
+    public static EffectConfig absorption = new EffectConfig("Absorption");
 
     public PotionEffectsConfig() {
         super(new Mod(PotionEffectsMod.NAME, ModType.UTIL_QOL), PotionEffectsMod.MODID + ".json");
@@ -81,25 +196,25 @@ public class PotionEffectsConfig extends Config {
                 name = "Effect Name",
                 subcategory = "Component"
         )
-        public static boolean effectName = true;
+        public boolean effectName = true;
 
         @Checkbox(
                 name = "Duration",
                 subcategory = "Component"
         )
-        public static boolean duration = true;
+        public boolean duration = true;
 
         @Switch(
                 name = "Show Amplifier",
                 subcategory = "Amplifier"
         )
-        public static boolean amplifier = true;
+        public boolean amplifier = true;
 
         @Switch(
                 name = "Show Level One",
                 subcategory = "Amplifier"
         )
-        public static boolean levelOne = false;
+        public boolean levelOne = false;
 
         @DualOption(
                 name = "Amplifier Numerals",
@@ -107,13 +222,13 @@ public class PotionEffectsConfig extends Config {
                 left = "Roman",
                 right = "Arabic"
         )
-        public static boolean romanNumerals = true;
+        public boolean romanNumerals = true;
 
         @Switch(
                 name = "Blink",
                 subcategory = "Blinking"
         )
-        public static boolean blink = true;
+        public boolean blink = true;
 
         @Slider(
                 name = "Blink Duration",
@@ -121,7 +236,7 @@ public class PotionEffectsConfig extends Config {
                 min = 0,
                 max = 60
         )
-        public static float blinkDuration = 10;
+        public float blinkDuration = 10;
 
         @Slider(
                 name = "Blink Speed",
@@ -129,19 +244,19 @@ public class PotionEffectsConfig extends Config {
                 min = 0,
                 max = 60
         )
-        public static float blinkSpeed = 30;
+        public float blinkSpeed = 30;
 
         @Color(
                 name = "Name Color",
                 subcategory = "Color"
         )
-        public static OneColor nameColor = new OneColor(255, 255, 255);
+        public OneColor nameColor = new OneColor(255, 255, 255);
 
         @Color(
                 name = "Duration Color",
                 subcategory = "Color"
         )
-        public static OneColor durationColor = new OneColor(255, 255, 255);
+        public OneColor durationColor = new OneColor(255, 255, 255);
         
     }
 }
