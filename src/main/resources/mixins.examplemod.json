@@ -1,0 +1,10 @@
+{
+  "compatibilityLevel": "JAVA_8",
+  "minVersion": "0.7",
+  "package": "cc.polyfrost.example.mixin",
+  "refmap": "mixins.oneconfig.refmap.json",
+  "verbose": true,
+  "client": [
+    "MinecraftMixin"
+  ]
+}
