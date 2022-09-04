@@ -1,12 +1,13 @@
 package cc.polyfrost.example.config;
 
-import cc.polyfrost.example.ExampleMod;
+import cc.polyfrost.example.PotionEffectsMod;
 import cc.polyfrost.example.hud.PotionEffects;
 import cc.polyfrost.oneconfig.config.Config;
 import cc.polyfrost.oneconfig.config.annotations.*;
 import cc.polyfrost.oneconfig.config.core.OneColor;
 import cc.polyfrost.oneconfig.config.data.Mod;
 import cc.polyfrost.oneconfig.config.data.ModType;
+import cc.polyfrost.oneconfig.config.data.PageLocation;
 
 public class PotionEffectsConfig extends Config {
 
@@ -22,82 +23,125 @@ public class PotionEffectsConfig extends Config {
     )
     public static float verticalSpacing = 4;
 
-    @Checkbox(
-            name = "Icon",
-            category = "Global",
-            subcategory = "Component"
+    @DualOption(
+            name = "Vertical Sorting",
+            left = "Top",
+            right = "Bottom"
     )
-    public static boolean icon = true;
+    public static boolean verticalSorting = false;
 
-    @Checkbox(
-            name = "Effect Name",
-            category = "Global",
-            subcategory = "Component"
+    @Dropdown(
+            name = "Sorting Method",
+            options = {"Vanilla", "Alphabetical", "Duration", "Amplifier"}
     )
-    public static boolean effectName = true;
+    public static int sortingMethod = 0;
 
-    @Checkbox(
-            name = "Duration",
-            category = "Global",
-            subcategory = "Component"
+    @Page(
+            name = "Global Effects",
+            location = PageLocation.BOTTOM
     )
-    public static boolean duration = true;
+    public static EffectConfig global = new EffectConfig("Global");
 
-    @Switch(
-            name = "Show Amplifier",
-            category = "Global",
-            subcategory = "Amplifier"
-    )
-    public static boolean amplifier = true;
-
-    @Switch(
-            name = "Show Level One",
-            category = "Global",
-            subcategory = "Amplifier"
-    )
-    public static boolean levelOne = false;
-
-    @Switch(
-            name = "Blink",
-            category = "Global",
-            subcategory = "Blinking"
-    )
-    public static boolean blink = true;
-
-    @Slider(
-            name = "Blink Duration",
-            category = "Global",
-            subcategory = "Blinking",
-            min = 0,
-            max = 60
-    )
-    public static float blinkDuration = 10;
-
-    @Slider(
-            name = "Blink Speed",
-            category = "Global",
-            subcategory = "Blinking",
-            min = 0,
-            max = 60
-    )
-    public static float blinkSpeed = 30;
-
-    @Color(
-            name = "Name Color",
-            category = "Global",
-            subcategory = "Color"
-    )
-    public static OneColor nameColor = new OneColor(255, 255, 255);
-
-    @Color(
-            name = "Duration Color",
-            category = "Global",
-            subcategory = "Color"
-    )
-    public static OneColor durationColor = new OneColor(255, 255, 255);
+//    @Page(
+//            name = "Speed",
+//            location = PageLocation.BOTTOM
+//    )
+//    public static EffectConfig speed = new EffectConfig("Speed");
+//
+//    @Page(
+//            name = "Slowness",
+//            location = PageLocation.BOTTOM
+//    )
+//    public static EffectConfig slowness = new EffectConfig("Slowness");
+//
+//    @Page(
+//            name = "Strength",
+//            location = PageLocation.BOTTOM
+//    )
+//    public static EffectConfig strength = new EffectConfig("Strength");
 
     public PotionEffectsConfig() {
-        super(new Mod(ExampleMod.NAME, ModType.UTIL_QOL), ExampleMod.MODID + ".json");
+        super(new Mod(PotionEffectsMod.NAME, ModType.UTIL_QOL), PotionEffectsMod.MODID + ".json");
         initialize();
+    }
+
+    public static class EffectConfig {
+        public String effect;
+        public EffectConfig(String effect) {
+            this.effect = effect;
+        }
+        
+        @Checkbox(
+                name = "Icon",
+                subcategory = "Component"
+        )
+        public boolean icon = true;
+
+        @Checkbox(
+                name = "Effect Name",
+                subcategory = "Component"
+        )
+        public static boolean effectName = true;
+
+        @Checkbox(
+                name = "Duration",
+                subcategory = "Component"
+        )
+        public static boolean duration = true;
+
+        @Switch(
+                name = "Show Amplifier",
+                subcategory = "Amplifier"
+        )
+        public static boolean amplifier = true;
+
+        @Switch(
+                name = "Show Level One",
+                subcategory = "Amplifier"
+        )
+        public static boolean levelOne = false;
+
+        @DualOption(
+                name = "Amplifier Numerals",
+                subcategory = "Amplifier",
+                left = "Roman",
+                right = "Arabic"
+        )
+        public static boolean romanNumerals = true;
+
+        @Switch(
+                name = "Blink",
+                subcategory = "Blinking"
+        )
+        public static boolean blink = true;
+
+        @Slider(
+                name = "Blink Duration",
+                subcategory = "Blinking",
+                min = 0,
+                max = 60
+        )
+        public static float blinkDuration = 10;
+
+        @Slider(
+                name = "Blink Speed",
+                subcategory = "Blinking",
+                min = 0,
+                max = 60
+        )
+        public static float blinkSpeed = 30;
+
+        @Color(
+                name = "Name Color",
+                subcategory = "Color"
+        )
+        public static OneColor nameColor = new OneColor(255, 255, 255);
+
+        @Color(
+                name = "Duration Color",
+                subcategory = "Color"
+        )
+        public static OneColor durationColor = new OneColor(255, 255, 255);
+        
     }
 }
