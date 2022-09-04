@@ -1,16 +1,16 @@
 [
   {
-    "modid": "${id}",
-    "name": "${name}",
-    "description": "",
-    "version": "${version}",
+    "modid": "potioneffects",
+    "name": "Potion Effects",
+    "description": "Display active potion effects on your player.",
+    "version": "0.0.1",
     "mcversion": "1.8.9",
     "url": "",
     "updateUrl": "",
     "authorList": [
-      "Your Name"
+      "Tellinq"
     ],
-    "credits": "",
+    "credits": "bspkrs and jadedcat as the original creators",
     "logoFile": "",
     "screenshots": [],
     "dependencies": []
