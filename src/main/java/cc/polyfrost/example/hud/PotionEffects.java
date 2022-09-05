@@ -1,7 +1,7 @@
 package cc.polyfrost.example.hud;
 
-import cc.polyfrost.example.PotionEffectsMod;
 import cc.polyfrost.example.config.PotionEffectsConfig;
+import cc.polyfrost.oneconfig.config.annotations.Exclude;
 import cc.polyfrost.oneconfig.config.core.OneColor;
 import cc.polyfrost.oneconfig.hud.BasicHud;
 import cc.polyfrost.oneconfig.libs.universal.UMatrixStack;
@@ -18,11 +18,10 @@ import net.minecraft.util.ResourceLocation;
 import java.util.*;
 
 public class PotionEffects extends BasicHud {
-    public static final int ICON_SIZE = 18;
-    private final ResourceLocation EFFECTS_RESOURCE = new ResourceLocation("textures/gui/container/inventory.png");
-    public Minecraft mc = Minecraft.getMinecraft();
-    public PotionEffectsConfig config = PotionEffectsMod.INSTANCE.config;
-    public Map<Integer, PotionEffectsConfig.EffectConfig> effectMap =
+    @Exclude public static final int ICON_SIZE = 18;
+    @Exclude private final ResourceLocation EFFECTS_RESOURCE = new ResourceLocation("textures/gui/container/inventory.png");
+    @Exclude public final Minecraft mc = Minecraft.getMinecraft();
+    @Exclude public Map<Integer, PotionEffectsConfig.EffectConfig> effectMap =
             new ImmutableMap.Builder<Integer, PotionEffectsConfig.EffectConfig>()
                     .put(Potion.moveSpeed.id, PotionEffectsConfig.speed)
                     .put(Potion.moveSlowdown.id, PotionEffectsConfig.slowness)

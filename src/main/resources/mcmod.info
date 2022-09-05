@@ -5,7 +5,7 @@
     "description": "Display active potion effects on your player.",
     "version": "0.0.1",
     "mcversion": "1.8.9",
-    "url": "",
+    "url": "https://github.com/Tellinq/Potion-Effects",
     "updateUrl": "",
     "authorList": [
       "Tellinq"
