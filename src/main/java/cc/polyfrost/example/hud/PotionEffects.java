@@ -117,6 +117,17 @@ public class PotionEffects extends BasicHud {
                 this.width = Math.max(this.width, xOff / getScale());
             }
 
+            RenderManager.TextType textType = RenderManager.TextType.NONE;
+            switch (oFormatting.textType) {
+                case 1:
+                    textType = RenderManager.TextType.SHADOW;
+                    break;
+                case 2:
+                    textType = RenderManager.TextType.FULL;
+                    break;
+                default:
+            }
+
             if (oComponent.effectName) {
                 if (oComponent.icon)
                     xOff = (ICON_SIZE + 4) * getScale();
@@ -150,7 +161,7 @@ public class PotionEffects extends BasicHud {
                 titleY /= getScale();
 
 
-                RenderManager.drawScaledString(builtTitle, titleX, titleY, oColor.nameColor.getRGB(), RenderManager.TextType.SHADOW, scale);
+                RenderManager.drawScaledString(builtTitle, titleX, titleY, oColor.nameColor.getRGB(), textType, scale);
 
             }
 
@@ -178,7 +189,7 @@ public class PotionEffects extends BasicHud {
                 timeY /= getScale();
 
                 if (effect.getDuration() / 20f > oBlinking.blinkDuration || effect.getDuration() % (50 - oBlinking.blinkSpeed) <= (50 - oBlinking.blinkSpeed) / 2f) {
-                    RenderManager.drawScaledString(builtTime, timeX, timeY, oColor.durationColor.getRGB(), RenderManager.TextType.SHADOW, scale);
+                    RenderManager.drawScaledString(builtTime, timeX, timeY, oColor.durationColor.getRGB(), textType, scale);
                 }
             }
 

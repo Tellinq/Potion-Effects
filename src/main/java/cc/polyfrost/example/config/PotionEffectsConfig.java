@@ -293,6 +293,13 @@ public class PotionEffectsConfig extends Config {
         )
         public float blinkSpeed = 30;
 
+        @Dropdown(
+                name = "Text Type",
+                subcategory = "Formatting",
+                options = {"No Shadow", "Shadow", "Full Shadow"}
+        )
+        public int textType = 1;
+
         @Text(
                 name = "Custom Name",
                 subcategory = "Formatting",
