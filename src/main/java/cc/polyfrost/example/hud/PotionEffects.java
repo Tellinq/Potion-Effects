@@ -6,6 +6,7 @@ import cc.polyfrost.oneconfig.config.core.OneColor;
 import cc.polyfrost.oneconfig.hud.BasicHud;
 import cc.polyfrost.oneconfig.libs.universal.UMatrixStack;
 import cc.polyfrost.oneconfig.renderer.RenderManager;
+import com.google.common.collect.ImmutableMap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
@@ -13,16 +14,33 @@ import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.ResourceLocation;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 public class PotionEffects extends BasicHud {
     public static final int ICON_SIZE = 18;
     private final ResourceLocation EFFECTS_RESOURCE = new ResourceLocation("textures/gui/container/inventory.png");
     public Minecraft mc = Minecraft.getMinecraft();
     public PotionEffectsConfig config = PotionEffectsMod.INSTANCE.config;
+    public Map<Integer, PotionEffectsConfig.EffectConfig> effectMap =
+            new ImmutableMap.Builder<Integer, PotionEffectsConfig.EffectConfig>()
+                    .put(Potion.moveSpeed.id, PotionEffectsConfig.speed)
+                    .put(Potion.moveSlowdown.id, PotionEffectsConfig.slowness)
+                    .put(Potion.digSpeed.id, PotionEffectsConfig.haste)
+                    .put(Potion.digSlowdown.id, PotionEffectsConfig.miningFatigue)
+                    .put(Potion.damageBoost.id, PotionEffectsConfig.strength)
+                    .put(Potion.jump.id, PotionEffectsConfig.jumpBoost)
+                    .put(Potion.confusion.id, PotionEffectsConfig.nausea)
+                    .put(Potion.regeneration.id, PotionEffectsConfig.regeneration)
+                    .put(Potion.resistance.id, PotionEffectsConfig.resistance)
+                    .put(Potion.fireResistance.id, PotionEffectsConfig.fireResistance)
+                    .put(Potion.waterBreathing.id, PotionEffectsConfig.waterBreathing)
+                    .put(Potion.invisibility.id, PotionEffectsConfig.invisibility)
+                    .put(Potion.nightVision.id, PotionEffectsConfig.nightVision)
+                    .put(Potion.hunger.id, PotionEffectsConfig.hunger)
+                    .put(Potion.poison.id, PotionEffectsConfig.poison)
+                    .put(Potion.wither.id, PotionEffectsConfig.wither)
+                    .put(Potion.absorption.id, PotionEffectsConfig.absorption)
+                    .build();
 
     private float width = 10f;
     private float height = 10f;
@@ -171,45 +189,12 @@ public class PotionEffects extends BasicHud {
     }
 
     public PotionEffectsConfig.EffectConfig getEffectSetting(PotionEffect effect) {
-        if (effect.getPotionID() == Potion.moveSpeed.id) {
-            return PotionEffectsConfig.speed;
-        } else if (effect.getPotionID() == Potion.moveSlowdown.id) {
-            return PotionEffectsConfig.slowness;
-        } else if (effect.getPotionID() == Potion.digSpeed.id) {
-            return PotionEffectsConfig.haste;
-        } else if (effect.getPotionID() == Potion.digSlowdown.id) {
-            return PotionEffectsConfig.miningFatigue;
-        } else if (effect.getPotionID() == Potion.damageBoost.id) {
-            return PotionEffectsConfig.strength;
-        } else if (effect.getPotionID() == Potion.jump.id) {
-            return PotionEffectsConfig.jumpBoost;
-        } else if (effect.getPotionID() == Potion.confusion.id) {
-            return PotionEffectsConfig.nausea;
-        } else if (effect.getPotionID() == Potion.regeneration.id) {
-            return PotionEffectsConfig.regeneration;
-        } else if (effect.getPotionID() == Potion.resistance.id) {
-            return PotionEffectsConfig.resistance;
-        } else if (effect.getPotionID() == Potion.fireResistance.id) {
-            return PotionEffectsConfig.fireResistance;
-        } else if (effect.getPotionID() == Potion.waterBreathing.id) {
-            return PotionEffectsConfig.waterBreathing;
-        } else if (effect.getPotionID() == Potion.invisibility.id) {
-            return PotionEffectsConfig.invisibility;
-        } else if (effect.getPotionID() == Potion.blindness.id) {
-            return PotionEffectsConfig.blindness;
-        } else if (effect.getPotionID() == Potion.nightVision.id) {
-            return PotionEffectsConfig.nightVision;
-        } else if (effect.getPotionID() == Potion.hunger.id) {
-            return PotionEffectsConfig.hunger;
-        } else if (effect.getPotionID() == Potion.poison.id) {
-            return PotionEffectsConfig.poison;
-        } else if (effect.getPotionID() == Potion.wither.id) {
-            return PotionEffectsConfig.wither;
-        } else if (effect.getPotionID() == Potion.absorption.id) {
-            return PotionEffectsConfig.absorption;
-        } else {
-            return PotionEffectsConfig.global;
+        for (Map.Entry<Integer, PotionEffectsConfig.EffectConfig> entry : effectMap.entrySet()) {
+            if (effect.getPotionID() == entry.getKey()) {
+                if (entry.getValue().override) return entry.getValue();
+            }
         }
+        return PotionEffectsConfig.global;
     }
 
     @Override

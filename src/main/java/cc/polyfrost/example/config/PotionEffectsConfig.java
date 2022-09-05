@@ -11,10 +11,10 @@ import cc.polyfrost.oneconfig.config.data.PageLocation;
 
 public class PotionEffectsConfig extends Config {
 
-    @HUD(
-            name = "HUD"
+    @Header(
+            text = "Potion Effects HUD",
+            size = 2
     )
-    public static PotionEffects testHud = new PotionEffects();
 
     @Slider(
             name = "Vertical Spacing",
@@ -38,142 +38,147 @@ public class PotionEffectsConfig extends Config {
 
     @Page(
             name = "Global Effects",
-            location = PageLocation.BOTTOM
+            location = PageLocation.TOP
     )
     public static EffectConfig global = new EffectConfig("Global");
 
     @Page(
             name = "Speed",
-            location = PageLocation.BOTTOM,
+            location = PageLocation.TOP,
             category = "Effects"
     )
     public static EffectConfig speed = new EffectConfig("Speed");
 
     @Page(
             name = "Slowness",
-            location = PageLocation.BOTTOM,
+            location = PageLocation.TOP,
             category = "Effects"
     )
     public static EffectConfig slowness = new EffectConfig("Slowness");
 
     @Page(
             name = "Haste",
-            location = PageLocation.BOTTOM,
+            location = PageLocation.TOP,
             category = "Effects"
     )
     public static EffectConfig haste = new EffectConfig("Haste");
 
     @Page(
             name = "Mining Fatigue",
-            location = PageLocation.BOTTOM,
+            location = PageLocation.TOP,
             category = "Effects"
     )
     public static EffectConfig miningFatigue = new EffectConfig("Mining Fatigue");
 
     @Page(
             name = "Strength",
-            location = PageLocation.BOTTOM,
+            location = PageLocation.TOP,
             category = "Effects"
     )
     public static EffectConfig strength = new EffectConfig("Strength");
 
     @Page(
             name = "Jump Boost",
-            location = PageLocation.BOTTOM,
+            location = PageLocation.TOP,
             category = "Effects"
     )
     public static EffectConfig jumpBoost = new EffectConfig("Jump Boost");
 
     @Page(
             name = "Nausea",
-            location = PageLocation.BOTTOM,
+            location = PageLocation.TOP,
             category = "Effects"
     )
     public static EffectConfig nausea = new EffectConfig("Nausea");
 
     @Page(
             name = "Regeneration",
-            location = PageLocation.BOTTOM,
+            location = PageLocation.TOP,
             category = "Effects"
     )
     public static EffectConfig regeneration = new EffectConfig("Regeneration");
 
     @Page(
             name = "Resistance",
-            location = PageLocation.BOTTOM,
+            location = PageLocation.TOP,
             category = "Effects"
     )
     public static EffectConfig resistance = new EffectConfig("Resistance");
 
     @Page(
             name = "Fire Resistance",
-            location = PageLocation.BOTTOM,
+            location = PageLocation.TOP,
             category = "Effects"
     )
     public static EffectConfig fireResistance = new EffectConfig("Fire Resistance");
 
     @Page(
             name = "Water Breathing",
-            location = PageLocation.BOTTOM,
+            location = PageLocation.TOP,
             category = "Effects"
     )
     public static EffectConfig waterBreathing = new EffectConfig("Water Breathing");
 
     @Page(
             name = "Invisibility",
-            location = PageLocation.BOTTOM,
+            location = PageLocation.TOP,
             category = "Effects"
     )
     public static EffectConfig invisibility = new EffectConfig("Invisibility");
 
     @Page(
             name = "Blindness",
-            location = PageLocation.BOTTOM,
+            location = PageLocation.TOP,
             category = "Effects"
     )
     public static EffectConfig blindness = new EffectConfig("Blindness");
 
     @Page(
             name = "Night Vision",
-            location = PageLocation.BOTTOM,
+            location = PageLocation.TOP,
             category = "Effects"
     )
     public static EffectConfig nightVision = new EffectConfig("Night Vision");
 
     @Page(
             name = "Hunger",
-            location = PageLocation.BOTTOM,
+            location = PageLocation.TOP,
             category = "Effects"
     )
     public static EffectConfig hunger = new EffectConfig("Hunger");
 
     @Page(
             name = "Weakness",
-            location = PageLocation.BOTTOM,
+            location = PageLocation.TOP,
             category = "Effects"
     )
     public static EffectConfig weakness = new EffectConfig("Weakness");
 
     @Page(
             name = "Poison",
-            location = PageLocation.BOTTOM,
+            location = PageLocation.TOP,
             category = "Effects"
     )
     public static EffectConfig poison = new EffectConfig("Poison");
 
     @Page(
             name = "Wither",
-            location = PageLocation.BOTTOM,
+            location = PageLocation.TOP,
             category = "Effects"
     )
     public static EffectConfig wither = new EffectConfig("Wither");
 
     @Page(
             name = "Absorption",
-            location = PageLocation.BOTTOM,
+            location = PageLocation.TOP,
             category = "Effects"
     )
     public static EffectConfig absorption = new EffectConfig("Absorption");
+
+    @HUD(
+            name = "General HUD"
+    )
+    public static PotionEffects testHud = new PotionEffects();
 
     public PotionEffectsConfig() {
         super(new Mod(PotionEffectsMod.NAME, ModType.UTIL_QOL), PotionEffectsMod.MODID + ".json");
@@ -185,6 +190,13 @@ public class PotionEffectsConfig extends Config {
         public EffectConfig(String effect) {
             this.effect = effect;
         }
+
+
+        @Checkbox(
+                name = "Override",
+                subcategory = "General"
+        )
+        public boolean override = false;
         
         @Checkbox(
                 name = "Icon",
@@ -222,7 +234,7 @@ public class PotionEffectsConfig extends Config {
                 left = "Roman",
                 right = "Arabic"
         )
-        public boolean romanNumerals = true;
+        public boolean romanNumerals = false;
 
         @Switch(
                 name = "Blink",
