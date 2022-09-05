@@ -12,6 +12,7 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
+import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.ResourceLocation;
 
 import java.util.*;
@@ -94,7 +95,13 @@ public class PotionEffects extends BasicHud {
 //        GlStateManager.scale(getScale(), getScale(), 1);
         for (PotionEffect effect : potionEffects) {
             PotionEffectsConfig.EffectConfig effectSetting = getEffectSetting(effect);
-            if (excludePotions(effectSetting, effect)) continue;
+            PotionEffectsConfig.EffectConfig oComponent = useOverride(effectSetting, effectSetting.overrideComponent);
+            PotionEffectsConfig.EffectConfig oAmplifier = useOverride(effectSetting, effectSetting.overrideAmplifier);
+            PotionEffectsConfig.EffectConfig oBlinking = useOverride(effectSetting, effectSetting.overrideBlinking);
+            PotionEffectsConfig.EffectConfig oFormatting = useOverride(effectSetting, effectSetting.overrideFormatting);
+            PotionEffectsConfig.EffectConfig oColor = useOverride(effectSetting, effectSetting.overrideColor);
+            PotionEffectsConfig.EffectConfig oExclusion = useOverride(effectSetting, effectSetting.overrideExclusion);
+            if (excludePotions(oExclusion, effect)) continue;
             Potion potion = Potion.potionTypes[effect.getPotionID()];
             if (!potion.shouldRender(effect)) continue;
 
@@ -103,26 +110,30 @@ public class PotionEffects extends BasicHud {
 
             GlStateManager.color(1f, 1f, 1f, 1f);
 
-            if (effectSetting.icon) {
+            if (oComponent.icon) {
                 mc.getTextureManager().bindTexture(EFFECTS_RESOURCE);
                 mc.ingameGUI.drawTexturedModalRect(iconX, (y + yOff) / getScale(), potion.getStatusIconIndex() % 8 * 18, 198 + potion.getStatusIconIndex() / 8 * 18, 18, 18);
                 xOff = ICON_SIZE * getScale();
                 this.width = Math.max(this.width, xOff / getScale());
             }
 
-            if (effectSetting.effectName) {
-                if (effectSetting.icon)
+            if (oComponent.effectName) {
+                if (oComponent.icon)
                     xOff = (ICON_SIZE + 4) * getScale();
 
                 StringBuilder titleSb = new StringBuilder();
-//                if (titleTextBold.get()) titleSb.append(EnumChatFormatting.BOLD);
-//                if (titleTextItalic.get()) titleSb.append(EnumChatFormatting.ITALIC);
-//                if (titleTextUnderline.get()) titleSb.append(EnumChatFormatting.UNDERLINE);
-                titleSb.append(I18n.format(potion.getName()));
+                if (oFormatting.boldEffectName) titleSb.append(EnumChatFormatting.BOLD);
+                if (oFormatting.italicEffectName) titleSb.append(EnumChatFormatting.ITALIC);
+                if (oFormatting.underlineEffectName) titleSb.append(EnumChatFormatting.UNDERLINE);
+                if (oFormatting.customName.isEmpty()) {
+                    titleSb.append(I18n.format(potion.getName()));
+                } else {
+                    titleSb.append(oFormatting.customName);
+                }
                 int amplifier = Math.max(1, effect.getAmplifier() + 1);
-                if (effectSetting.amplifier && (amplifier != 1 || effectSetting.levelOne)) {
+                if (oAmplifier.amplifier && (amplifier != 1 || oAmplifier.levelOne)) {
                     titleSb.append(" ");
-                    if (!effectSetting.romanNumerals) titleSb.append(amplifierNumerals(amplifier));
+                    if (!oAmplifier.romanNumerals) titleSb.append(amplifierNumerals(amplifier));
                     else titleSb.append(amplifier);
                 }
                 String builtTitle = titleSb.toString();
@@ -134,23 +145,24 @@ public class PotionEffects extends BasicHud {
                 titleX /= getScale();
 
                 float titleY = y + yOff;
-                if (!effectSetting.duration)
+                if (!oComponent.duration)
                     titleY += mc.fontRendererObj.FONT_HEIGHT / 2f;
                 titleY /= getScale();
 
 
-                RenderManager.drawScaledString(builtTitle, titleX, titleY, effectSetting.nameColor.getRGB(), RenderManager.TextType.SHADOW, scale);
+                RenderManager.drawScaledString(builtTitle, titleX, titleY, oColor.nameColor.getRGB(), RenderManager.TextType.SHADOW, scale);
 
             }
 
-            if (effectSetting.duration) {
-                if (effectSetting.icon)
+            if (oComponent.duration) {
+                if (oComponent.icon)
                     xOff = (ICON_SIZE + 4) * getScale();
 
                 StringBuilder timeSb = new StringBuilder();
-//                if (timeTextItalic.get()) timeSb.append(EnumChatFormatting.ITALIC);
-//                if (timeTextUnderline.get()) timeSb.append(EnumChatFormatting.UNDERLINE);
-                if (effect.getIsPotionDurationMax()) timeSb.append("**:**");
+                if (oFormatting.boldDuration) timeSb.append(EnumChatFormatting.BOLD);
+                if (oFormatting.italicDuration) timeSb.append(EnumChatFormatting.ITALIC);
+                if (oFormatting.underlineDuration) timeSb.append(EnumChatFormatting.UNDERLINE);
+                if (effect.getIsPotionDurationMax()) timeSb.append(oFormatting.maxDurationString);
                 else timeSb.append(Potion.getDurationString(effect));
                 String builtTime = timeSb.toString();
 
@@ -161,12 +173,12 @@ public class PotionEffects extends BasicHud {
                 timeX /= getScale();
 
                 float timeY = y + yOff + (mc.fontRendererObj.FONT_HEIGHT) + 1;
-                if (!effectSetting.effectName)
+                if (!oComponent.effectName)
                     timeY -= mc.fontRendererObj.FONT_HEIGHT / 2f;
                 timeY /= getScale();
 
-                if (effect.getDuration() / 20f > effectSetting.blinkDuration || effect.getDuration() % (50 - effectSetting.blinkSpeed) <= (50 - effectSetting.blinkSpeed) / 2f) {
-                    RenderManager.drawScaledString(builtTime, timeX, timeY, effectSetting.durationColor.getRGB(), RenderManager.TextType.SHADOW, scale);
+                if (effect.getDuration() / 20f > oBlinking.blinkDuration || effect.getDuration() % (50 - oBlinking.blinkSpeed) <= (50 - oBlinking.blinkSpeed) / 2f) {
+                    RenderManager.drawScaledString(builtTime, timeX, timeY, oColor.durationColor.getRGB(), RenderManager.TextType.SHADOW, scale);
                 }
             }
 
@@ -196,13 +208,18 @@ public class PotionEffects extends BasicHud {
         return PotionEffectsConfig.global;
     }
 
+    public PotionEffectsConfig.EffectConfig useOverride(PotionEffectsConfig.EffectConfig effectSetting, boolean overrideBoolean) {
+        if (overrideBoolean) return effectSetting;
+        else return PotionEffectsConfig.global;
+    }
+
     private boolean excludePotions(PotionEffectsConfig.EffectConfig effectSetting, PotionEffect effect) {
         if (effectSetting.excludePermanentEffects && effect.getIsPotionDurationMax()) {
             return true;
         }
         if (this.excludeArrayOptions(effectSetting.excludeSetDuration, effect.getDuration(), effectSetting.excludedDurationValues * 20.0F) && !effect.getIsPotionDurationMax()) return true;
         if (this.excludeArrayOptions(effectSetting.excludeSetAmplifier, effect.getAmplifier(), effectSetting.excludedAmplifierValues - 1)) return true;
-        return false;
+        return effectSetting.exclude;
     }
 
     protected boolean excludeArrayOptions(int set, int realValue, float sliderValue) {

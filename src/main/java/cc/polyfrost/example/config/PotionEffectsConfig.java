@@ -15,6 +15,7 @@ public class PotionEffectsConfig extends Config {
             text = "Potion Effects HUD",
             size = 2
     )
+    public static int ignored;
 
     @Slider(
             name = "Vertical Spacing",
@@ -189,11 +190,48 @@ public class PotionEffectsConfig extends Config {
         public String effect;
 
 
-        @Checkbox(
+        @Switch(
                 name = "Override",
-                subcategory = "General"
+                subcategory = "Override",
+                size = 2
         )
         public boolean override = false;
+
+        @Checkbox(
+                name = "Override Component",
+                subcategory = "Override"
+        )
+        public boolean overrideComponent = false;
+
+        @Checkbox(
+                name = "Override Amplifier",
+                subcategory = "Override"
+        )
+        public boolean overrideAmplifier = false;
+
+        @Checkbox(
+                name = "Override Blinking",
+                subcategory = "Override"
+        )
+        public boolean overrideBlinking = false;
+
+        @Checkbox(
+                name = "Override Formatting",
+                subcategory = "Override"
+        )
+        public boolean overrideFormatting = true;
+
+        @Checkbox(
+                name = "Override Color",
+                subcategory = "Override"
+        )
+        public boolean overrideColor = true;
+
+        @Checkbox(
+                name = "Override Exclusion",
+                subcategory = "Override"
+        )
+        public boolean overrideExclusion = true;
         
         @Checkbox(
                 name = "Icon",
@@ -255,6 +293,56 @@ public class PotionEffectsConfig extends Config {
         )
         public float blinkSpeed = 30;
 
+        @Text(
+                name = "Custom Name",
+                subcategory = "Formatting",
+                size = 2
+        )
+        public String customName = "";
+
+        @Checkbox(
+                name = "Bold Effect Name",
+                subcategory = "Formatting"
+        )
+        public boolean boldEffectName = false;
+
+        @Checkbox(
+                name = "Italic Effect Name",
+                subcategory = "Formatting"
+        )
+        public boolean italicEffectName = false;
+
+        @Checkbox(
+                name = "Underline Effect Name",
+                subcategory = "Formatting"
+        )
+        public boolean underlineEffectName = false;
+
+        @Text(
+                name = "Max Duration String",
+                subcategory = "Formatting",
+                size = 2
+        )
+        public String maxDurationString = "**:**";
+
+        @Checkbox(
+                name = "Bold Duration",
+                subcategory = "Formatting"
+        )
+        public boolean boldDuration = false;
+
+        @Checkbox(
+                name = "Italic Duration",
+                subcategory = "Formatting"
+        )
+        public boolean italicDuration = false;
+
+        @Checkbox(
+                name = "Underline Duration",
+                subcategory = "Formatting"
+        )
+        public boolean underlineDuration = false;
+
         @Color(
                 name = "Name Color",
                 subcategory = "Color"
@@ -266,6 +354,13 @@ public class PotionEffectsConfig extends Config {
                 subcategory = "Color"
         )
         public OneColor durationColor = new OneColor(255, 255, 255);
+
+        @Checkbox(
+                name = "Exclude",
+                subcategory = "Exclusion",
+                size = 2
+        )
+        public boolean exclude = false;
 
         @Checkbox(
                 name = "Permanent Effects",
