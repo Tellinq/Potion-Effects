@@ -182,7 +182,7 @@ public class PotionEffectsConfig extends Config {
     public static PotionEffects testHud = new PotionEffects();
 
     public PotionEffectsConfig() {
-        super(new Mod(PotionEffectsMod.NAME, ModType.UTIL_QOL), PotionEffectsMod.MODID + ".json");
+        super(new Mod(PotionEffectsMod.NAME, ModType.HUD), PotionEffectsMod.MODID + ".json");
         initialize();
     }
 
