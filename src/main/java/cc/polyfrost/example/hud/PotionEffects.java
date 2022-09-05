@@ -60,13 +60,11 @@ public class PotionEffects extends BasicHud {
 
         List<PotionEffect> potionEffects = new ArrayList<>();
         if (mc.thePlayer != null) potionEffects.addAll(mc.thePlayer.getActivePotionEffects());
-//        potionEffects = filterEffects(potionEffects);
 
         if (potionEffects.isEmpty()) {
             if (example) {
                 potionEffects.add(new PotionEffect(Potion.moveSpeed.id, 1200, 1));
                 potionEffects.add(new PotionEffect(Potion.damageBoost.id, 30, 3));
-//                potionEffects = filterEffects(potionEffects);
             } else {
                 return;
             }
@@ -96,6 +94,7 @@ public class PotionEffects extends BasicHud {
 //        GlStateManager.scale(getScale(), getScale(), 1);
         for (PotionEffect effect : potionEffects) {
             PotionEffectsConfig.EffectConfig effectSetting = getEffectSetting(effect);
+            if (excludePotions(effectSetting, effect)) continue;
             Potion potion = Potion.potionTypes[effect.getPotionID()];
             if (!potion.shouldRender(effect)) continue;
 
@@ -196,6 +195,71 @@ public class PotionEffects extends BasicHud {
         }
         return PotionEffectsConfig.global;
     }
+
+    private boolean excludePotions(PotionEffectsConfig.EffectConfig effectSetting, PotionEffect effect) {
+        if (effectSetting.excludePermanentEffects && effect.getIsPotionDurationMax()) {
+            return true;
+        }
+        if (this.excludeArrayOptions(effectSetting.excludeSetDuration, effect.getDuration(), effectSetting.excludedDurationValues * 20.0F) && !effect.getIsPotionDurationMax()) return true;
+        if (this.excludeArrayOptions(effectSetting.excludeSetAmplifier, effect.getAmplifier(), effectSetting.excludedAmplifierValues - 1)) return true;
+        return false;
+    }
+
+    protected boolean excludeArrayOptions(int set, int realValue, float sliderValue) {
+        switch (set) {
+            case 1: return realValue > sliderValue;
+            case 2: return realValue < sliderValue;
+            case 3: return realValue == sliderValue;
+            case 4: return realValue != sliderValue;
+            default: return false;
+        }
+    }
+
+//    private int getPotionColor(int color, PotionEffect effect) {
+//        int time = effect.getDuration();
+//        int value;
+//        switch ((String) option) {
+//            case "Effect":
+//                Potion var9 = Potion.potionTypes[effect.getPotionID()];
+//                switch (this.colorType.getStringValue()) {
+//                    case "Default":
+//                        value = potionColorDefault.get(effect.getPotionID());
+//                        break;
+//                    case "Potion Colors":
+//                        value = potionColorPotionColors.get(effect.getPotionID());
+//                        break;
+//                    case "Color Codes":
+//                        value = potionColorColorCodes.get(effect.getPotionID());
+//                        break;
+//                    case "Vibrant":
+//                        value = potionColorsVibrant.get(effect.getPotionID());
+//                        break;
+//                    default:
+//                        if (!var9.isBadEffect()) {
+//                            value = -15691760;
+//                        } else {
+//                            value = -7335920;
+//                        }
+//                }
+//                break;
+//            case "Duration":
+//                if (time >= 1200) {
+//                    value = -16733696;
+//                } else if (time >= 600) {
+//                    value = -11141291;
+//                } else if (time >= 200) {
+//                    value = -171;
+//                } else {
+//                    value = time >= 100 ? -43691 : -5636096;
+//                }
+//                break;
+//            default:
+//                value = staticColor;
+//        }
+//        int opacity = value >> 24 & 0xFF;
+//        opacity = (int)((float)opacity * (excludePotions(effect) ? 0.5F : 1.0F));
+//        return value & 0xFFFFFF | opacity << 24;
+//    }
 
     @Override
     protected float getWidth(float scale, boolean example) {

@@ -187,9 +187,6 @@ public class PotionEffectsConfig extends Config {
 
     public static class EffectConfig {
         public String effect;
-        public EffectConfig(String effect) {
-            this.effect = effect;
-        }
 
 
         @Checkbox(
@@ -269,6 +266,49 @@ public class PotionEffectsConfig extends Config {
                 subcategory = "Color"
         )
         public OneColor durationColor = new OneColor(255, 255, 255);
-        
+
+        @Checkbox(
+                name = "Permanent Effects",
+                subcategory = "Exclusion",
+                size = 2
+        )
+        public boolean excludePermanentEffects = false;
+
+        @Dropdown(
+                name = "Exclude Duration Set",
+                options = {"None", "Above", "Below", "At", "Not At"},
+                subcategory = "Exclusion"
+        )
+        public int excludeSetDuration = 0;
+
+        @Slider(
+                name = "Excluded Duration Value(s)",
+                subcategory = "Exclusion",
+                min = 2,
+                max = 90
+        )
+        public float excludedDurationValues = 30f;
+
+        @Dropdown(
+                name = "Exclude Amplifier Set",
+                options = {"None", "Above", "Below", "At", "Not At"},
+                subcategory = "Exclusion"
+        )
+        public int excludeSetAmplifier = 0;
+
+        @Slider(
+                name = "Excluded Amplifier Value(s)",
+                subcategory = "Exclusion",
+                min = 0,
+                max = 20,
+                step = 1
+        )
+        public int excludedAmplifierValues = 10;
+
+
+
+        public EffectConfig(String effect) {
+            this.effect = effect;
+        }
     }
 }
