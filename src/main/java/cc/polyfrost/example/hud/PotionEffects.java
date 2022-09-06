@@ -1,11 +1,18 @@
 package cc.polyfrost.example.hud;
 
+import cc.polyfrost.example.PotionEffectsMod;
 import cc.polyfrost.example.config.PotionEffectsConfig;
-import cc.polyfrost.oneconfig.config.annotations.Exclude;
+import cc.polyfrost.oneconfig.config.Config;
+import cc.polyfrost.oneconfig.config.annotations.*;
 import cc.polyfrost.oneconfig.config.core.OneColor;
+import cc.polyfrost.oneconfig.config.data.InfoType;
+import cc.polyfrost.oneconfig.config.data.Mod;
+import cc.polyfrost.oneconfig.config.data.ModType;
+import cc.polyfrost.oneconfig.config.data.PageLocation;
 import cc.polyfrost.oneconfig.hud.BasicHud;
 import cc.polyfrost.oneconfig.libs.universal.UMatrixStack;
 import cc.polyfrost.oneconfig.renderer.RenderManager;
+import cc.polyfrost.oneconfig.utils.InputHandler;
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
@@ -18,11 +25,43 @@ import net.minecraft.util.ResourceLocation;
 import java.util.*;
 
 public class PotionEffects extends BasicHud {
-    @Exclude public static final int ICON_SIZE = 18;
+
+    @Slider(
+            name = "Vertical Spacing",
+            min = 0,
+            max = 10
+    )
+    public float verticalSpacing = 4f;
+
+    @DualOption(
+            name = "Vertical Sorting",
+            left = "Top",
+            right = "Bottom"
+    )
+    public boolean verticalSorting = false;
+
+    @Dropdown(
+            name = "Sorting Method",
+            options = {"Vanilla", "Alphabetical", "Duration", "Amplifier"}
+    )
+    public int sortingMethod = 0;
+
+    @Switch(
+            name = "Show Excluded Effects in HUD Editor"
+    )
+    public boolean showExcludedEffects = true;
+
+    @Info(
+            text = "Not recommended to disable if all effects are excluded!",
+            type = InfoType.WARNING
+    )
+    public String info;
+
+    @Exclude public final int ICON_SIZE = 18;
     @Exclude private final ResourceLocation EFFECTS_RESOURCE = new ResourceLocation("textures/gui/container/inventory.png");
     @Exclude public final Minecraft mc = Minecraft.getMinecraft();
-    @Exclude public Map<Integer, PotionEffectsConfig.EffectConfig> effectMap =
-            new ImmutableMap.Builder<Integer, PotionEffectsConfig.EffectConfig>()
+    @Exclude public Map<Integer, EffectConfig> effectMap =
+            new ImmutableMap.Builder<Integer, EffectConfig>()
                     .put(Potion.moveSpeed.id, PotionEffectsConfig.speed)
                     .put(Potion.moveSlowdown.id, PotionEffectsConfig.slowness)
                     .put(Potion.digSpeed.id, PotionEffectsConfig.haste)
@@ -34,6 +73,7 @@ public class PotionEffects extends BasicHud {
                     .put(Potion.resistance.id, PotionEffectsConfig.resistance)
                     .put(Potion.fireResistance.id, PotionEffectsConfig.fireResistance)
                     .put(Potion.waterBreathing.id, PotionEffectsConfig.waterBreathing)
+                    .put(Potion.blindness.id, PotionEffectsConfig.blindness)
                     .put(Potion.invisibility.id, PotionEffectsConfig.invisibility)
                     .put(Potion.nightVision.id, PotionEffectsConfig.nightVision)
                     .put(Potion.hunger.id, PotionEffectsConfig.hunger)
@@ -42,8 +82,8 @@ public class PotionEffects extends BasicHud {
                     .put(Potion.absorption.id, PotionEffectsConfig.absorption)
                     .build();
 
-    private float width = 10f;
-    private float height = 10f;
+    private float width = 0f;
+    private float height = 0f;
 
     public PotionEffects() {
         super(true, 0, 0, 1, false, false, 0, 0, 0, new OneColor(0, 0, 0, 120), false, 2, new OneColor(0, 0, 0));
@@ -70,7 +110,7 @@ public class PotionEffects extends BasicHud {
             }
         }
 
-        switch (PotionEffectsConfig.sortingMethod) {
+        switch (this.sortingMethod) {
             case 1:
                 potionEffects.sort(Comparator.comparing(effect -> I18n.format(effect.getEffectName())));
                 break;
@@ -81,33 +121,40 @@ public class PotionEffects extends BasicHud {
                 potionEffects.sort(Comparator.comparingInt(PotionEffect::getAmplifier));
                 Collections.reverse(potionEffects);
         }
-        if (PotionEffectsConfig.verticalSorting) Collections.reverse(potionEffects);
+        if (this.verticalSorting) Collections.reverse(potionEffects);
 
         float yOff = 0;
         float xOff = 0;
-        final int yAmt = (int) (ICON_SIZE + PotionEffectsConfig.verticalSpacing);
+        final int yAmt = (int) (ICON_SIZE + this.verticalSpacing);
 
-        this.height = (potionEffects.size() * yAmt) - PotionEffectsConfig.verticalSpacing;
-        this.width = 10f;
+        this.height = (potionEffects.size() * yAmt) - this.verticalSpacing;
 
         GlStateManager.pushMatrix();
 //        GlStateManager.scale(getScale(), getScale(), 1);
         for (PotionEffect effect : potionEffects) {
-            PotionEffectsConfig.EffectConfig effectSetting = getEffectSetting(effect);
-            PotionEffectsConfig.EffectConfig oComponent = useOverride(effectSetting, effectSetting.overrideComponent);
-            PotionEffectsConfig.EffectConfig oAmplifier = useOverride(effectSetting, effectSetting.overrideAmplifier);
-            PotionEffectsConfig.EffectConfig oBlinking = useOverride(effectSetting, effectSetting.overrideBlinking);
-            PotionEffectsConfig.EffectConfig oFormatting = useOverride(effectSetting, effectSetting.overrideFormatting);
-            PotionEffectsConfig.EffectConfig oColor = useOverride(effectSetting, effectSetting.overrideColor);
-            PotionEffectsConfig.EffectConfig oExclusion = useOverride(effectSetting, effectSetting.overrideExclusion);
-            if (excludePotions(oExclusion, effect)) continue;
+            EffectConfig effectSetting = getEffectSetting(effect);
+            EffectConfig oComponent = useOverride(effectSetting, effectSetting.overrideComponent);
+            EffectConfig oAmplifier = useOverride(effectSetting, effectSetting.overrideAmplifier);
+            EffectConfig oBlinking = useOverride(effectSetting, effectSetting.overrideBlinking);
+            EffectConfig oFormatting = useOverride(effectSetting, effectSetting.overrideFormatting);
+            EffectConfig oColor = useOverride(effectSetting, effectSetting.overrideColor);
+            EffectConfig oExclusion = useOverride(effectSetting, effectSetting.overrideExclusion);
+            boolean excluded = false;
+            if (excludePotions(oExclusion, effect)) {
+                if (example && this.showExcludedEffects) {
+                    excluded = true;
+                } else {
+                    this.height -= yAmt;
+                    continue;
+                }
+            }
             Potion potion = Potion.potionTypes[effect.getPotionID()];
             if (!potion.shouldRender(effect)) continue;
 
             float iconX = x;
             iconX /= getScale();
 
-            GlStateManager.color(1f, 1f, 1f, 1f);
+            GlStateManager.color(1f, 1f, 1f, excluded ? 0.5f : 1f);
 
             if (oComponent.icon) {
                 mc.getTextureManager().bindTexture(EFFECTS_RESOURCE);
@@ -160,7 +207,7 @@ public class PotionEffects extends BasicHud {
                 titleY /= getScale();
 
 
-                RenderManager.drawScaledString(builtTitle, titleX, titleY, oColor.nameColor.getRGB(), textType, scale);
+                RenderManager.drawScaledString(builtTitle, titleX, titleY, getColor(oColor.nameColor.getRGB(), excluded), textType, scale);
 
             }
 
@@ -188,7 +235,7 @@ public class PotionEffects extends BasicHud {
                 timeY /= getScale();
 
                 if (effect.getDuration() / 20f > oBlinking.blinkDuration || effect.getDuration() % (50 - oBlinking.blinkSpeed) <= (50 - oBlinking.blinkSpeed) / 2f) {
-                    RenderManager.drawScaledString(builtTime, timeX, timeY, oColor.durationColor.getRGB(), textType, scale);
+                    RenderManager.drawScaledString(builtTime, timeX, timeY, getColor(oColor.durationColor.getRGB(), excluded), textType, scale);
                 }
             }
 
@@ -209,8 +256,8 @@ public class PotionEffects extends BasicHud {
                     .replace("CCCC", "CD").replace("DD", "M").replace("DCD", "CM");
     }
 
-    public PotionEffectsConfig.EffectConfig getEffectSetting(PotionEffect effect) {
-        for (Map.Entry<Integer, PotionEffectsConfig.EffectConfig> entry : effectMap.entrySet()) {
+    public EffectConfig getEffectSetting(PotionEffect effect) {
+        for (Map.Entry<Integer, EffectConfig> entry : effectMap.entrySet()) {
             if (effect.getPotionID() == entry.getKey()) {
                 if (entry.getValue().override) return entry.getValue();
             }
@@ -218,12 +265,12 @@ public class PotionEffects extends BasicHud {
         return PotionEffectsConfig.global;
     }
 
-    public PotionEffectsConfig.EffectConfig useOverride(PotionEffectsConfig.EffectConfig effectSetting, boolean overrideBoolean) {
+    public EffectConfig useOverride(EffectConfig effectSetting, boolean overrideBoolean) {
         if (overrideBoolean) return effectSetting;
         else return PotionEffectsConfig.global;
     }
 
-    private boolean excludePotions(PotionEffectsConfig.EffectConfig effectSetting, PotionEffect effect) {
+    private boolean excludePotions(EffectConfig effectSetting, PotionEffect effect) {
         if (effectSetting.excludePermanentEffects && effect.getIsPotionDurationMax()) {
             return true;
         }
@@ -242,51 +289,11 @@ public class PotionEffects extends BasicHud {
         }
     }
 
-//    private int getPotionColor(int color, PotionEffect effect) {
-//        int time = effect.getDuration();
-//        int value;
-//        switch ((String) option) {
-//            case "Effect":
-//                Potion var9 = Potion.potionTypes[effect.getPotionID()];
-//                switch (this.colorType.getStringValue()) {
-//                    case "Default":
-//                        value = potionColorDefault.get(effect.getPotionID());
-//                        break;
-//                    case "Potion Colors":
-//                        value = potionColorPotionColors.get(effect.getPotionID());
-//                        break;
-//                    case "Color Codes":
-//                        value = potionColorColorCodes.get(effect.getPotionID());
-//                        break;
-//                    case "Vibrant":
-//                        value = potionColorsVibrant.get(effect.getPotionID());
-//                        break;
-//                    default:
-//                        if (!var9.isBadEffect()) {
-//                            value = -15691760;
-//                        } else {
-//                            value = -7335920;
-//                        }
-//                }
-//                break;
-//            case "Duration":
-//                if (time >= 1200) {
-//                    value = -16733696;
-//                } else if (time >= 600) {
-//                    value = -11141291;
-//                } else if (time >= 200) {
-//                    value = -171;
-//                } else {
-//                    value = time >= 100 ? -43691 : -5636096;
-//                }
-//                break;
-//            default:
-//                value = staticColor;
-//        }
-//        int opacity = value >> 24 & 0xFF;
-//        opacity = (int)((float)opacity * (excludePotions(effect) ? 0.5F : 1.0F));
-//        return value & 0xFFFFFF | opacity << 24;
-//    }
+    private int getColor(int color, boolean excluded) {
+        int opacity = color >> 24 & 0xFF;
+        opacity = (int)((float)opacity * (excluded ? 0.5F : 1.0F));
+        return color & 0xFFFFFF | opacity << 24;
+    }
 
     @Override
     protected float getWidth(float scale, boolean example) {
@@ -296,5 +303,233 @@ public class PotionEffects extends BasicHud {
     @Override
     protected float getHeight(float scale, boolean example) {
         return height;
+    }
+
+    public static class EffectConfig {
+        public String effect;
+
+
+        @Switch(
+                name = "Override",
+                subcategory = "Override",
+                size = 2
+        )
+        public boolean override = false;
+
+        @Checkbox(
+                name = "Override Component",
+                subcategory = "Override"
+        )
+        public boolean overrideComponent = false;
+
+        @Checkbox(
+                name = "Override Amplifier",
+                subcategory = "Override"
+        )
+        public boolean overrideAmplifier = false;
+
+        @Checkbox(
+                name = "Override Blinking",
+                subcategory = "Override"
+        )
+        public boolean overrideBlinking = false;
+
+        @Checkbox(
+                name = "Override Formatting",
+                subcategory = "Override"
+        )
+        public boolean overrideFormatting = true;
+
+        @Checkbox(
+                name = "Override Color",
+                subcategory = "Override"
+        )
+        public boolean overrideColor = true;
+
+        @Checkbox(
+                name = "Override Exclusion",
+                subcategory = "Override"
+        )
+        public boolean overrideExclusion = true;
+
+        @Checkbox(
+                name = "Icon",
+                subcategory = "Component"
+        )
+        public boolean icon = true;
+
+        @Checkbox(
+                name = "Effect Name",
+                subcategory = "Component"
+        )
+        public boolean effectName = true;
+
+        @Checkbox(
+                name = "Duration",
+                subcategory = "Component"
+        )
+        public boolean duration = true;
+
+        @Switch(
+                name = "Show Amplifier",
+                subcategory = "Amplifier"
+        )
+        public boolean amplifier = true;
+
+        @Switch(
+                name = "Show Level One",
+                subcategory = "Amplifier"
+        )
+        public boolean levelOne = false;
+
+        @DualOption(
+                name = "Amplifier Numerals",
+                subcategory = "Amplifier",
+                left = "Roman",
+                right = "Arabic"
+        )
+        public boolean romanNumerals = false;
+
+        @Switch(
+                name = "Blink",
+                subcategory = "Blinking"
+        )
+        public boolean blink = true;
+
+        @Slider(
+                name = "Blink Duration",
+                subcategory = "Blinking",
+                min = 0,
+                max = 60
+        )
+        public float blinkDuration = 10;
+
+        @Slider(
+                name = "Blink Speed",
+                subcategory = "Blinking",
+                min = 0,
+                max = 60
+        )
+        public float blinkSpeed = 30;
+
+        @Dropdown(
+                name = "Text Type",
+                subcategory = "Formatting",
+                options = {"No Shadow", "Shadow", "Full Shadow"}
+        )
+        public int textType = 1;
+
+        @Text(
+                name = "Custom Name",
+                subcategory = "Formatting",
+                size = 2
+        )
+        public String customName = "";
+
+        @Checkbox(
+                name = "Bold Effect Name",
+                subcategory = "Formatting"
+        )
+        public boolean boldEffectName = false;
+
+        @Checkbox(
+                name = "Italic Effect Name",
+                subcategory = "Formatting"
+        )
+        public boolean italicEffectName = false;
+
+        @Checkbox(
+                name = "Underline Effect Name",
+                subcategory = "Formatting"
+        )
+        public boolean underlineEffectName = false;
+
+        @Text(
+                name = "Max Duration String",
+                subcategory = "Formatting",
+                size = 2
+        )
+        public String maxDurationString = "**:**";
+
+        @Checkbox(
+                name = "Bold Duration",
+                subcategory = "Formatting"
+        )
+        public boolean boldDuration = false;
+
+        @Checkbox(
+                name = "Italic Duration",
+                subcategory = "Formatting"
+        )
+        public boolean italicDuration = false;
+
+        @Checkbox(
+                name = "Underline Duration",
+                subcategory = "Formatting"
+        )
+        public boolean underlineDuration = false;
+
+        @Color(
+                name = "Name Color",
+                subcategory = "Color"
+        )
+        public OneColor nameColor = new OneColor(255, 255, 255);
+
+        @Color(
+                name = "Duration Color",
+                subcategory = "Color"
+        )
+        public OneColor durationColor = new OneColor(255, 255, 255);
+
+        @Checkbox(
+                name = "Exclude",
+                subcategory = "Exclusion",
+                size = 2
+        )
+        public boolean exclude = false;
+
+        @Checkbox(
+                name = "Permanent Effects",
+                subcategory = "Exclusion",
+                size = 2
+        )
+        public boolean excludePermanentEffects = false;
+
+        @Dropdown(
+                name = "Exclude Duration Set",
+                options = {"None", "Above", "Below", "At", "Not At"},
+                subcategory = "Exclusion"
+        )
+        public int excludeSetDuration = 0;
+
+        @Slider(
+                name = "Excluded Duration Value(s)",
+                subcategory = "Exclusion",
+                min = 2,
+                max = 90
+        )
+        public float excludedDurationValues = 30f;
+
+        @Dropdown(
+                name = "Exclude Amplifier Set",
+                options = {"None", "Above", "Below", "At", "Not At"},
+                subcategory = "Exclusion"
+        )
+        public int excludeSetAmplifier = 0;
+
+        @Slider(
+                name = "Excluded Amplifier Value(s)",
+                subcategory = "Exclusion",
+                min = 0,
+                max = 20,
+                step = 1
+        )
+        public int excludedAmplifierValues = 10;
+
+
+
+        public EffectConfig(String effect) {
+            this.effect = effect;
+        }
     }
 }
