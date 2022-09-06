@@ -1,14 +1,12 @@
-package cc.polyfrost.example.config;
+package tk.tellinq.potioneffects.config;
 
-import cc.polyfrost.example.PotionEffectsMod;
-import cc.polyfrost.example.hud.PotionEffects;
+import tk.tellinq.potioneffects.PotionEffectsMod;
+import tk.tellinq.potioneffects.hud.PotionEffects;
 import cc.polyfrost.oneconfig.config.Config;
 import cc.polyfrost.oneconfig.config.annotations.*;
-import cc.polyfrost.oneconfig.config.core.OneColor;
 import cc.polyfrost.oneconfig.config.data.Mod;
 import cc.polyfrost.oneconfig.config.data.ModType;
 import cc.polyfrost.oneconfig.config.data.PageLocation;
-import cc.polyfrost.oneconfig.utils.InputHandler;
 
 public class PotionEffectsConfig extends Config {
 
@@ -145,11 +143,25 @@ public class PotionEffectsConfig extends Config {
     public static PotionEffects.EffectConfig wither = new PotionEffects.EffectConfig("Wither");
 
     @Page(
+            name = "Health Boost",
+            location = PageLocation.TOP,
+            category = "Effects"
+    )
+    public static PotionEffects.EffectConfig healthBoost = new PotionEffects.EffectConfig("Health Boost");
+
+    @Page(
             name = "Absorption",
             location = PageLocation.TOP,
             category = "Effects"
     )
     public static PotionEffects.EffectConfig absorption = new PotionEffects.EffectConfig("Absorption");
+
+    @Page(
+            name = "Saturation",
+            location = PageLocation.TOP,
+            category = "Effects"
+    )
+    public static PotionEffects.EffectConfig saturation = new PotionEffects.EffectConfig("Saturation");
     
     @HUD(
             name = "General HUD"

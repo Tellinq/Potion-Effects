@@ -1,18 +1,16 @@
-package cc.polyfrost.example.hud;
+package tk.tellinq.potioneffects.hud;
 
-import cc.polyfrost.example.PotionEffectsMod;
-import cc.polyfrost.example.config.PotionEffectsConfig;
-import cc.polyfrost.oneconfig.config.Config;
+import tk.tellinq.potioneffects.config.PotionEffectsConfig;
 import cc.polyfrost.oneconfig.config.annotations.*;
 import cc.polyfrost.oneconfig.config.core.OneColor;
 import cc.polyfrost.oneconfig.config.data.InfoType;
-import cc.polyfrost.oneconfig.config.data.Mod;
-import cc.polyfrost.oneconfig.config.data.ModType;
-import cc.polyfrost.oneconfig.config.data.PageLocation;
+import cc.polyfrost.oneconfig.events.EventManager;
+import cc.polyfrost.oneconfig.events.event.Stage;
+import cc.polyfrost.oneconfig.events.event.TickEvent;
 import cc.polyfrost.oneconfig.hud.BasicHud;
+import cc.polyfrost.oneconfig.libs.eventbus.Subscribe;
 import cc.polyfrost.oneconfig.libs.universal.UMatrixStack;
 import cc.polyfrost.oneconfig.renderer.RenderManager;
-import cc.polyfrost.oneconfig.utils.InputHandler;
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
@@ -77,24 +75,32 @@ public class PotionEffects extends BasicHud {
                     .put(Potion.invisibility.id, PotionEffectsConfig.invisibility)
                     .put(Potion.nightVision.id, PotionEffectsConfig.nightVision)
                     .put(Potion.hunger.id, PotionEffectsConfig.hunger)
+                    .put(Potion.weakness.id, PotionEffectsConfig.weakness)
                     .put(Potion.poison.id, PotionEffectsConfig.poison)
                     .put(Potion.wither.id, PotionEffectsConfig.wither)
+                    .put(Potion.healthBoost.id, PotionEffectsConfig.healthBoost)
                     .put(Potion.absorption.id, PotionEffectsConfig.absorption)
+                    .put(Potion.saturation.id, PotionEffectsConfig.saturation)
                     .build();
 
-    private float width = 0f;
-    private float height = 0f;
+    private float width = 10f;
+    private float height = 10f;
+    @Exclude private int ticks = 0;
 
     public PotionEffects() {
         super(true, 0, 0, 1, false, false, 0, 0, 0, new OneColor(0, 0, 0, 120), false, 2, new OneColor(0, 0, 0));
+        EventManager.INSTANCE.register(this);
+    }
+
+    @Subscribe
+    private void onTick(TickEvent event) {
+        if (event.stage == Stage.START) {
+            ++this.ticks;
+        }
     }
 
     @Override
     protected void draw(UMatrixStack matrices, float x, float y, float scale, boolean example) {
-        // we would be rendering it twice
-//        if (origin == RenderOrigin.HUD && overwriteIER.get() && mc.currentScreen instanceof InventoryEffectRenderer)
-//            return;
-
         GlStateManager.color(1f, 1f, 1f, 1f);
         GlStateManager.disableLighting();
 
@@ -106,6 +112,8 @@ public class PotionEffects extends BasicHud {
                 potionEffects.add(new PotionEffect(Potion.moveSpeed.id, 1200, 1));
                 potionEffects.add(new PotionEffect(Potion.damageBoost.id, 30, 3));
             } else {
+                this.width = 0;
+                this.height = 0;
                 return;
             }
         }
@@ -125,12 +133,13 @@ public class PotionEffects extends BasicHud {
 
         float yOff = 0;
         float xOff = 0;
-        final int yAmt = (int) (ICON_SIZE + this.verticalSpacing);
+        final int yAmt = (int) ((ICON_SIZE + this.verticalSpacing) * scale);
 
-        this.height = (potionEffects.size() * yAmt) - this.verticalSpacing;
+        this.height = ((potionEffects.size() * yAmt) - this.verticalSpacing) * scale;
+        this.width = 10f;
 
         GlStateManager.pushMatrix();
-//        GlStateManager.scale(getScale(), getScale(), 1);
+        GlStateManager.scale(getScale(), getScale(), 1);
         for (PotionEffect effect : potionEffects) {
             EffectConfig effectSetting = getEffectSetting(effect);
             EffectConfig oComponent = useOverride(effectSetting, effectSetting.overrideComponent);
@@ -144,7 +153,7 @@ public class PotionEffects extends BasicHud {
                 if (example && this.showExcludedEffects) {
                     excluded = true;
                 } else {
-                    this.height -= yAmt;
+                    this.height -= yAmt * scale;
                     continue;
                 }
             }
@@ -158,7 +167,9 @@ public class PotionEffects extends BasicHud {
 
             if (oComponent.icon) {
                 mc.getTextureManager().bindTexture(EFFECTS_RESOURCE);
-                mc.ingameGUI.drawTexturedModalRect(iconX, (y + yOff) / getScale(), potion.getStatusIconIndex() % 8 * 18, 198 + potion.getStatusIconIndex() / 8 * 18, 18, 18);
+                if (showEffectDuringBlink(oBlinking, oBlinking.makeEffectIconBlink, effect.getDuration())) {
+                    mc.ingameGUI.drawTexturedModalRect(iconX, (y + yOff) / getScale(), potion.getStatusIconIndex() % 8 * 18, 198 + potion.getStatusIconIndex() / 8 * 18, 18, 18);
+                }
                 xOff = ICON_SIZE * getScale();
                 this.width = Math.max(this.width, xOff / getScale());
             }
@@ -206,14 +217,15 @@ public class PotionEffects extends BasicHud {
                     titleY += mc.fontRendererObj.FONT_HEIGHT / 2f;
                 titleY /= getScale();
 
+                if (showEffectDuringBlink(oBlinking, oBlinking.makeEffectNameBlink, effect.getDuration())) {
+                    RenderManager.drawScaledString(builtTitle, titleX, titleY, getColor(oColor.nameColor.getRGB(), excluded), textType, scale);
+                }
 
-                RenderManager.drawScaledString(builtTitle, titleX, titleY, getColor(oColor.nameColor.getRGB(), excluded), textType, scale);
 
             }
 
             if (oComponent.duration) {
-                if (oComponent.icon)
-                    xOff = (ICON_SIZE + 4) * getScale();
+                if (oComponent.icon) xOff = (ICON_SIZE + 4) * getScale();
 
                 StringBuilder timeSb = new StringBuilder();
                 if (oFormatting.boldDuration) timeSb.append(EnumChatFormatting.BOLD);
@@ -230,11 +242,9 @@ public class PotionEffects extends BasicHud {
                 timeX /= getScale();
 
                 float timeY = y + yOff + (mc.fontRendererObj.FONT_HEIGHT) + 1;
-                if (!oComponent.effectName)
-                    timeY -= mc.fontRendererObj.FONT_HEIGHT / 2f;
+                if (!oComponent.effectName) timeY -= mc.fontRendererObj.FONT_HEIGHT / 2f * 2;
                 timeY /= getScale();
-
-                if (effect.getDuration() / 20f > oBlinking.blinkDuration || effect.getDuration() % (50 - oBlinking.blinkSpeed) <= (50 - oBlinking.blinkSpeed) / 2f) {
+                if (showEffectDuringBlink(oBlinking, oBlinking.makeEffectDurationBlink, effect.getDuration())) {
                     RenderManager.drawScaledString(builtTime, timeX, timeY, getColor(oColor.durationColor.getRGB(), excluded), textType, scale);
                 }
             }
@@ -243,6 +253,18 @@ public class PotionEffects extends BasicHud {
         }
         GlStateManager.popMatrix();
     }
+
+    private boolean showEffectDuringBlink(EffectConfig effectConfig, boolean blinkType, float duration) {
+        float blinkSpeed = effectConfig.blinkSpeed / 3.0f;
+        if (effectConfig.blink && blinkType && duration <= effectConfig.blinkDuration * 20.0F) {
+            if (this.ticks > blinkSpeed * 2) {
+                this.ticks = 0;
+            }
+            return this.ticks <= blinkSpeed;
+        }
+        return true;
+    }
+
 
     private String amplifierNumerals(int level) {
         if (level < 0) {
@@ -395,6 +417,24 @@ public class PotionEffects extends BasicHud {
                 subcategory = "Blinking"
         )
         public boolean blink = true;
+
+        @Switch(
+                name = "Make Icon Blink",
+                subcategory = "Blinking"
+        )
+        public boolean makeEffectIconBlink = false;
+
+        @Switch(
+                name = "Make Effect Name Blink",
+                subcategory = "Blinking"
+        )
+        public boolean makeEffectNameBlink = false;
+
+        @Switch(
+                name = "Make Duration Blink",
+                subcategory = "Blinking"
+        )
+        public boolean makeEffectDurationBlink = true;
 
         @Slider(
                 name = "Blink Duration",

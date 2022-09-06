@@ -1,7 +1,7 @@
-package cc.polyfrost.example;
+package tk.tellinq.potioneffects;
 
-import cc.polyfrost.example.command.ExampleCommand;
-import cc.polyfrost.example.config.PotionEffectsConfig;
+import tk.tellinq.potioneffects.command.ExampleCommand;
+import tk.tellinq.potioneffects.config.PotionEffectsConfig;
 import cc.polyfrost.oneconfig.utils.commands.CommandManager;
 
 @net.minecraftforge.fml.common.Mod(modid = PotionEffectsMod.MODID, name = PotionEffectsMod.NAME, version = PotionEffectsMod.VERSION)
