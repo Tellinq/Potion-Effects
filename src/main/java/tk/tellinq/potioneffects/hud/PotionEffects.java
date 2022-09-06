@@ -242,7 +242,7 @@ public class PotionEffects extends BasicHud {
                 timeX /= getScale();
 
                 float timeY = y + yOff + (mc.fontRendererObj.FONT_HEIGHT) + 1;
-                if (!oComponent.effectName) timeY -= mc.fontRendererObj.FONT_HEIGHT / 2f * 2;
+                if (!oComponent.effectName) timeY -= mc.fontRendererObj.FONT_HEIGHT / 2f;
                 timeY /= getScale();
                 if (showEffectDuringBlink(oBlinking, oBlinking.makeEffectDurationBlink, effect.getDuration())) {
                     RenderManager.drawScaledString(builtTime, timeX, timeY, getColor(oColor.durationColor.getRGB(), excluded), textType, scale);
