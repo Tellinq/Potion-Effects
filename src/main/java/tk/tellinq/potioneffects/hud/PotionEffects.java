@@ -1,6 +1,8 @@
 package tk.tellinq.potioneffects.hud;
 
 import cc.polyfrost.oneconfig.libs.universal.UGraphics;
+import net.minecraft.client.gui.ScaledResolution;
+import org.lwjgl.opengl.GL11;
 import tk.tellinq.potioneffects.config.PotionEffectsConfig;
 import cc.polyfrost.oneconfig.config.annotations.*;
 import cc.polyfrost.oneconfig.config.core.OneColor;
@@ -141,7 +143,7 @@ public class PotionEffects extends BasicHud {
 
         GlStateManager.pushMatrix();
         UGraphics.GL.scale(scale, scale, 1);
-        UGraphics.GL.translate(-scale, -scale, 1);
+        UGraphics.GL.translate(x / scale - x, y / scale - y, 1);
         for (PotionEffect effect : potionEffects) {
             EffectConfig effectSetting = getEffectSetting(effect);
             EffectConfig oComponent = useOverride(effectSetting, effectSetting.overrideComponent);
