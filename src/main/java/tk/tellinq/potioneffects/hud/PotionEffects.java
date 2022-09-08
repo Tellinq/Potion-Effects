@@ -29,6 +29,7 @@ public class PotionEffects extends BasicHud {
 
     @Slider(
             name = "Vertical Spacing",
+            description = "Adjust the spacing between effects",
             min = 0,
             max = 10
     )
@@ -36,6 +37,7 @@ public class PotionEffects extends BasicHud {
 
     @DualOption(
             name = "Vertical Sorting",
+            description = "Make sorting start from the top or bottom",
             left = "Top",
             right = "Bottom"
     )
@@ -43,12 +45,18 @@ public class PotionEffects extends BasicHud {
 
     @Dropdown(
             name = "Sorting Method",
+            description = "Vanilla: Sorts based off the default order" +
+                    "\nAlphabetical: Sorts from A-Z" +
+                    "\nDuration: Sorts from the effects with the lowest duration to the highest" +
+                    "\nAmplifier: Sorts from the highest amplifier to the lowest",
             options = {"Vanilla", "Alphabetical", "Duration", "Amplifier"}
     )
     public int sortingMethod = 0;
 
     @Switch(
-            name = "Show Excluded Effects in HUD Editor"
+            name = "Show Excluded Effects in HUD Editor",
+            description = "Show potion effects that are excluded in the HUD editor" +
+                    "\nNot recommended to disable if all effects are excluded!"
     )
     public boolean showExcludedEffects = true;
 
@@ -321,6 +329,7 @@ public class PotionEffects extends BasicHud {
 
         @Switch(
                 name = "Override",
+                description = "Let this specific effect override",
                 subcategory = "Override",
                 size = 2
         )
@@ -328,72 +337,84 @@ public class PotionEffects extends BasicHud {
 
         @Checkbox(
                 name = "Override Component",
+                description = "Override the component category",
                 subcategory = "Override"
         )
         public boolean overrideComponent = false;
 
         @Checkbox(
                 name = "Override Amplifier",
+                description = "Override the amplifier category",
                 subcategory = "Override"
         )
         public boolean overrideAmplifier = false;
 
         @Checkbox(
                 name = "Override Blinking",
+                description = "Override the blinking category",
                 subcategory = "Override"
         )
         public boolean overrideBlinking = false;
 
         @Checkbox(
                 name = "Override Formatting",
+                description = "Override the formatting category",
                 subcategory = "Override"
         )
         public boolean overrideFormatting = true;
 
         @Checkbox(
                 name = "Override Color",
+                description = "Override the color category",
                 subcategory = "Override"
         )
         public boolean overrideColor = true;
 
         @Checkbox(
                 name = "Override Exclusion",
+                description = "Override the exclusion category",
                 subcategory = "Override"
         )
         public boolean overrideExclusion = true;
 
         @Checkbox(
                 name = "Icon",
+                description = "Show the effect icon",
                 subcategory = "Component"
         )
         public boolean icon = true;
 
         @Checkbox(
                 name = "Effect Name",
+                description = "Show the effect name",
                 subcategory = "Component"
         )
         public boolean effectName = true;
 
         @Checkbox(
                 name = "Duration",
+                description = "Show the effect duration",
                 subcategory = "Component"
         )
         public boolean duration = true;
 
         @Switch(
                 name = "Show Amplifier",
+                description = "Show the amplifier amount next to the effect name",
                 subcategory = "Amplifier"
         )
         public boolean amplifier = true;
 
         @Switch(
                 name = "Show Level One",
+                description = "Show the amplifier if the effect level is one",
                 subcategory = "Amplifier"
         )
         public boolean levelOne = false;
 
         @DualOption(
                 name = "Amplifier Numerals",
+                description = "Choose to show roman numerals or arabic amount",
                 subcategory = "Amplifier",
                 left = "Roman",
                 right = "Arabic"
@@ -402,30 +423,35 @@ public class PotionEffects extends BasicHud {
 
         @Switch(
                 name = "Blink",
+                description = "Make the potion effects blink when the duration is low",
                 subcategory = "Blinking"
         )
         public boolean blink = true;
 
         @Switch(
                 name = "Make Icon Blink",
+                description = "Make the icon blink",
                 subcategory = "Blinking"
         )
         public boolean makeEffectIconBlink = false;
 
         @Switch(
                 name = "Make Effect Name Blink",
+                description = "Make the effect name blink",
                 subcategory = "Blinking"
         )
         public boolean makeEffectNameBlink = false;
 
         @Switch(
                 name = "Make Duration Blink",
+                description = "Make the duration blink",
                 subcategory = "Blinking"
         )
         public boolean makeEffectDurationBlink = true;
 
         @Slider(
                 name = "Blink Duration",
+                description = "The duration the effect should start blinking at",
                 subcategory = "Blinking",
                 min = 0,
                 max = 60
@@ -434,6 +460,7 @@ public class PotionEffects extends BasicHud {
 
         @Slider(
                 name = "Blink Speed",
+                description = "The speed of which the effect should blink at",
                 subcategory = "Blinking",
                 min = 0,
                 max = 60
@@ -449,6 +476,7 @@ public class PotionEffects extends BasicHud {
 
         @Text(
                 name = "Custom Name",
+                description = "Override the effect name with a custom one",
                 subcategory = "Formatting",
                 size = 2
         )
@@ -456,24 +484,28 @@ public class PotionEffects extends BasicHud {
 
         @Checkbox(
                 name = "Bold Effect Name",
+                description = "Bold the effect name",
                 subcategory = "Formatting"
         )
         public boolean boldEffectName = false;
 
         @Checkbox(
                 name = "Italic Effect Name",
+                description = "Make the effect name italic",
                 subcategory = "Formatting"
         )
         public boolean italicEffectName = false;
 
         @Checkbox(
                 name = "Underline Effect Name",
+                description = "Underline the effect name",
                 subcategory = "Formatting"
         )
         public boolean underlineEffectName = false;
 
         @Text(
                 name = "Max Duration String",
+                description = "The text that should show when you have a permanent effect",
                 subcategory = "Formatting",
                 size = 2
         )
@@ -481,36 +513,42 @@ public class PotionEffects extends BasicHud {
 
         @Checkbox(
                 name = "Bold Duration",
+                description = "Bold the duration text",
                 subcategory = "Formatting"
         )
         public boolean boldDuration = false;
 
         @Checkbox(
                 name = "Italic Duration",
+                description = "Make the duration text italic",
                 subcategory = "Formatting"
         )
         public boolean italicDuration = false;
 
         @Checkbox(
                 name = "Underline Duration",
+                description = "Underline the duration text",
                 subcategory = "Formatting"
         )
         public boolean underlineDuration = false;
 
         @Color(
                 name = "Name Color",
+                description = "The color of the effect name",
                 subcategory = "Color"
         )
         public OneColor nameColor = new OneColor(255, 255, 255);
 
         @Color(
                 name = "Duration Color",
+                description = "The color of the duration text",
                 subcategory = "Color"
         )
         public OneColor durationColor = new OneColor(255, 255, 255);
 
         @Checkbox(
                 name = "Exclude",
+                description = "Completely exclude the effect(s)",
                 subcategory = "Exclusion",
                 size = 2
         )
@@ -518,20 +556,23 @@ public class PotionEffects extends BasicHud {
 
         @Checkbox(
                 name = "Permanent Effects",
+                description = "Exclude the effect(s) when the duration is permanent",
                 subcategory = "Exclusion",
                 size = 2
         )
         public boolean excludePermanentEffects = false;
 
         @Dropdown(
-                name = "Exclude Duration Set",
+                name = "Exclude Duration Rule",
+                description = "Exclude effects that are either above, below, at, or not at a certain duration threshold",
                 options = {"None", "Above", "Below", "At", "Not At"},
                 subcategory = "Exclusion"
         )
         public int excludeSetDuration = 0;
 
         @Slider(
-                name = "Excluded Duration Value(s)",
+                name = "Excluded Duration Threshold",
+                description = "The value(s) that will be excluded based off the duration rule",
                 subcategory = "Exclusion",
                 min = 2,
                 max = 90
@@ -539,7 +580,8 @@ public class PotionEffects extends BasicHud {
         public float excludedDurationValues = 30f;
 
         @Dropdown(
-                name = "Exclude Amplifier Set",
+                name = "Exclude Amplifier Rule",
+                description = "Exclude effects that are either above, below, at, or not at a certain amplifier amount",
                 options = {"None", "Above", "Below", "At", "Not At"},
                 subcategory = "Exclusion"
         )
@@ -547,14 +589,13 @@ public class PotionEffects extends BasicHud {
 
         @Slider(
                 name = "Excluded Amplifier Value(s)",
+                description = "The value(s) that will be excluded based off the amplifier rule",
                 subcategory = "Exclusion",
                 min = 0,
                 max = 20,
                 step = 1
         )
         public int excludedAmplifierValues = 10;
-
-
 
         public EffectConfig(String effect) {
             this.effect = effect;
