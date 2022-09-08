@@ -1,5 +1,6 @@
 package tk.tellinq.potioneffects.hud;
 
+import cc.polyfrost.oneconfig.libs.universal.UGraphics;
 import tk.tellinq.potioneffects.config.PotionEffectsConfig;
 import cc.polyfrost.oneconfig.config.annotations.*;
 import cc.polyfrost.oneconfig.config.core.OneColor;
@@ -133,13 +134,14 @@ public class PotionEffects extends BasicHud {
 
         float yOff = 0;
         float xOff = 0;
-        final int yAmt = (int) ((ICON_SIZE + this.verticalSpacing) * scale);
+        final int yAmt = (int) ((ICON_SIZE + this.verticalSpacing));
 
-        this.height = ((potionEffects.size() * yAmt) - this.verticalSpacing) * scale;
+        this.height = ((potionEffects.size() * yAmt) - this.verticalSpacing);
         this.width = 10f;
 
         GlStateManager.pushMatrix();
-        GlStateManager.scale(getScale(), getScale(), 1);
+        UGraphics.GL.scale(scale, scale, 1);
+        UGraphics.GL.translate(-scale, -scale, 1);
         for (PotionEffect effect : potionEffects) {
             EffectConfig effectSetting = getEffectSetting(effect);
             EffectConfig oComponent = useOverride(effectSetting, effectSetting.overrideComponent);
@@ -153,7 +155,7 @@ public class PotionEffects extends BasicHud {
                 if (example && this.showExcludedEffects) {
                     excluded = true;
                 } else {
-                    this.height -= yAmt * scale;
+                    this.height -= yAmt;
                     continue;
                 }
             }
@@ -161,33 +163,21 @@ public class PotionEffects extends BasicHud {
             if (!potion.shouldRender(effect)) continue;
 
             float iconX = x;
-            iconX /= getScale();
 
             GlStateManager.color(1f, 1f, 1f, excluded ? 0.5f : 1f);
 
             if (oComponent.icon) {
                 mc.getTextureManager().bindTexture(EFFECTS_RESOURCE);
                 if (showEffectDuringBlink(oBlinking, oBlinking.makeEffectIconBlink, effect.getDuration())) {
-                    mc.ingameGUI.drawTexturedModalRect(iconX, (y + yOff) / getScale(), potion.getStatusIconIndex() % 8 * 18, 198 + potion.getStatusIconIndex() / 8 * 18, 18, 18);
+                    mc.ingameGUI.drawTexturedModalRect(iconX, (y + yOff), potion.getStatusIconIndex() % 8 * 18, 198 + potion.getStatusIconIndex() / 8 * 18, 18, 18);
                 }
-                xOff = ICON_SIZE * getScale();
-                this.width = Math.max(this.width, xOff / getScale());
-            }
-
-            RenderManager.TextType textType = RenderManager.TextType.NONE;
-            switch (oFormatting.textType) {
-                case 1:
-                    textType = RenderManager.TextType.SHADOW;
-                    break;
-                case 2:
-                    textType = RenderManager.TextType.FULL;
-                    break;
-                default:
+                xOff = ICON_SIZE;
+                this.width = Math.max(this.width, xOff);
             }
 
             if (oComponent.effectName) {
                 if (oComponent.icon)
-                    xOff = (ICON_SIZE + 4) * getScale();
+                    xOff = (ICON_SIZE + 4);
 
                 StringBuilder titleSb = new StringBuilder();
                 if (oFormatting.boldEffectName) titleSb.append(EnumChatFormatting.BOLD);
@@ -207,25 +197,23 @@ public class PotionEffects extends BasicHud {
                 String builtTitle = titleSb.toString();
 
                 int titleWidth = mc.fontRendererObj.getStringWidth(builtTitle);
-                width = Math.max(width, (xOff / getScale()) + titleWidth);
+                width = Math.max(width, (xOff) + titleWidth);
 
                 float titleX = x + xOff;
-                titleX /= getScale();
 
                 float titleY = y + yOff;
                 if (!oComponent.duration)
                     titleY += mc.fontRendererObj.FONT_HEIGHT / 2f;
-                titleY /= getScale();
 
                 if (showEffectDuringBlink(oBlinking, oBlinking.makeEffectNameBlink, effect.getDuration())) {
-                    RenderManager.drawScaledString(builtTitle, titleX, titleY, getColor(oColor.nameColor.getRGB(), excluded), textType, scale);
+                    RenderManager.drawScaledString(builtTitle, titleX, titleY, getColor(oColor.nameColor.getRGB(), excluded), RenderManager.TextType.toType(oFormatting.textType), 1);
                 }
 
 
             }
 
             if (oComponent.duration) {
-                if (oComponent.icon) xOff = (ICON_SIZE + 4) * getScale();
+                if (oComponent.icon) xOff = (ICON_SIZE + 4);
 
                 StringBuilder timeSb = new StringBuilder();
                 if (oFormatting.boldDuration) timeSb.append(EnumChatFormatting.BOLD);
@@ -236,20 +224,18 @@ public class PotionEffects extends BasicHud {
                 String builtTime = timeSb.toString();
 
                 int timeWidth = mc.fontRendererObj.getStringWidth(builtTime);
-                width = Math.max(width, (xOff / getScale()) + timeWidth);
+                width = Math.max(width, (xOff) + timeWidth);
 
                 float timeX = x + xOff;
-                timeX /= getScale();
 
                 float timeY = y + yOff + (mc.fontRendererObj.FONT_HEIGHT) + 1;
                 if (!oComponent.effectName) timeY -= mc.fontRendererObj.FONT_HEIGHT / 2f;
-                timeY /= getScale();
                 if (showEffectDuringBlink(oBlinking, oBlinking.makeEffectDurationBlink, effect.getDuration())) {
-                    RenderManager.drawScaledString(builtTime, timeX, timeY, getColor(oColor.durationColor.getRGB(), excluded), textType, scale);
+                    RenderManager.drawScaledString(builtTime, timeX, timeY, getColor(oColor.durationColor.getRGB(), excluded), RenderManager.TextType.toType(oFormatting.textType), 1);
                 }
             }
 
-            yOff += yAmt * getScale();
+            yOff += yAmt;
         }
         GlStateManager.popMatrix();
     }
@@ -319,12 +305,12 @@ public class PotionEffects extends BasicHud {
 
     @Override
     protected float getWidth(float scale, boolean example) {
-        return width;
+        return width * scale;
     }
 
     @Override
     protected float getHeight(float scale, boolean example) {
-        return height;
+        return height * scale;
     }
 
     public static class EffectConfig {
