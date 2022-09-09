@@ -1,5 +1,5 @@
 # Potion Effects
-A mod from [OneConfig](https://github.com/Polyfrost/OneConfig) that sllows you to see the active potion effects on your player!
+A mod from [OneConfig](https://github.com/Polyfrost/OneConfig) that sllows you to see the active potion effects!
 
 # NOTE
 ### Because [OneConfig](https://github.com/Polyfrost/OneConfig) is still in development, this mod is not completed. Some bugs may appear due to issues with OneConfig. In the meantime, you may still compile the mod yourself and try it out.
