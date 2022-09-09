@@ -96,7 +96,8 @@ public class PotionEffects extends BasicHud {
     private float width = 0f;
     private float height = 0f;
     @Exclude private int ticks = 0;
-    private List<PotionEffect> potionEffects;
+    @Exclude private List<PotionEffect> potionEffects;
+    @Exclude private boolean dummy = false;
 
     public PotionEffects() {
         super(true, 0, 0, 1, false, false, 0, 0, 0, new OneColor(0, 0, 0, 120), false, 2, new OneColor(0, 0, 0));
@@ -116,14 +117,13 @@ public class PotionEffects extends BasicHud {
         if (mc.thePlayer != null) {
             potionEffects.addAll(mc.thePlayer.getActivePotionEffects());
         }
-
-        if (potionEffects.isEmpty()) {
-            if (example) {
-                potionEffects.add(new PotionEffect(Potion.moveSpeed.id, 1200, 1));
-                potionEffects.add(new PotionEffect(Potion.damageBoost.id, 30, 3));
-            }
+        this.dummy = example && potionEffects.isEmpty();
+        if (this.dummy) {
+            potionEffects.add(new PotionEffect(Potion.moveSpeed.id, 1200, 1));
+            potionEffects.add(new PotionEffect(Potion.damageBoost.id, 30, 3));
         }
-        int lengt = 0;
+
+        int amount = 0;
         for (PotionEffect effect : potionEffects) {
             EffectConfig effectSetting = getEffectSetting(effect);
             EffectConfig oExclusion = useOverride(effectSetting, effectSetting.overrideExclusion);
@@ -132,11 +132,13 @@ public class PotionEffects extends BasicHud {
                     continue;
                 }
             }
-            lengt++;
+            amount++;
         }
-        if (lengt == 0) {
+
+        if (amount == 0) {
             return;
         }
+
         super.drawAll(matrices, example);
     }
 
@@ -148,7 +150,7 @@ public class PotionEffects extends BasicHud {
 
         float yOff = 0;
         float xOff = 0;
-        final int yAmt = (int) ((ICON_SIZE + this.verticalSpacing));
+        int yAmt = (int) ((ICON_SIZE + this.verticalSpacing));
 
         this.height = ((potionEffects.size() * yAmt) - this.verticalSpacing);
         this.width = 0f;
@@ -176,9 +178,9 @@ public class PotionEffects extends BasicHud {
             Potion potion = Potion.potionTypes[effect.getPotionID()];
             if (!potion.shouldRender(effect)) continue;
 
-            GlStateManager.color(1f, 1f, 1f, excluded ? 0.5f : 1f);
 
             if (oComponent.icon) {
+                GlStateManager.color(1f, 1f, 1f, excluded ? 0.5f : 1f);
                 mc.getTextureManager().bindTexture(EFFECTS_RESOURCE);
                 if (showEffectDuringBlink(oBlinking, oBlinking.makeEffectIconBlink, effect.getDuration())) {
                     mc.ingameGUI.drawTexturedModalRect(x, (y + yOff), potion.getStatusIconIndex() % 8 * 18, 198 + potion.getStatusIconIndex() / 8 * 18, 18, 18);
@@ -270,12 +272,16 @@ public class PotionEffects extends BasicHud {
     }
 
     private boolean showEffectDuringBlink(EffectConfig effectConfig, boolean blinkType, float duration) {
-        float blinkSpeed = effectConfig.blinkSpeed / 3.0f;
-        if (effectConfig.blink && blinkType && duration <= effectConfig.blinkDuration * 20.0F) {
-            if (this.ticks > blinkSpeed * 2) {
-                this.ticks = 0;
+        if (effectConfig.blink && blinkType) {
+            if (effectConfig.syncBlinking || this.dummy) {
+                float blinkSpeed = effectConfig.blinkSpeed / 3.0f;
+                if (duration <= effectConfig.blinkDuration * 20.0F) {
+                    if (this.ticks > blinkSpeed * 2) this.ticks = 0;
+                    return this.ticks <= blinkSpeed;
+                }
+            } else {
+                return duration / 20f > effectConfig.blinkDuration || duration % (50 - effectConfig.blinkSpeed) <= (50 - effectConfig.blinkSpeed) / 2f;
             }
-            return this.ticks <= blinkSpeed;
         }
         return true;
     }
@@ -445,21 +451,35 @@ public class PotionEffects extends BasicHud {
         public boolean blink = true;
 
         @Switch(
-                name = "Make Icon Blink",
+                name = "Sync Blinking",
+                description = "Make blinking synced with tick counts or make blinking go based off the duration time.",
+                subcategory = "Blinking"
+        )
+        public boolean syncBlinking = true;
+
+        @Header(
+                text = "Blinking components",
+                subcategory = "Blinking",
+                size = 2
+        )
+        public boolean blinkingIgnored = true;
+
+        @Checkbox(
+                name = "Icon",
                 description = "Make the icon blink",
                 subcategory = "Blinking"
         )
         public boolean makeEffectIconBlink = false;
 
-        @Switch(
-                name = "Make Effect Name Blink",
+        @Checkbox(
+                name = "Effect Name",
                 description = "Make the effect name blink",
                 subcategory = "Blinking"
         )
         public boolean makeEffectNameBlink = false;
 
-        @Switch(
-                name = "Make Duration Blink",
+        @Checkbox(
+                name = "Duration Text",
                 description = "Make the duration blink",
                 subcategory = "Blinking"
         )
