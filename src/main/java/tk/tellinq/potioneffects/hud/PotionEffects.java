@@ -324,9 +324,6 @@ public class PotionEffects extends BasicHud {
     }
 
     public static class EffectConfig {
-        public String effect;
-
-
         @Switch(
                 name = "Override",
                 description = "Let this specific effect override",
@@ -597,8 +594,6 @@ public class PotionEffects extends BasicHud {
         )
         public int excludedAmplifierValues = 10;
 
-        public EffectConfig(String effect) {
-            this.effect = effect;
-        }
+        public EffectConfig() {}
     }
 }

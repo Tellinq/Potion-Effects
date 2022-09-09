@@ -14,154 +14,155 @@ public class PotionEffectsConfig extends Config {
             name = "Global Effects",
             location = PageLocation.TOP
     )
-    public static PotionEffects.EffectConfig global = new PotionEffects.EffectConfig("Global");
+    public static PotionEffects.EffectConfig global = new PotionEffects.EffectConfig();
 
     @Page(
             name = "Speed",
+            description = "Change the speed effect's appearance",
             location = PageLocation.TOP,
             category = "Effects"
     )
-    public static PotionEffects.EffectConfig speed = new PotionEffects.EffectConfig("Speed");
+    public static PotionEffects.EffectConfig speed = new PotionEffects.EffectConfig();
 
     @Page(
             name = "Slowness",
             location = PageLocation.TOP,
             category = "Effects"
     )
-    public static PotionEffects.EffectConfig slowness = new PotionEffects.EffectConfig("Slowness");
+    public static PotionEffects.EffectConfig slowness = new PotionEffects.EffectConfig();
 
     @Page(
             name = "Haste",
             location = PageLocation.TOP,
             category = "Effects"
     )
-    public static PotionEffects.EffectConfig haste = new PotionEffects.EffectConfig("Haste");
+    public static PotionEffects.EffectConfig haste = new PotionEffects.EffectConfig();
 
     @Page(
             name = "Mining Fatigue",
             location = PageLocation.TOP,
             category = "Effects"
     )
-    public static PotionEffects.EffectConfig miningFatigue = new PotionEffects.EffectConfig("Mining Fatigue");
+    public static PotionEffects.EffectConfig miningFatigue = new PotionEffects.EffectConfig();
 
     @Page(
             name = "Strength",
             location = PageLocation.TOP,
             category = "Effects"
     )
-    public static PotionEffects.EffectConfig strength = new PotionEffects.EffectConfig("Strength");
+    public static PotionEffects.EffectConfig strength = new PotionEffects.EffectConfig();
 
     @Page(
             name = "Jump Boost",
             location = PageLocation.TOP,
             category = "Effects"
     )
-    public static PotionEffects.EffectConfig jumpBoost = new PotionEffects.EffectConfig("Jump Boost");
+    public static PotionEffects.EffectConfig jumpBoost = new PotionEffects.EffectConfig();
 
     @Page(
             name = "Nausea",
             location = PageLocation.TOP,
             category = "Effects"
     )
-    public static PotionEffects.EffectConfig nausea = new PotionEffects.EffectConfig("Nausea");
+    public static PotionEffects.EffectConfig nausea = new PotionEffects.EffectConfig();
 
     @Page(
             name = "Regeneration",
             location = PageLocation.TOP,
             category = "Effects"
     )
-    public static PotionEffects.EffectConfig regeneration = new PotionEffects.EffectConfig("Regeneration");
+    public static PotionEffects.EffectConfig regeneration = new PotionEffects.EffectConfig();
 
     @Page(
             name = "Resistance",
             location = PageLocation.TOP,
             category = "Effects"
     )
-    public static PotionEffects.EffectConfig resistance = new PotionEffects.EffectConfig("Resistance");
+    public static PotionEffects.EffectConfig resistance = new PotionEffects.EffectConfig();
 
     @Page(
             name = "Fire Resistance",
             location = PageLocation.TOP,
             category = "Effects"
     )
-    public static PotionEffects.EffectConfig fireResistance = new PotionEffects.EffectConfig("Fire Resistance");
+    public static PotionEffects.EffectConfig fireResistance = new PotionEffects.EffectConfig();
 
     @Page(
             name = "Water Breathing",
             location = PageLocation.TOP,
             category = "Effects"
     )
-    public static PotionEffects.EffectConfig waterBreathing = new PotionEffects.EffectConfig("Water Breathing");
+    public static PotionEffects.EffectConfig waterBreathing = new PotionEffects.EffectConfig();
 
     @Page(
             name = "Invisibility",
             location = PageLocation.TOP,
             category = "Effects"
     )
-    public static PotionEffects.EffectConfig invisibility = new PotionEffects.EffectConfig("Invisibility");
+    public static PotionEffects.EffectConfig invisibility = new PotionEffects.EffectConfig();
 
     @Page(
             name = "Blindness",
             location = PageLocation.TOP,
             category = "Effects"
     )
-    public static PotionEffects.EffectConfig blindness = new PotionEffects.EffectConfig("Blindness");
+    public static PotionEffects.EffectConfig blindness = new PotionEffects.EffectConfig();
 
     @Page(
             name = "Night Vision",
             location = PageLocation.TOP,
             category = "Effects"
     )
-    public static PotionEffects.EffectConfig nightVision = new PotionEffects.EffectConfig("Night Vision");
+    public static PotionEffects.EffectConfig nightVision = new PotionEffects.EffectConfig();
 
     @Page(
             name = "Hunger",
             location = PageLocation.TOP,
             category = "Effects"
     )
-    public static PotionEffects.EffectConfig hunger = new PotionEffects.EffectConfig("Hunger");
+    public static PotionEffects.EffectConfig hunger = new PotionEffects.EffectConfig();
 
     @Page(
             name = "Weakness",
             location = PageLocation.TOP,
             category = "Effects"
     )
-    public static PotionEffects.EffectConfig weakness = new PotionEffects.EffectConfig("Weakness");
+    public static PotionEffects.EffectConfig weakness = new PotionEffects.EffectConfig();
 
     @Page(
             name = "Poison",
             location = PageLocation.TOP,
             category = "Effects"
     )
-    public static PotionEffects.EffectConfig poison = new PotionEffects.EffectConfig("Poison");
+    public static PotionEffects.EffectConfig poison = new PotionEffects.EffectConfig();
 
     @Page(
             name = "Wither",
             location = PageLocation.TOP,
             category = "Effects"
     )
-    public static PotionEffects.EffectConfig wither = new PotionEffects.EffectConfig("Wither");
+    public static PotionEffects.EffectConfig wither = new PotionEffects.EffectConfig();
 
     @Page(
             name = "Health Boost",
             location = PageLocation.TOP,
             category = "Effects"
     )
-    public static PotionEffects.EffectConfig healthBoost = new PotionEffects.EffectConfig("Health Boost");
+    public static PotionEffects.EffectConfig healthBoost = new PotionEffects.EffectConfig();
 
     @Page(
             name = "Absorption",
             location = PageLocation.TOP,
             category = "Effects"
     )
-    public static PotionEffects.EffectConfig absorption = new PotionEffects.EffectConfig("Absorption");
+    public static PotionEffects.EffectConfig absorption = new PotionEffects.EffectConfig();
 
     @Page(
             name = "Saturation",
             location = PageLocation.TOP,
             category = "Effects"
     )
-    public static PotionEffects.EffectConfig saturation = new PotionEffects.EffectConfig("Saturation");
+    public static PotionEffects.EffectConfig saturation = new PotionEffects.EffectConfig();
     
     @HUD(
             name = "General HUD"
