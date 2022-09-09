@@ -1,8 +1,7 @@
 package tk.tellinq.potioneffects.hud;
 
 import cc.polyfrost.oneconfig.libs.universal.UGraphics;
-import net.minecraft.client.gui.ScaledResolution;
-import org.lwjgl.opengl.GL11;
+import cc.polyfrost.oneconfig.libs.universal.UMinecraft;
 import tk.tellinq.potioneffects.config.PotionEffectsConfig;
 import cc.polyfrost.oneconfig.config.annotations.*;
 import cc.polyfrost.oneconfig.config.core.OneColor;
@@ -68,7 +67,7 @@ public class PotionEffects extends BasicHud {
 
     @Exclude public final int ICON_SIZE = 18;
     @Exclude private final ResourceLocation EFFECTS_RESOURCE = new ResourceLocation("textures/gui/container/inventory.png");
-    @Exclude public final Minecraft mc = Minecraft.getMinecraft();
+    @Exclude public final Minecraft mc = UMinecraft.getMinecraft();
     @Exclude public Map<Integer, EffectConfig> effectMap =
             new ImmutableMap.Builder<Integer, EffectConfig>()
                     .put(Potion.moveSpeed.id, PotionEffectsConfig.speed)
@@ -94,9 +93,10 @@ public class PotionEffects extends BasicHud {
                     .put(Potion.saturation.id, PotionEffectsConfig.saturation)
                     .build();
 
-    private float width = 10f;
-    private float height = 10f;
+    private float width = 0f;
+    private float height = 0f;
     @Exclude private int ticks = 0;
+    private List<PotionEffect> potionEffects;
 
     public PotionEffects() {
         super(true, 0, 0, 1, false, false, 0, 0, 0, new OneColor(0, 0, 0, 120), false, 2, new OneColor(0, 0, 0));
@@ -111,43 +111,47 @@ public class PotionEffects extends BasicHud {
     }
 
     @Override
-    protected void draw(UMatrixStack matrices, float x, float y, float scale, boolean example) {
-        GlStateManager.color(1f, 1f, 1f, 1f);
-        GlStateManager.disableLighting();
-
-        List<PotionEffect> potionEffects = new ArrayList<>();
-        if (mc.thePlayer != null) potionEffects.addAll(mc.thePlayer.getActivePotionEffects());
+    public void drawAll(UMatrixStack matrices, boolean example) {
+        potionEffects = new ArrayList<>();
+        if (mc.thePlayer != null) {
+            potionEffects.addAll(mc.thePlayer.getActivePotionEffects());
+        }
 
         if (potionEffects.isEmpty()) {
             if (example) {
                 potionEffects.add(new PotionEffect(Potion.moveSpeed.id, 1200, 1));
                 potionEffects.add(new PotionEffect(Potion.damageBoost.id, 30, 3));
-            } else {
-                this.width = 0;
-                this.height = 0;
-                return;
             }
         }
-
-        switch (this.sortingMethod) {
-            case 1:
-                potionEffects.sort(Comparator.comparing(effect -> I18n.format(effect.getEffectName())));
-                break;
-            case 2:
-                potionEffects.sort(Comparator.comparingInt(PotionEffect::getDuration));
-                break;
-            case 3:
-                potionEffects.sort(Comparator.comparingInt(PotionEffect::getAmplifier));
-                Collections.reverse(potionEffects);
+        int lengt = 0;
+        for (PotionEffect effect : potionEffects) {
+            EffectConfig effectSetting = getEffectSetting(effect);
+            EffectConfig oExclusion = useOverride(effectSetting, effectSetting.overrideExclusion);
+            if (excludePotions(oExclusion, effect)) {
+                if (!example) {
+                    continue;
+                }
+            }
+            lengt++;
         }
-        if (this.verticalSorting) Collections.reverse(potionEffects);
+        if (lengt == 0) {
+            return;
+        }
+        super.drawAll(matrices, example);
+    }
+
+    @Override
+    protected void draw(UMatrixStack matrices, float x, float y, float scale, boolean example) {
+        GlStateManager.disableLighting();
+
+        this.softEffects(potionEffects);
 
         float yOff = 0;
         float xOff = 0;
         final int yAmt = (int) ((ICON_SIZE + this.verticalSpacing));
 
         this.height = ((potionEffects.size() * yAmt) - this.verticalSpacing);
-        this.width = 10f;
+        this.width = 0f;
 
         GlStateManager.pushMatrix();
         UGraphics.GL.scale(scale, scale, 1);
@@ -172,22 +176,22 @@ public class PotionEffects extends BasicHud {
             Potion potion = Potion.potionTypes[effect.getPotionID()];
             if (!potion.shouldRender(effect)) continue;
 
-            float iconX = x;
-
             GlStateManager.color(1f, 1f, 1f, excluded ? 0.5f : 1f);
 
             if (oComponent.icon) {
                 mc.getTextureManager().bindTexture(EFFECTS_RESOURCE);
                 if (showEffectDuringBlink(oBlinking, oBlinking.makeEffectIconBlink, effect.getDuration())) {
-                    mc.ingameGUI.drawTexturedModalRect(iconX, (y + yOff), potion.getStatusIconIndex() % 8 * 18, 198 + potion.getStatusIconIndex() / 8 * 18, 18, 18);
+                    mc.ingameGUI.drawTexturedModalRect(x, (y + yOff), potion.getStatusIconIndex() % 8 * 18, 198 + potion.getStatusIconIndex() / 8 * 18, 18, 18);
                 }
                 xOff = ICON_SIZE;
                 this.width = Math.max(this.width, xOff);
             }
 
             if (oComponent.effectName) {
-                if (oComponent.icon)
+                if (oComponent.icon) {
                     xOff = (ICON_SIZE + 4);
+                }
+
 
                 StringBuilder titleSb = new StringBuilder();
                 if (oFormatting.boldEffectName) titleSb.append(EnumChatFormatting.BOLD);
@@ -207,13 +211,13 @@ public class PotionEffects extends BasicHud {
                 String builtTitle = titleSb.toString();
 
                 int titleWidth = mc.fontRendererObj.getStringWidth(builtTitle);
-                width = Math.max(width, (xOff) + titleWidth);
+                width = Math.max(width, xOff + titleWidth);
 
                 float titleX = x + xOff;
 
                 float titleY = y + yOff;
                 if (!oComponent.duration)
-                    titleY += mc.fontRendererObj.FONT_HEIGHT / 2f;
+                    titleY += mc.fontRendererObj.FONT_HEIGHT / 2f + 0.5f;
 
                 if (showEffectDuringBlink(oBlinking, oBlinking.makeEffectNameBlink, effect.getDuration())) {
                     RenderManager.drawScaledString(builtTitle, titleX, titleY, getColor(oColor.nameColor.getRGB(), excluded), RenderManager.TextType.toType(oFormatting.textType), 1);
@@ -239,7 +243,7 @@ public class PotionEffects extends BasicHud {
                 float timeX = x + xOff;
 
                 float timeY = y + yOff + (mc.fontRendererObj.FONT_HEIGHT) + 1;
-                if (!oComponent.effectName) timeY -= mc.fontRendererObj.FONT_HEIGHT / 2f;
+                if (!oComponent.effectName) timeY -= mc.fontRendererObj.FONT_HEIGHT / 2f + 0.5f;
                 if (showEffectDuringBlink(oBlinking, oBlinking.makeEffectDurationBlink, effect.getDuration())) {
                     RenderManager.drawScaledString(builtTime, timeX, timeY, getColor(oColor.durationColor.getRGB(), excluded), RenderManager.TextType.toType(oFormatting.textType), 1);
                 }
@@ -248,6 +252,21 @@ public class PotionEffects extends BasicHud {
             yOff += yAmt;
         }
         GlStateManager.popMatrix();
+    }
+
+    public void softEffects(List<PotionEffect> potionEffects) {
+        switch (this.sortingMethod) {
+            case 1:
+                potionEffects.sort(Comparator.comparing(effect -> I18n.format(effect.getEffectName())));
+                break;
+            case 2:
+                potionEffects.sort(Comparator.comparingInt(PotionEffect::getDuration));
+                break;
+            case 3:
+                potionEffects.sort(Comparator.comparingInt(PotionEffect::getAmplifier));
+                Collections.reverse(potionEffects);
+        }
+        if (this.verticalSorting) Collections.reverse(potionEffects);
     }
 
     private boolean showEffectDuringBlink(EffectConfig effectConfig, boolean blinkType, float duration) {
