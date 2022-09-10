@@ -314,20 +314,28 @@ public class PotionEffects extends BasicHud {
     }
 
     private boolean excludePotions(EffectConfig effectSetting, PotionEffect effect) {
-        if (effectSetting.excludePermanentEffects && effect.getIsPotionDurationMax()) {
-            return true;
-        }
+        if (effectSetting.excludePermanentEffects && effect.getIsPotionDurationMax()) return true;
+        if (this.excludeBulk(effectSetting.ambientExclusionRule, effect.getIsAmbient())) return true;
+        if (this.excludeBulk(effectSetting.particlesExclusionRule, effect.getIsShowParticles())) return true;
         if (this.excludeArrayOptions(effectSetting.excludeSetDuration, effect.getDuration(), effectSetting.excludedDurationValues * 20.0F) && !effect.getIsPotionDurationMax()) return true;
         if (this.excludeArrayOptions(effectSetting.excludeSetAmplifier, effect.getAmplifier(), effectSetting.excludedAmplifierValues - 1)) return true;
         return effectSetting.exclude;
     }
 
-    protected boolean excludeArrayOptions(int set, int realValue, float sliderValue) {
-        switch (set) {
-            case 1: return realValue > sliderValue;
-            case 2: return realValue < sliderValue;
-            case 3: return realValue == sliderValue;
-            case 4: return realValue != sliderValue;
+    protected boolean excludeBulk(int rule, boolean currentValue) {
+        switch (rule) {
+            case 1: return currentValue;
+            case 2: return !currentValue;
+            default: return false;
+        }
+    }
+
+    protected boolean excludeArrayOptions(int rule, int currentValue, float threshold) {
+        switch (rule) {
+            case 1: return currentValue > threshold;
+            case 2: return currentValue < threshold;
+            case 3: return currentValue == threshold;
+            case 4: return currentValue != threshold;
             default: return false;
         }
     }
@@ -442,6 +450,16 @@ public class PotionEffects extends BasicHud {
                 right = "Arabic"
         )
         public boolean romanNumerals = false;
+
+        /*@Slider(
+                name = "Order Priority",
+                description = "Higher numbers will indicate higher priority",
+                subcategory = "Sorting",
+                step = 1,
+                min = -15,
+                max = 15
+        )
+        public int orderPriority = 0;*/ // To be implemented
 
         @Switch(
                 name = "Blink",
@@ -606,6 +624,30 @@ public class PotionEffects extends BasicHud {
         )
         public int excludeSetDuration = 0;
 
+        @Dropdown(
+                name = "Exclude Amplifier Rule",
+                description = "Exclude effects that are either above, below, at, or not at a certain amplifier amount",
+                options = {"None", "Above", "Below", "At", "Not At"},
+                subcategory = "Exclusion"
+        )
+        public int excludeSetAmplifier = 0;
+
+        @Dropdown(
+                name = "Ambient Effects Rule",
+                description = "Decide if effects from a beacon should be excluded.",
+                subcategory = "Exclusion",
+                options = {"None", "Exclude All Ambient", "Exclude All Non Ambient"}
+        )
+        public int ambientExclusionRule = 0;
+
+        @Dropdown(
+                name = "Emitting Particles Rule",
+                description = "Decide if effects that allow particles should be excluded.",
+                subcategory = "Exclusion",
+                options = {"None", "Exclude All Emitting particles", "Exclude All Disallowing particles"}
+        )
+        public int particlesExclusionRule = 0;
+
         @Slider(
                 name = "Excluded Duration Threshold",
                 description = "The value(s) that will be excluded based off the duration rule",
@@ -614,14 +656,6 @@ public class PotionEffects extends BasicHud {
                 max = 90
         )
         public float excludedDurationValues = 30f;
-
-        @Dropdown(
-                name = "Exclude Amplifier Rule",
-                description = "Exclude effects that are either above, below, at, or not at a certain amplifier amount",
-                options = {"None", "Above", "Below", "At", "Not At"},
-                subcategory = "Exclusion"
-        )
-        public int excludeSetAmplifier = 0;
 
         @Slider(
                 name = "Excluded Amplifier Value(s)",
