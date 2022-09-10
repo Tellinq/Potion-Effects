@@ -21,6 +21,7 @@ import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.ResourceLocation;
+import tk.tellinq.potioneffects.util.RomanNumeral;
 
 import java.util.*;
 
@@ -207,7 +208,7 @@ public class PotionEffects extends BasicHud {
                 int amplifier = Math.max(1, effect.getAmplifier() + 1);
                 if (oAmplifier.amplifier && (amplifier != 1 || oAmplifier.levelOne)) {
                     titleSb.append(" ");
-                    if (!oAmplifier.romanNumerals) titleSb.append(amplifierNumerals(amplifier));
+                    if (!oAmplifier.romanNumerals) titleSb.append(RomanNumeral.INSTANCE.getCache(amplifier));
                     else titleSb.append(amplifier);
                 }
                 String builtTitle = titleSb.toString();
@@ -284,19 +285,6 @@ public class PotionEffects extends BasicHud {
             }
         }
         return true;
-    }
-
-
-    private String amplifierNumerals(int level) {
-        if (level < 0) {
-            level = 127 + Math.abs(128 + level);
-        }
-        int l = level;
-            return String.join("", Collections.nCopies(l, "I"))
-                    .replace("IIIII", "V").replace("IIII", "IV").replace("VV", "X")
-                    .replace("VIV", "IX").replace("XXXXX", "L").replace("XXXX", "XL")
-                    .replace("LL", "C").replace("LXL", "XC").replace("CCCCC", "D")
-                    .replace("CCCC", "CD").replace("DD", "M").replace("DCD", "CM");
     }
 
     public EffectConfig getEffectSetting(PotionEffect effect) {
