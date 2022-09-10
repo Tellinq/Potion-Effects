@@ -236,8 +236,21 @@ public class PotionEffects extends BasicHud {
                 if (oFormatting.boldDuration) timeSb.append(EnumChatFormatting.BOLD);
                 if (oFormatting.italicDuration) timeSb.append(EnumChatFormatting.ITALIC);
                 if (oFormatting.underlineDuration) timeSb.append(EnumChatFormatting.UNDERLINE);
-                if (effect.getIsPotionDurationMax()) timeSb.append(oFormatting.maxDurationString);
-                else timeSb.append(Potion.getDurationString(effect));
+                if (effect.getIsPotionDurationMax()) {
+                    timeSb.append(oFormatting.maxDurationString);
+                } else {
+                    switch (oFormatting.durationFormat) {
+                        case 0:
+                            timeSb.append(Potion.getDurationString(effect));
+                            break;
+                        case 1:
+                            timeSb.append(effect.getDuration() / 20).append("s");
+                            break;
+                        case 2:
+                            timeSb.append(RomanNumeral.INSTANCE.getCache(effect.getDuration() / 20));
+                    }
+
+                }
                 String builtTime = timeSb.toString();
 
                 int timeWidth = mc.fontRendererObj.getStringWidth(builtTime);
@@ -516,6 +529,13 @@ public class PotionEffects extends BasicHud {
         )
         public int textType = 1;
 
+        @Header(
+                text = "Effect Name",
+                subcategory = "Formatting",
+                size = 2
+        )
+        public boolean effectNameFormattingHeader;
+
         @Text(
                 name = "Custom Name",
                 description = "Override the effect name with a custom one",
@@ -545,6 +565,13 @@ public class PotionEffects extends BasicHud {
         )
         public boolean underlineEffectName = false;
 
+        @Header(
+                text = "Duration",
+                subcategory = "Formatting",
+                size = 2
+        )
+        public boolean durationFormattingHeader;
+
         @Text(
                 name = "Max Duration String",
                 description = "The text that should show when you have a permanent effect",
@@ -552,6 +579,15 @@ public class PotionEffects extends BasicHud {
                 size = 2
         )
         public String maxDurationString = "**:**";
+
+        @Dropdown(
+                name = "Duration Format",
+                description = "Choose how the duration text should be formatted",
+                subcategory = "Formatting",
+                options = {"Standard", "Split Format", "Roman Numerals"},
+                size = 2
+        )
+        public int durationFormat = 0;
 
         @Checkbox(
                 name = "Bold Duration",
