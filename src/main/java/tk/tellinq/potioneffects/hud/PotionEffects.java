@@ -1,5 +1,7 @@
 package tk.tellinq.potioneffects.hud;
 
+import cc.polyfrost.oneconfig.gui.OneConfigGui;
+import cc.polyfrost.oneconfig.hud.Position;
 import cc.polyfrost.oneconfig.libs.universal.UGraphics;
 import cc.polyfrost.oneconfig.libs.universal.UMinecraft;
 import tk.tellinq.potioneffects.config.PotionEffectsConfig;
@@ -27,6 +29,12 @@ import java.util.*;
 
 public class PotionEffects extends BasicHud {
 
+
+    @Dropdown(
+            name = "Horizontal Alignment",
+            options = {/*"Auto", */"Left", "Center", "Right"}
+    )
+    public int horizontalAlignment = 0;
     @Slider(
             name = "Vertical Spacing",
             description = "Adjust the spacing between effects",

@@ -8,6 +8,9 @@ import cc.polyfrost.oneconfig.config.data.Mod;
 import cc.polyfrost.oneconfig.config.data.ModType;
 import cc.polyfrost.oneconfig.config.data.PageLocation;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class PotionEffectsConfig extends Config {
 
     @Page(
@@ -169,6 +172,34 @@ public class PotionEffectsConfig extends Config {
     )
     public static PotionEffects testHud = new PotionEffects();
 
+    public static List<String> effectNames = new ArrayList<>();
+
+    static {
+        effectNames.add("Global Effects");
+        effectNames.add("Speed");
+        effectNames.add("Slowness");
+        effectNames.add("Haste");
+        effectNames.add("Mining Fatigue");
+        effectNames.add("Strength");
+        effectNames.add("Jump Boost");
+        effectNames.add("Nausea");
+        effectNames.add("Regeneration");
+        effectNames.add("Resistance");
+        effectNames.add("Fire Resistance");
+        effectNames.add("Water Breathing");
+        effectNames.add("Invisibility");
+        effectNames.add("Blindness");
+        effectNames.add("Night Vision");
+        effectNames.add("Hunger");
+        effectNames.add("Weakness");
+        effectNames.add("Poison");
+        effectNames.add("Wither");
+        effectNames.add("Health Boost");
+        effectNames.add("Absorption");
+        effectNames.add("Saturation");
+
+    }
+
     public PotionEffectsConfig() {
         super(new Mod(PotionEffectsMod.NAME, ModType.HUD), PotionEffectsMod.MODID + ".json");
         initialize();
@@ -179,5 +210,16 @@ public class PotionEffectsConfig extends Config {
         hideIf("Global Effects.overrideFormatting", true);
         hideIf("Global Effects.overrideColor", true);
         hideIf("Global Effects.overrideExclusion", true);
+
+
+        for (String effectName : effectNames) {
+            addDependency(effectName + ".overrideComponent", effectName + ".override");
+            addDependency(effectName + ".overrideAmplifier", effectName + ".override");
+            addDependency(effectName + ".overrideBlinking", effectName + ".override");
+            addDependency(effectName + ".overrideFormatting", effectName + ".override");
+            addDependency(effectName + ".overrideColor", effectName + ".override");
+            addDependency(effectName + ".overrideExclusion", effectName + ".override");
+
+        }
     }
 }
