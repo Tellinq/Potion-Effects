@@ -5,7 +5,9 @@ A mod from [OneConfig](https://github.com/Polyfrost/OneConfig) that allows you t
 ### Because [OneConfig](https://github.com/Polyfrost/OneConfig) is still in development, this mod is not completed. Some bugs may appear due to issues with OneConfig. In the meantime, you may still compile the mod yourself and try it out.
 Once OneConig releases and this is ensured that this is also in a releasable state, I will make a release!
 
-I may also release alpha builds to OneConfig alpha testers in the meantime (not confirmed, but I plan to do so). If you want to become an alpha tester for OneConfig and mods utilizing it, please join the [PolyFrost Discord](https://polyfrost.cc/discord) and boost the server to gain access.
+I also want to note that I have distributed jars privately. The main thing blocking me from releasing this is that this mod doesn't appear to work when no other OneConfig mod loads. I am not really familiar with Gradle and Mixin so I do believe this is more of my fault for lack of experience with both (and I have a burning hatred for Gradle as 99% of my projects are using Maven).
+
+This mod also has some limitations as I am waiting for certain functions in OneConfig to either be implemented or accessible (mainly anchor points being private, and I need them to shift text and icon positions when you move the potion effects around)
 
 ## Main Features
 
