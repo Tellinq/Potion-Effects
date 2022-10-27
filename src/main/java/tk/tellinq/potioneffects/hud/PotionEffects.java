@@ -1,9 +1,10 @@
 package tk.tellinq.potioneffects.hud;
 
-import cc.polyfrost.oneconfig.gui.OneConfigGui;
-import cc.polyfrost.oneconfig.hud.Position;
 import cc.polyfrost.oneconfig.libs.universal.UGraphics;
 import cc.polyfrost.oneconfig.libs.universal.UMinecraft;
+import net.minecraft.client.entity.EntityPlayerSP;
+import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.entity.player.EntityPlayer;
 import tk.tellinq.potioneffects.config.PotionEffectsConfig;
 import cc.polyfrost.oneconfig.config.annotations.*;
 import cc.polyfrost.oneconfig.config.core.OneColor;
@@ -17,7 +18,6 @@ import cc.polyfrost.oneconfig.libs.universal.UMatrixStack;
 import cc.polyfrost.oneconfig.renderer.RenderManager;
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
@@ -77,6 +77,8 @@ public class PotionEffects extends BasicHud {
     @Exclude public final int ICON_SIZE = 18;
     @Exclude private final ResourceLocation EFFECTS_RESOURCE = new ResourceLocation("textures/gui/container/inventory.png");
     @Exclude public final Minecraft mc = UMinecraft.getMinecraft();
+    @Exclude public final EntityPlayerSP player = mc.thePlayer;
+    @Exclude public final FontRenderer fontRenderer = mc.fontRendererObj;
     @Exclude public Map<Integer, EffectConfig> effectMap =
             new ImmutableMap.Builder<Integer, EffectConfig>()
                     .put(Potion.moveSpeed.id, PotionEffectsConfig.speed)
@@ -122,18 +124,18 @@ public class PotionEffects extends BasicHud {
 
     @Override
     public void drawAll(UMatrixStack matrices, boolean example) {
-        potionEffects = new ArrayList<>();
-        if (mc.thePlayer != null) {
-            potionEffects.addAll(mc.thePlayer.getActivePotionEffects());
+        this.potionEffects = new ArrayList<>();
+        if (this.player != null) {
+            this.potionEffects.addAll(this.player.getActivePotionEffects());
         }
-        this.dummy = example && potionEffects.isEmpty();
+        this.dummy = example && this.potionEffects.isEmpty();
         if (this.dummy) {
-            potionEffects.add(new PotionEffect(Potion.moveSpeed.id, 1200, 1));
-            potionEffects.add(new PotionEffect(Potion.damageBoost.id, 30, 3));
+            this.potionEffects.add(new PotionEffect(Potion.moveSpeed.id, 1200, 1));
+            this.potionEffects.add(new PotionEffect(Potion.damageBoost.id, 30, 3));
         }
 
         int amount = 0;
-        for (PotionEffect effect : potionEffects) {
+        for (PotionEffect effect : this.potionEffects) {
             EffectConfig effectSetting = getEffectSetting(effect);
             EffectConfig oExclusion = useOverride(effectSetting, effectSetting.overrideExclusion);
             if (excludePotions(oExclusion, effect)) {
@@ -153,22 +155,25 @@ public class PotionEffects extends BasicHud {
 
     @Override
     protected void draw(UMatrixStack matrices, float x, float y, float scale, boolean example) {
-        GlStateManager.disableLighting();
+        UGraphics.disableLighting();
 
-        this.softEffects(potionEffects);
+        this.softEffects(this.potionEffects);
 
         float yOff = 0;
         float xOff = 0;
-        int yAmt = (int) ((ICON_SIZE + this.verticalSpacing));
+        int yAmt = (int) (this.ICON_SIZE + this.verticalSpacing);
 
-        this.height = ((potionEffects.size() * yAmt) - this.verticalSpacing);
+        this.height = (this.potionEffects.size() * yAmt) - this.verticalSpacing;
         this.width = 0f;
 
-        GlStateManager.pushMatrix();
+        UGraphics.GL.pushMatrix();
+        // This REALLY should be a method inside OneConfig... CB does have it inside as a scaleAndTranslate method.
+        // I would make this a method myself, but I find it pointless since it's just two lines of code and making a new one just seems silly unless I was repeatedly calling it for multiple HUD mods.
         UGraphics.GL.scale(scale, scale, 1);
-        UGraphics.GL.translate(x / scale - x, y / scale - y, 1);
-        for (PotionEffect effect : potionEffects) {
+        UGraphics.GL.translate(x / scale, y / scale, 1);
+        for (PotionEffect effect : this.potionEffects) {
             EffectConfig effectSetting = getEffectSetting(effect);
+            // I wish there was a more efficient way of doing this...
             EffectConfig oComponent = useOverride(effectSetting, effectSetting.overrideComponent);
             EffectConfig oAmplifier = useOverride(effectSetting, effectSetting.overrideAmplifier);
             EffectConfig oBlinking = useOverride(effectSetting, effectSetting.overrideBlinking);
@@ -176,7 +181,7 @@ public class PotionEffects extends BasicHud {
             EffectConfig oColor = useOverride(effectSetting, effectSetting.overrideColor);
             EffectConfig oExclusion = useOverride(effectSetting, effectSetting.overrideExclusion);
             boolean excluded = false;
-            if (excludePotions(oExclusion, effect)) {
+            if (this.excludePotions(oExclusion, effect)) {
                 if (example && this.showExcludedEffects) {
                     excluded = true;
                 } else {
@@ -189,18 +194,22 @@ public class PotionEffects extends BasicHud {
 
 
             if (oComponent.icon) {
-                GlStateManager.color(1f, 1f, 1f, excluded ? 0.5f : 1f);
-                mc.getTextureManager().bindTexture(EFFECTS_RESOURCE);
-                if (showEffectDuringBlink(oBlinking, oBlinking.makeEffectIconBlink, effect.getDuration())) {
-                    mc.ingameGUI.drawTexturedModalRect(x, (y + yOff), potion.getStatusIconIndex() % 8 * 18, 198 + potion.getStatusIconIndex() / 8 * 18, 18, 18);
+                UGraphics.color4f(1f, 1f, 1f, excluded ? 0.5f : 1f);
+                this.mc.getTextureManager().bindTexture(EFFECTS_RESOURCE);
+                float iconX = 0;
+                if (this.horizontalAlignment == 2) {
+                    iconX = this.width - ICON_SIZE;
                 }
-                xOff = ICON_SIZE;
+                if (showEffectDuringBlink(oBlinking, oBlinking.makeEffectIconBlink, effect.getDuration())) {
+                    this.mc.ingameGUI.drawTexturedModalRect(iconX, yOff, potion.getStatusIconIndex() % 8 * 18, 198 + potion.getStatusIconIndex() / 8 * 18, 18, 18);
+                }
+                xOff = this.ICON_SIZE;
                 this.width = Math.max(this.width, xOff);
             }
 
             if (oComponent.effectName) {
                 if (oComponent.icon) {
-                    xOff = (ICON_SIZE + 4);
+                    xOff = (this.ICON_SIZE + 4);
                 }
 
 
@@ -213,23 +222,37 @@ public class PotionEffects extends BasicHud {
                 } else {
                     titleSb.append(oFormatting.customName);
                 }
+
                 int amplifier = Math.max(1, effect.getAmplifier() + 1);
                 if (oAmplifier.amplifier && (amplifier != 1 || oAmplifier.levelOne)) {
                     titleSb.append(" ");
                     if (!oAmplifier.romanNumerals) titleSb.append(RomanNumeral.INSTANCE.getCache(amplifier));
                     else titleSb.append(amplifier);
                 }
+
                 String builtTitle = titleSb.toString();
 
-                int titleWidth = mc.fontRendererObj.getStringWidth(builtTitle);
-                width = Math.max(width, xOff + titleWidth);
+                int titleWidth = this.fontRenderer.getStringWidth(builtTitle);
+                this.width = Math.max(this.width, xOff + titleWidth);
 
-                float titleX = x + xOff;
+                float titleX = xOff;
 
-                float titleY = y + yOff;
-                if (!oComponent.duration)
-                    titleY += mc.fontRendererObj.FONT_HEIGHT / 2f + 0.5f;
+                float titleY = yOff;
+                if (!oComponent.duration) {
+                    titleY += this.fontRenderer.FONT_HEIGHT / 2f + 0.5f;
+                }
 
+
+                switch (this.horizontalAlignment) {
+                    case 0:
+                        titleX = xOff;
+                        break;
+                    case 1:
+                        titleX = this.width / 2f - xOff;
+                        break;
+                    case 2:
+                        titleX = this.width - xOff;
+                }
                 if (showEffectDuringBlink(oBlinking, oBlinking.makeEffectNameBlink, effect.getDuration())) {
                     RenderManager.drawScaledString(builtTitle, titleX, titleY, getColor(oColor.nameColor.getRGB(), excluded), RenderManager.TextType.toType(oFormatting.textType), 1);
                 }
@@ -238,7 +261,7 @@ public class PotionEffects extends BasicHud {
             }
 
             if (oComponent.duration) {
-                if (oComponent.icon) xOff = (ICON_SIZE + 4);
+                if (oComponent.icon) xOff = (this.ICON_SIZE + 4);
 
                 StringBuilder timeSb = new StringBuilder();
                 if (oFormatting.boldDuration) timeSb.append(EnumChatFormatting.BOLD);
@@ -261,21 +284,31 @@ public class PotionEffects extends BasicHud {
                 }
                 String builtTime = timeSb.toString();
 
-                int timeWidth = mc.fontRendererObj.getStringWidth(builtTime);
-                width = Math.max(width, (xOff) + timeWidth);
+                int timeWidth = this.fontRenderer.getStringWidth(builtTime);
+                this.width = Math.max(width, xOff + timeWidth);
 
-                float timeX = x + xOff;
+                float timeX = xOff;
 
-                float timeY = y + yOff + (mc.fontRendererObj.FONT_HEIGHT) + 1;
-                if (!oComponent.effectName) timeY -= mc.fontRendererObj.FONT_HEIGHT / 2f + 0.5f;
+                float timeY = yOff + this.fontRenderer.FONT_HEIGHT + 1;
+                if (!oComponent.effectName) timeY -= this.fontRenderer.FONT_HEIGHT / 2f + 0.5f;
                 if (showEffectDuringBlink(oBlinking, oBlinking.makeEffectDurationBlink, effect.getDuration())) {
+                    switch (this.horizontalAlignment) {
+                        case 0:
+                            timeX = xOff;
+                            break;
+                        case 1:
+                            timeX = this.width / 2f - xOff;
+                            break;
+                        case 2:
+                            timeX = this.width - xOff;
+                    }
                     RenderManager.drawScaledString(builtTime, timeX, timeY, getColor(oColor.durationColor.getRGB(), excluded), RenderManager.TextType.toType(oFormatting.textType), 1);
                 }
             }
 
             yOff += yAmt;
         }
-        GlStateManager.popMatrix();
+        UGraphics.GL.popMatrix();
     }
 
     public void softEffects(List<PotionEffect> potionEffects) {
@@ -309,7 +342,7 @@ public class PotionEffects extends BasicHud {
     }
 
     public EffectConfig getEffectSetting(PotionEffect effect) {
-        for (Map.Entry<Integer, EffectConfig> entry : effectMap.entrySet()) {
+        for (Map.Entry<Integer, EffectConfig> entry : this.effectMap.entrySet()) {
             if (effect.getPotionID() == entry.getKey()) {
                 if (entry.getValue().override) return entry.getValue();
             }
@@ -357,12 +390,12 @@ public class PotionEffects extends BasicHud {
 
     @Override
     protected float getWidth(float scale, boolean example) {
-        return width * scale;
+        return this.width * scale;
     }
 
     @Override
     protected float getHeight(float scale, boolean example) {
-        return height * scale;
+        return this.height * scale;
     }
 
     public static class EffectConfig {

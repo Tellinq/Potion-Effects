@@ -29,6 +29,7 @@ public class PotionEffectsConfig extends Config {
 
     @Page(
             name = "Slowness",
+            description = "Change the slowness effect's appearance",
             location = PageLocation.TOP,
             category = "Effects"
     )
@@ -36,6 +37,7 @@ public class PotionEffectsConfig extends Config {
 
     @Page(
             name = "Haste",
+            description = "Change the haste effect's appearance",
             location = PageLocation.TOP,
             category = "Effects"
     )
@@ -43,6 +45,7 @@ public class PotionEffectsConfig extends Config {
 
     @Page(
             name = "Mining Fatigue",
+            description = "Change the mining fatigue effect's appearance",
             location = PageLocation.TOP,
             category = "Effects"
     )
@@ -50,6 +53,7 @@ public class PotionEffectsConfig extends Config {
 
     @Page(
             name = "Strength",
+            description = "Change the strength effect's appearance",
             location = PageLocation.TOP,
             category = "Effects"
     )
@@ -57,6 +61,7 @@ public class PotionEffectsConfig extends Config {
 
     @Page(
             name = "Jump Boost",
+            description = "Change the jump boost effect's appearance",
             location = PageLocation.TOP,
             category = "Effects"
     )
@@ -64,6 +69,7 @@ public class PotionEffectsConfig extends Config {
 
     @Page(
             name = "Nausea",
+            description = "Change the nausea effect's appearance",
             location = PageLocation.TOP,
             category = "Effects"
     )
@@ -71,6 +77,7 @@ public class PotionEffectsConfig extends Config {
 
     @Page(
             name = "Regeneration",
+            description = "Change the regeneration effect's appearance",
             location = PageLocation.TOP,
             category = "Effects"
     )
@@ -78,6 +85,7 @@ public class PotionEffectsConfig extends Config {
 
     @Page(
             name = "Resistance",
+            description = "Change the resistance effect's appearance",
             location = PageLocation.TOP,
             category = "Effects"
     )
@@ -85,6 +93,7 @@ public class PotionEffectsConfig extends Config {
 
     @Page(
             name = "Fire Resistance",
+            description = "Change the fire resistance effect's appearance",
             location = PageLocation.TOP,
             category = "Effects"
     )
@@ -92,6 +101,7 @@ public class PotionEffectsConfig extends Config {
 
     @Page(
             name = "Water Breathing",
+            description = "Change the water breathing effect's appearance",
             location = PageLocation.TOP,
             category = "Effects"
     )
@@ -99,6 +109,7 @@ public class PotionEffectsConfig extends Config {
 
     @Page(
             name = "Invisibility",
+            description = "Change the invisibility effect's appearance",
             location = PageLocation.TOP,
             category = "Effects"
     )
@@ -106,6 +117,7 @@ public class PotionEffectsConfig extends Config {
 
     @Page(
             name = "Blindness",
+            description = "Change the blindness effect's appearance",
             location = PageLocation.TOP,
             category = "Effects"
     )
@@ -113,6 +125,7 @@ public class PotionEffectsConfig extends Config {
 
     @Page(
             name = "Night Vision",
+            description = "Change the night vision effect's appearance",
             location = PageLocation.TOP,
             category = "Effects"
     )
@@ -120,6 +133,7 @@ public class PotionEffectsConfig extends Config {
 
     @Page(
             name = "Hunger",
+            description = "Change the hunger effect's appearance",
             location = PageLocation.TOP,
             category = "Effects"
     )
@@ -127,6 +141,7 @@ public class PotionEffectsConfig extends Config {
 
     @Page(
             name = "Weakness",
+            description = "Change the weakness effect's appearance",
             location = PageLocation.TOP,
             category = "Effects"
     )
@@ -134,6 +149,7 @@ public class PotionEffectsConfig extends Config {
 
     @Page(
             name = "Poison",
+            description = "Change the poison effect's appearance",
             location = PageLocation.TOP,
             category = "Effects"
     )
@@ -141,6 +157,7 @@ public class PotionEffectsConfig extends Config {
 
     @Page(
             name = "Wither",
+            description = "Change the wither effect's appearance",
             location = PageLocation.TOP,
             category = "Effects"
     )
@@ -148,6 +165,7 @@ public class PotionEffectsConfig extends Config {
 
     @Page(
             name = "Health Boost",
+            description = "Change the health boost effect's appearance",
             location = PageLocation.TOP,
             category = "Effects"
     )
@@ -155,6 +173,7 @@ public class PotionEffectsConfig extends Config {
 
     @Page(
             name = "Absorption",
+            description = "Change the absorption effect's appearance",
             location = PageLocation.TOP,
             category = "Effects"
     )
@@ -162,6 +181,7 @@ public class PotionEffectsConfig extends Config {
 
     @Page(
             name = "Saturation",
+            description = "Change the saturation effect's appearance",
             location = PageLocation.TOP,
             category = "Effects"
     )
