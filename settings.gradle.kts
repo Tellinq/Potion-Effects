@@ -1,7 +1,5 @@
 pluginManagement {
     repositories {
-        gradlePluginPortal()
-        mavenCentral()
         maven("https://repo.polyfrost.cc/releases")
         maven("https://maven.architectury.dev/")
     }
