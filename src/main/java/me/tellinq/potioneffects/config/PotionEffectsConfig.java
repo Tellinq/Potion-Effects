@@ -15,6 +15,7 @@ public class PotionEffectsConfig extends Config {
 
     @Page(
             name = "Global Effects",
+            description = "Change all non-overridden effects",
             location = PageLocation.TOP
     )
     public static PotionEffects.EffectConfig global = new PotionEffects.EffectConfig();

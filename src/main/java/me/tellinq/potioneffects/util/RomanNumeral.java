@@ -30,19 +30,21 @@ public class RomanNumeral {
     private final Map<Integer, String> numeralCache = new HashMap<>();
 
     public String getCache(int number) {
-        if (numeralCache.containsKey(number)) return numeralCache.get(number);
+        if (this.numeralCache.containsKey(number)) {
+            return this.numeralCache.get(number);
+        }
 
         String roman = toRoman(number);
-        numeralCache.put(number, roman);
+        this.numeralCache.put(number, roman);
         return roman;
     }
 
     public static String toRoman(int number) {
-        int l = map.floorKey(number);
-        if (number == l) {
+        int floorKey = map.floorKey(number);
+        if (number == floorKey) {
             return map.get(number);
         }
-        return map.get(l) + toRoman(number - l);
+        return map.get(floorKey) + toRoman(number - floorKey);
     }
 
 }
