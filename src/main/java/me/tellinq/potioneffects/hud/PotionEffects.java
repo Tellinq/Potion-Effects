@@ -5,6 +5,7 @@ import cc.polyfrost.oneconfig.libs.universal.UGraphics;
 import cc.polyfrost.oneconfig.libs.universal.UMinecraft;
 import com.google.common.collect.ImmutableList;
 import me.tellinq.potioneffects.config.PotionEffectsConfig;
+import me.tellinq.potioneffects.event.UpdatePotionMetadataEvent;
 import me.tellinq.potioneffects.util.RomanNumeral;
 import net.minecraft.client.gui.FontRenderer;
 import cc.polyfrost.oneconfig.config.annotations.*;
@@ -74,11 +75,37 @@ public class PotionEffects extends BasicHud {
     )
     public String info;
 
-    @Exclude public final int ICON_SIZE = 18;
-    @Exclude private final ResourceLocation EFFECTS_RESOURCE = new ResourceLocation("textures/gui/container/inventory.png");
-    @Exclude public final Minecraft mc = UMinecraft.getMinecraft();
-    @Exclude public final FontRenderer fontRenderer = mc.fontRendererObj;
-    @Exclude public Map<Integer, EffectConfig> effectMap =
+    /**
+     * Each effect's icon texture size is 18 pixels.
+     */
+    @Exclude
+    public final int ICON_SIZE = 18;
+
+    /**
+     * Gets the inventory resource location.
+     */
+    @Exclude
+    private final ResourceLocation EFFECTS_RESOURCE = new ResourceLocation("textures/gui/container/inventory.png");
+
+    /**
+     * Gets OneConfig's Universal Minecraft instance.
+     */
+    @Exclude
+    public final Minecraft mc = UMinecraft.getMinecraft();
+
+    /**
+     * Gets OneConfig's Universal Minecraft fontRenderer.
+     */
+    @Exclude
+    public final FontRenderer fontRenderer = UMinecraft.getFontRenderer();
+
+    /**
+     * Map of all of Minecraft's effect IDs, to the mod's config potion type respectively.
+     * <br>
+     * Used to get if each potion config override is enabled or not in {@link #getEffectSetting(PotionEffect)}
+     */
+    @Exclude
+    public Map<Integer, EffectConfig> effectMap =
             new ImmutableMap.Builder<Integer, EffectConfig>()
                     .put(Potion.moveSpeed.id, PotionEffectsConfig.speed)
                     .put(Potion.moveSlowdown.id, PotionEffectsConfig.slowness)
@@ -103,13 +130,50 @@ public class PotionEffects extends BasicHud {
                     .put(Potion.saturation.id, PotionEffectsConfig.saturation)
                     .build();
 
+    /**
+     * Determines the mod's dimensional width.
+     */
     private float width = 0f;
+    /**
+     * Determines the mod's dimensional height.
+     */
     private float height = 0f;
-    @Exclude private int ticks = 0;
-    @Exclude private List<PotionEffect> activeEffects = new ArrayList<>();
-    @Exclude private List<PotionEffect> currentEffects = new ArrayList<>();
-    @Exclude private final List<PotionEffect> dummyEffects = new ArrayList<>();
+    /**
+     * Continuously counts up every tick, and resets back to 0 if the current amount is over a specific threshold determined by blinkSpeed.
+     */
+    @Exclude
+    private int ticks = 0;
+    /**
+     * Used to set the current active potion effects.
+     * <br>
+     * Also determines if the mod should show if the mod is not empty, or if {@link #currentEffects} should reference this list if not empty, or use {@link #dummyEffects}..
+     */
+    @Exclude
+    private List<PotionEffect> activeEffects = new ArrayList<>();
 
+    /**
+     * Set by either {@link #activeEffects} or {@link #dummyEffects} depending on if {@link #activeEffects} is empty.
+     * <br>
+     * Used to sort (see {@link #sortEffects(List)}), help set the height of the mod, and split each effect to render independently.
+     *
+     */
+    @Exclude
+    private List<PotionEffect> currentEffects = new ArrayList<>();
+    /**
+     * Used to list example effects that will not get updated at all.
+     * <br>
+     * Only called after to set {@link #currentEffects} to this list if there are no active effects.
+     */
+    @Exclude
+    private final List<PotionEffect> dummyEffects = new ArrayList<>();
+
+    /**
+     * The following default options have been modified:
+     * <br>
+     * Background is disabled by default
+     * <br>
+     * Padding is set to 0 by default
+     */
     public PotionEffects() {
         super(true, 0, 0, 1, false, false, 0, 0, 0, new OneColor(0, 0, 0, 120), false, 2, new OneColor(0, 0, 0));
         EventManager.INSTANCE.register(this);
@@ -139,24 +203,32 @@ public class PotionEffects extends BasicHud {
     }
 
     /**
-     * @return True if the active player effects are not empty and the basic HUD conditions are met.
+     * Gets the player's active effects and sets the current effect list to either:
+     * <br>
+     * 1. The actual active effect list (if not empty)
+     * <br>
+     * 2. The dummy list (if there are no active effects)
      */
-    @Override
-    protected boolean shouldShow() {
-        /*
-        In my opinion, this should only be set every time the potion effect gets updated. I haven't looked into making events for OneConfig, but I will later on.
-        If anyone wants to take a look at implementing this before I decide to, this is what I did for CheatBreaker: https://imgur.com/OOhV7H6 https://imgur.com/2BJAanz
-         */
+    @Subscribe
+    private void onUpdatePotionMetadata(UpdatePotionMetadataEvent event) {
         if (this.mc.thePlayer != null) {
             this.activeEffects = ImmutableList.copyOf(this.mc.thePlayer.getActivePotionEffects());
         }
 
         this.currentEffects = this.activeEffects.isEmpty() ? this.dummyEffects : this.activeEffects;
+    }
+
+    /**
+     * @return True if the active player effects are not empty and the basic HUD conditions are met.
+     */
+    @Override
+    protected boolean shouldShow() {
         return !this.activeEffects.isEmpty() && super.shouldShow();
     }
 
     /**
      * Draws the current effects, except for any marked as excluded.
+     *
      * @param matrices The UMatrixStack used for rendering in higher versions
      * @param x        Top left x-coordinate of the hud
      * @param y        Top left y-coordinate of the hud
@@ -167,15 +239,15 @@ public class PotionEffects extends BasicHud {
     protected void draw(UMatrixStack matrices, float x, float y, float scale, boolean example) {
         UGraphics.disableLighting();
 
-        final int actualHorizontal = horizontalAlignment == 0 ? getAlignment() : horizontalAlignment - 1;
+        final int actualHorizontal = horizontalAlignment == 0 ? this.getAlignment() : horizontalAlignment - 1;
 
-        this.softEffects(this.currentEffects);
+        this.sortEffects(this.currentEffects);
 
-        float yOff = 0;
-        float xOff = 0;
-        int yAmt = (int) (this.ICON_SIZE + this.verticalSpacing);
+        float xOffset = 0;
+        float yOffset = 0;
+        int yAmount = (int) (this.ICON_SIZE + this.verticalSpacing);
 
-        this.height = (this.currentEffects.size() * yAmt) - this.verticalSpacing;
+        this.height = (this.currentEffects.size() * yAmount) - this.verticalSpacing;
         this.width = 0f;
 
         UGraphics.GL.pushMatrix();
@@ -186,18 +258,19 @@ public class PotionEffects extends BasicHud {
         for (PotionEffect effect : this.currentEffects) {
             EffectConfig effectSetting = getEffectSetting(effect);
             // I wish there was a more efficient way of doing this...
-            EffectConfig oComponent = useOverride(effectSetting, effectSetting.overrideComponent);
-            EffectConfig oAmplifier = useOverride(effectSetting, effectSetting.overrideAmplifier);
-            EffectConfig oBlinking = useOverride(effectSetting, effectSetting.overrideBlinking);
-            EffectConfig oFormatting = useOverride(effectSetting, effectSetting.overrideFormatting);
-            EffectConfig oColor = useOverride(effectSetting, effectSetting.overrideColor);
-            EffectConfig oExclusion = useOverride(effectSetting, effectSetting.overrideExclusion);
+            EffectConfig oComponent = this.useOverride(effectSetting, effectSetting.overrideComponent);
+            EffectConfig oAmplifier = this.useOverride(effectSetting, effectSetting.overrideAmplifier);
+            EffectConfig oBlinking = this.useOverride(effectSetting, effectSetting.overrideBlinking);
+            EffectConfig oFormatting = this.useOverride(effectSetting, effectSetting.overrideFormatting);
+            EffectConfig oColor = this.useOverride(effectSetting, effectSetting.overrideColor);
+            EffectConfig oExclusion = this.useOverride(effectSetting, effectSetting.overrideExclusion);
+
             boolean excluded = false;
             if (this.excludePotions(oExclusion, effect)) {
                 if (example && this.showExcludedEffects) {
                     excluded = true;
                 } else {
-                    this.height -= yAmt;
+                    this.height -= yAmount;
                     continue;
                 }
             }
@@ -216,15 +289,15 @@ public class PotionEffects extends BasicHud {
                     iconX = this.width - ICON_SIZE;
                 }
                 if (showEffectDuringBlink(oBlinking, oBlinking.makeEffectIconBlink, effect.getDuration(), example)) {
-                    this.mc.ingameGUI.drawTexturedModalRect(iconX, yOff, potion.getStatusIconIndex() % 8 * 18, 198 + potion.getStatusIconIndex() / 8 * 18, 18, 18);
+                    this.mc.ingameGUI.drawTexturedModalRect(iconX, yOffset, potion.getStatusIconIndex() % 8 * 18, 198 + potion.getStatusIconIndex() / 8 * 18, 18, 18);
                 }
-                xOff = this.ICON_SIZE;
-                this.width = Math.max(this.width, xOff);
+                xOffset = this.ICON_SIZE;
+                this.width = Math.max(this.width, xOffset);
             }
 
             if (oComponent.effectName) {
                 if (oComponent.icon) {
-                    xOff = (this.ICON_SIZE + 4);
+                    xOffset = (this.ICON_SIZE + 4);
                 }
 
 
@@ -258,11 +331,10 @@ public class PotionEffects extends BasicHud {
                 String builtTitle = titleSb.toString();
 
                 int titleWidth = this.fontRenderer.getStringWidth(builtTitle);
-                this.width = Math.max(this.width, xOff + titleWidth);
+                this.width = Math.max(this.width, xOffset + titleWidth);
 
-                float titleX = xOff;
-
-                float titleY = yOff;
+                float titleX = xOffset;
+                float titleY = yOffset;
                 if (!oComponent.duration) {
                     titleY += this.fontRenderer.FONT_HEIGHT / 2f + 0.5f;
                 }
@@ -270,13 +342,13 @@ public class PotionEffects extends BasicHud {
 
                 switch (actualHorizontal) {
                     case 0:
-                        titleX = xOff;
+                        titleX = xOffset;
                         break;
                     case 1:
-                        titleX = this.width / 2f - xOff;
+                        titleX = this.width / 2f - xOffset;
                         break;
                     case 2:
-                        titleX = this.width - xOff;
+                        titleX = this.width - xOffset;
                 }
                 if (showEffectDuringBlink(oBlinking, oBlinking.makeEffectNameBlink, effect.getDuration(), example)) {
                     RenderManager.drawScaledString(builtTitle, titleX, titleY, getColor(oColor.nameColor.getRGB(), excluded), RenderManager.TextType.toType(oFormatting.textType), 1);
@@ -286,7 +358,9 @@ public class PotionEffects extends BasicHud {
             }
 
             if (oComponent.duration) {
-                if (oComponent.icon) xOff = (this.ICON_SIZE + 4);
+                if (oComponent.icon) {
+                    xOffset = (this.ICON_SIZE + 4);
+                }
 
                 StringBuilder timeSb = new StringBuilder();
                 // I really hope there's a more efficient way of setting this up...
@@ -321,10 +395,10 @@ public class PotionEffects extends BasicHud {
                 String builtTime = timeSb.toString();
 
                 int timeWidth = this.fontRenderer.getStringWidth(builtTime);
-                this.width = Math.max(width, xOff + timeWidth);
+                this.width = Math.max(width, xOffset + timeWidth);
 
-                float timeX = xOff;
-                float timeY = yOff + this.fontRenderer.FONT_HEIGHT + 1;
+                float timeX = xOffset;
+                float timeY = yOffset + this.fontRenderer.FONT_HEIGHT + 1;
 
                 if (!oComponent.effectName) {
                     timeY -= this.fontRenderer.FONT_HEIGHT / 2f + 0.5f;
@@ -333,23 +407,33 @@ public class PotionEffects extends BasicHud {
                 if (showEffectDuringBlink(oBlinking, oBlinking.makeEffectDurationBlink, effect.getDuration(), example)) {
                     switch (actualHorizontal) {
                         case 0:
-                            timeX = xOff;
+                            timeX = xOffset;
                             break;
                         case 1:
-                            timeX = this.width / 2f - xOff;
+                            timeX = this.width / 2f - xOffset;
                             break;
                         case 2:
-                            timeX = this.width - xOff;
+                            timeX = this.width - xOffset;
                     }
                     RenderManager.drawScaledString(builtTime, timeX, timeY, getColor(oColor.durationColor.getRGB(), excluded), RenderManager.TextType.toType(oFormatting.textType), 1);
                 }
             }
 
-            yOff += yAmt;
+            yOffset += yAmount;
         }
         UGraphics.GL.popMatrix();
     }
 
+    /**
+     * Gets the horizontal alignment based off the mod's anchor.
+     * @return The int corrosponding to the mod's alignment
+     * <br>
+     * 0: Left horizontal alignment
+     * <br>
+     * 1: Center horizontal alignment
+     * <br>
+     * 2: Right horizontal alignment
+     */
     private int getAlignment() {
         switch (position.anchor) {
             case TOP_LEFT:
@@ -371,12 +455,16 @@ public class PotionEffects extends BasicHud {
 
     /**
      * Sorts all the current potion effects based off what sorting method the user set
+     * <br>
      * 1: Sorts alphabetically by name only
+     * <br>
      * 2: Sorts alphabetically based off duration.
+     * <br>
      * 3: Sorts alphabetically based off amplifier.
+     * <br>
      * Optionally, the entire list can get reversed if the user enables Vertical Sorting.
      */
-    public void softEffects(List<PotionEffect> potionEffects) {
+    public void sortEffects(List<PotionEffect> potionEffects) {
         switch (this.sortingMethod) {
             case 1:
                 potionEffects.sort(Comparator.comparing(effect -> I18n.format(effect.getEffectName())));
@@ -395,10 +483,10 @@ public class PotionEffects extends BasicHud {
     }
 
     /**
-     * @param effectConfig The current effect's configuration (global or effect specific)
+     * @param effectConfig       The current effect's configuration (global or effect specific)
      * @param makeComponentBlink If the set component should blink
-     * @param duration The effect's duration
-     * @param example If the user is currently in the HUD editor
+     * @param duration           The effect's duration
+     * @param example            If the user is currently in the HUD editor
      * @return False if either:
      * <br>
      * - If synced or if the example effects are running: Depending on the amount of counted ticks and the "speed" slider amount set, those two main factors determine if the element set should show while blinking.
@@ -410,7 +498,9 @@ public class PotionEffects extends BasicHud {
             if (effectConfig.syncBlinking || (example && this.activeEffects.isEmpty())) {
                 float blinkSpeed = effectConfig.blinkSpeed / 3.0f;
                 if (duration <= effectConfig.blinkDuration * 20.0F) {
-                    if (this.ticks > blinkSpeed * 2) this.ticks = 0;
+                    if (this.ticks > blinkSpeed * 2) {
+                        this.ticks = 0;
+                    }
                     return this.ticks <= blinkSpeed;
                 }
             } else {
@@ -434,7 +524,7 @@ public class PotionEffects extends BasicHud {
     }
 
     /**
-     * @param effectSetting The current effect setting.
+     * @param effectSetting   The current effect setting.
      * @param overrideBoolean The override check based off the category's override check.
      * @return True if the category's override check is enabled.
      */
@@ -444,22 +534,26 @@ public class PotionEffects extends BasicHud {
 
     /**
      * Exclude the current effect depending on exclusion configuration
+     *
      * @param effectSetting The current effect's setting.
-     * @param effect The current potion effect
+     * @param effect        The current potion effect
      * @return True if one of the exclusion conditions is set to true
      */
     private boolean excludePotions(EffectConfig effectSetting, PotionEffect effect) {
         if (effectSetting.excludePermanentEffects && effect.getIsPotionDurationMax()) return true;
         if (this.excludeBulk(effectSetting.ambientExclusionRule, effect.getIsAmbient())) return true;
         if (this.excludeBulk(effectSetting.particlesExclusionRule, effect.getIsShowParticles())) return true;
-        if (this.excludeArrayOptions(effectSetting.excludeSetDuration, effect.getDuration(), effectSetting.excludedDurationValues * 20.0F) && !effect.getIsPotionDurationMax()) return true;
-        if (this.excludeArrayOptions(effectSetting.excludeSetAmplifier, effect.getAmplifier(), effectSetting.excludedAmplifierValues - 1)) return true;
+        if (this.excludeArrayOptions(effectSetting.excludeSetDuration, effect.getDuration(), effectSetting.excludedDurationValues * 20.0F) && !effect.getIsPotionDurationMax())
+            return true;
+        if (this.excludeArrayOptions(effectSetting.excludeSetAmplifier, effect.getAmplifier(), effectSetting.excludedAmplifierValues - 1))
+            return true;
         return effectSetting.exclude;
     }
 
     /**
      * Explanation is not very well explained. Will be revised.
-     * @param rule The configuration rule
+     *
+     * @param rule         The configuration rule
      * @param currentValue The current effect's value
      * @return True depending on the config's rule
      * <br>
@@ -469,17 +563,19 @@ public class PotionEffects extends BasicHud {
      */
     protected boolean excludeBulk(int rule, boolean currentValue) {
         switch (rule) {
-            case 1: return currentValue;
-            case 2: return !currentValue;
-            default: return false;
+            case 1:
+                return currentValue;
+            case 2:
+                return !currentValue;
+            default:
+                return false;
         }
     }
 
     /**
-     *
-     * @param rule The configuration rule
+     * @param rule         The configuration rule
      * @param currentValue The current effect's value
-     * @param threshold The threshold amount
+     * @param threshold    The threshold amount
      * @return True depending on the rule number set
      * <br>
      * 1: Current value exceeds threshold
@@ -492,22 +588,27 @@ public class PotionEffects extends BasicHud {
      */
     protected boolean excludeArrayOptions(int rule, int currentValue, float threshold) {
         switch (rule) {
-            case 1: return currentValue > threshold;
-            case 2: return currentValue < threshold;
-            case 3: return currentValue == threshold;
-            case 4: return currentValue != threshold;
-            default: return false;
+            case 1:
+                return currentValue > threshold;
+            case 2:
+                return currentValue < threshold;
+            case 3:
+                return currentValue == threshold;
+            case 4:
+                return currentValue != threshold;
+            default:
+                return false;
         }
     }
 
     /**
-     * @param color The color given
+     * @param color    The color given
      * @param excluded If the effect is excluded
      * @return The given color or half of the color's opacity if the effect is excluded.
      */
     private int getColor(int color, boolean excluded) {
         int opacity = color >> 24 & 0xFF;
-        opacity = (int)((float)opacity * (excluded ? 0.5F : 1.0F));
+        opacity = (int) ((float) opacity * (excluded ? 0.5F : 1.0F));
         return color & 0xFFFFFF | opacity << 24;
     }
 
@@ -868,6 +969,7 @@ public class PotionEffects extends BasicHud {
         )
         public int excludedAmplifierValues = 10;
 
-        public EffectConfig() {}
+        public EffectConfig() {
+        }
     }
 }
