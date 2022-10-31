@@ -1,10 +1,10 @@
 {
   "compatibilityLevel": "JAVA_8",
   "minVersion": "0.7",
-  "package": "tk.tellinq.potioneffects.mixin",
+  "package": "me.tellinq.potioneffects.mixin",
   "refmap": "mixins.oneconfig.refmap.json",
   "verbose": true,
   "client": [
-    "me.tellinq.potioneffects.mixin.MinecraftMixin"
+    "MinecraftMixin"
   ]
 }
