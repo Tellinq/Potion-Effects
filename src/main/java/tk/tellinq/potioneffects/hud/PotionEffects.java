@@ -119,7 +119,6 @@ public class PotionEffects extends BasicHud {
      * On every tick, this tick counter will add up every tick.
      * <br>
      * Primarily used if a component should blink.
-     * @param event
      */
     @Subscribe
     private void onTick(TickEvent event) {
