@@ -5,12 +5,12 @@ import cc.polyfrost.oneconfig.utils.commands.annotations.Command;
 import cc.polyfrost.oneconfig.utils.commands.annotations.Main;
 
 @Command(
-    value = PotionEffectsMod.MODID,
-    description = "Access the " + PotionEffectsMod.NAME + " GUI.")
+        value = PotionEffectsMod.MODID,
+        description = "Access the " + PotionEffectsMod.NAME + " GUI.")
 public class ExampleCommand {
 
-  @Main
-  private static void main() {
-    PotionEffectsMod.INSTANCE.config.openGui();
-  }
+    @Main
+    private static void main() {
+        PotionEffectsMod.INSTANCE.config.openGui();
+    }
 }
