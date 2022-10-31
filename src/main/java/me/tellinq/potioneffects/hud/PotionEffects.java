@@ -226,7 +226,7 @@ public class PotionEffects extends BasicHud {
         UGraphics.disableLighting();
 
         final int actualHorizontal =
-                horizontalAlignment == 0 ? this.getAlignment() : horizontalAlignment - 1;
+                this.horizontalAlignment == 0 ? this.getAlignment() : this.horizontalAlignment - 1;
 
         this.sortEffects(this.currentEffects);
 
@@ -251,7 +251,8 @@ public class PotionEffects extends BasicHud {
                     this.useOverride(effectSetting, effectSetting.overrideBlinking);
             EffectConfig oFormatting =
                     this.useOverride(effectSetting, effectSetting.overrideFormatting);
-            EffectConfig oColor = this.useOverride(effectSetting, effectSetting.overrideColor);
+            EffectConfig oColor =
+                    this.useOverride(effectSetting, effectSetting.overrideColor);
             EffectConfig oExclusion =
                     this.useOverride(effectSetting, effectSetting.overrideExclusion);
 
