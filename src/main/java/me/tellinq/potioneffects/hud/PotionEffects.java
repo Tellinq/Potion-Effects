@@ -76,7 +76,7 @@ public class PotionEffects extends BasicHud {
     public String info;
 
     /**
-     * Each effect icon texture is 18 pixels.
+     * Each effect's icon texture size is 18 pixels.
      */
     @Exclude
     public final int ICON_SIZE = 18;
