@@ -251,8 +251,6 @@ public class PotionEffects extends BasicHud {
         this.width = 0f;
 
         UGraphics.GL.pushMatrix();
-        // This REALLY should be a method inside OneConfig... CB does have it inside as a scaleAndTranslate method.
-        // I would make this a method myself, but I find it pointless since it's just two lines of code and making a new one just seems silly unless I was repeatedly calling it for multiple HUD mods.
         UGraphics.GL.scale(scale, scale, 1);
         UGraphics.GL.translate(x / scale, y / scale, 1);
         for (PotionEffect effect : this.currentEffects) {
