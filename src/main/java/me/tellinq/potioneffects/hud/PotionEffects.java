@@ -75,14 +75,35 @@ public class PotionEffects extends BasicHud {
     )
     public String info;
 
+    /**
+     * Each effect icon texture is 18 pixels.
+     */
     @Exclude
     public final int ICON_SIZE = 18;
+
+    /**
+     * Gets the inventory resource location.
+     */
     @Exclude
     private final ResourceLocation EFFECTS_RESOURCE = new ResourceLocation("textures/gui/container/inventory.png");
+
+    /**
+     * Gets OneConfig's Universal Minecraft instance.
+     */
     @Exclude
     public final Minecraft mc = UMinecraft.getMinecraft();
+
+    /**
+     * Gets OneConfig's Universal Minecraft fontRenderer.
+     */
     @Exclude
-    public final FontRenderer fontRenderer = mc.fontRendererObj;
+    public final FontRenderer fontRenderer = UMinecraft.getFontRenderer();
+
+    /**
+     * Map of all of Minecraft's effect IDs, to the mod's config potion type respectively.
+     * <br>
+     * Used to get if each potion config override is enabled or not in {@link #getEffectSetting(PotionEffect)}
+     */
     @Exclude
     public Map<Integer, EffectConfig> effectMap =
             new ImmutableMap.Builder<Integer, EffectConfig>()
@@ -109,17 +130,50 @@ public class PotionEffects extends BasicHud {
                     .put(Potion.saturation.id, PotionEffectsConfig.saturation)
                     .build();
 
+    /**
+     * Determines the mod's dimensional width.
+     */
     private float width = 0f;
+    /**
+     * Determines the mod's dimensional height.
+     */
     private float height = 0f;
+    /**
+     * Continuously counts up every tick, and resets back to 0 if the current amount is over a specific threshold determined by blinkSpeed.
+     */
     @Exclude
     private int ticks = 0;
+    /**
+     * Used to set the current active potion effects.
+     * <br>
+     * Also determines if the mod should show if the mod is not empty, or if {@link #currentEffects} should reference this list if not empty, or use {@link #dummyEffects}..
+     */
     @Exclude
     private List<PotionEffect> activeEffects = new ArrayList<>();
+
+    /**
+     * Set by either {@link #activeEffects} or {@link #dummyEffects} depending on if {@link #activeEffects} is empty.
+     * <br>
+     * Used to sort (see {@link #sortEffects(List)}), help set the height of the mod, and split each effect to render independently.
+     *
+     */
     @Exclude
     private List<PotionEffect> currentEffects = new ArrayList<>();
+    /**
+     * Used to list example effects that will not get updated at all.
+     * <br>
+     * Only called after to set {@link #currentEffects} to this list if there are no active effects.
+     */
     @Exclude
     private final List<PotionEffect> dummyEffects = new ArrayList<>();
 
+    /**
+     * The following default options have been modified:
+     * <br>
+     * Background is disabled by default
+     * <br>
+     * Padding is set to 0 by default
+     */
     public PotionEffects() {
         super(true, 0, 0, 1, false, false, 0, 0, 0, new OneColor(0, 0, 0, 120), false, 2, new OneColor(0, 0, 0));
         EventManager.INSTANCE.register(this);
@@ -185,9 +239,9 @@ public class PotionEffects extends BasicHud {
     protected void draw(UMatrixStack matrices, float x, float y, float scale, boolean example) {
         UGraphics.disableLighting();
 
-        final int actualHorizontal = horizontalAlignment == 0 ? getAlignment() : horizontalAlignment - 1;
+        final int actualHorizontal = horizontalAlignment == 0 ? this.getAlignment() : horizontalAlignment - 1;
 
-        this.softEffects(this.currentEffects);
+        this.sortEffects(this.currentEffects);
 
         float xOffset = 0;
         float yOffset = 0;
@@ -204,12 +258,13 @@ public class PotionEffects extends BasicHud {
         for (PotionEffect effect : this.currentEffects) {
             EffectConfig effectSetting = getEffectSetting(effect);
             // I wish there was a more efficient way of doing this...
-            EffectConfig oComponent = useOverride(effectSetting, effectSetting.overrideComponent);
-            EffectConfig oAmplifier = useOverride(effectSetting, effectSetting.overrideAmplifier);
-            EffectConfig oBlinking = useOverride(effectSetting, effectSetting.overrideBlinking);
-            EffectConfig oFormatting = useOverride(effectSetting, effectSetting.overrideFormatting);
-            EffectConfig oColor = useOverride(effectSetting, effectSetting.overrideColor);
-            EffectConfig oExclusion = useOverride(effectSetting, effectSetting.overrideExclusion);
+            EffectConfig oComponent = this.useOverride(effectSetting, effectSetting.overrideComponent);
+            EffectConfig oAmplifier = this.useOverride(effectSetting, effectSetting.overrideAmplifier);
+            EffectConfig oBlinking = this.useOverride(effectSetting, effectSetting.overrideBlinking);
+            EffectConfig oFormatting = this.useOverride(effectSetting, effectSetting.overrideFormatting);
+            EffectConfig oColor = this.useOverride(effectSetting, effectSetting.overrideColor);
+            EffectConfig oExclusion = this.useOverride(effectSetting, effectSetting.overrideExclusion);
+
             boolean excluded = false;
             if (this.excludePotions(oExclusion, effect)) {
                 if (example && this.showExcludedEffects) {
@@ -369,6 +424,16 @@ public class PotionEffects extends BasicHud {
         UGraphics.GL.popMatrix();
     }
 
+    /**
+     * Gets the horizontal alignment based off the mod's anchor.
+     * @return The int corrosponding to the mod's alignment
+     * <br>
+     * 0: Left horizontal alignment
+     * <br>
+     * 1: Center horizontal alignment
+     * <br>
+     * 2: Right horizontal alignment
+     */
     private int getAlignment() {
         switch (position.anchor) {
             case TOP_LEFT:
@@ -390,12 +455,16 @@ public class PotionEffects extends BasicHud {
 
     /**
      * Sorts all the current potion effects based off what sorting method the user set
+     * <br>
      * 1: Sorts alphabetically by name only
+     * <br>
      * 2: Sorts alphabetically based off duration.
+     * <br>
      * 3: Sorts alphabetically based off amplifier.
+     * <br>
      * Optionally, the entire list can get reversed if the user enables Vertical Sorting.
      */
-    public void softEffects(List<PotionEffect> potionEffects) {
+    public void sortEffects(List<PotionEffect> potionEffects) {
         switch (this.sortingMethod) {
             case 1:
                 potionEffects.sort(Comparator.comparing(effect -> I18n.format(effect.getEffectName())));
@@ -429,7 +498,9 @@ public class PotionEffects extends BasicHud {
             if (effectConfig.syncBlinking || (example && this.activeEffects.isEmpty())) {
                 float blinkSpeed = effectConfig.blinkSpeed / 3.0f;
                 if (duration <= effectConfig.blinkDuration * 20.0F) {
-                    if (this.ticks > blinkSpeed * 2) this.ticks = 0;
+                    if (this.ticks > blinkSpeed * 2) {
+                        this.ticks = 0;
+                    }
                     return this.ticks <= blinkSpeed;
                 }
             } else {
