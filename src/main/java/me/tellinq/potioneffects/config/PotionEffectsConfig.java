@@ -1,7 +1,7 @@
-package tk.tellinq.potioneffects.config;
+package me.tellinq.potioneffects.config;
 
-import tk.tellinq.potioneffects.PotionEffectsMod;
-import tk.tellinq.potioneffects.hud.PotionEffects;
+import me.tellinq.potioneffects.PotionEffectsMod;
+import me.tellinq.potioneffects.hud.PotionEffects;
 import cc.polyfrost.oneconfig.config.Config;
 import cc.polyfrost.oneconfig.config.annotations.*;
 import cc.polyfrost.oneconfig.config.data.Mod;

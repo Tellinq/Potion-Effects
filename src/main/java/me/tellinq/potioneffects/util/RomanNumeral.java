@@ -1,4 +1,4 @@
-package tk.tellinq.potioneffects.util;
+package me.tellinq.potioneffects.util;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -1,4 +1,4 @@
-package tk.tellinq.potioneffects.mixin;
+package me.tellinq.potioneffects.mixin;
 
 import net.minecraft.client.Minecraft;
 import org.spongepowered.asm.mixin.Mixin;

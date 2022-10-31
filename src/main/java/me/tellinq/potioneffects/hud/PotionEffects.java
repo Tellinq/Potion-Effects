@@ -1,11 +1,12 @@
-package tk.tellinq.potioneffects.hud;
+package me.tellinq.potioneffects.hud;
 
 import cc.polyfrost.oneconfig.events.event.InitializationEvent;
 import cc.polyfrost.oneconfig.libs.universal.UGraphics;
 import cc.polyfrost.oneconfig.libs.universal.UMinecraft;
 import com.google.common.collect.ImmutableList;
+import me.tellinq.potioneffects.config.PotionEffectsConfig;
+import me.tellinq.potioneffects.util.RomanNumeral;
 import net.minecraft.client.gui.FontRenderer;
-import tk.tellinq.potioneffects.config.PotionEffectsConfig;
 import cc.polyfrost.oneconfig.config.annotations.*;
 import cc.polyfrost.oneconfig.config.core.OneColor;
 import cc.polyfrost.oneconfig.config.data.InfoType;
@@ -23,7 +24,6 @@ import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.ResourceLocation;
-import tk.tellinq.potioneffects.util.RomanNumeral;
 
 import java.util.*;
 
@@ -143,6 +143,15 @@ public class PotionEffects extends BasicHud {
      */
     @Override
     protected boolean shouldShow() {
+        /*
+        In my opinion, this should only be set every time the potion effect gets updated. I haven't looked into making events for OneConfig, but I will later on.
+        If anyone wants to take a look at implementing this before I decide to, this is what I did for CheatBreaker: https://imgur.com/OOhV7H6 https://imgur.com/2BJAanz
+         */
+        if (this.mc.thePlayer != null) {
+            this.activeEffects = ImmutableList.copyOf(this.mc.thePlayer.getActivePotionEffects());
+        }
+
+        this.currentEffects = this.activeEffects.isEmpty() ? this.dummyEffects : this.activeEffects;
         return !this.activeEffects.isEmpty() && super.shouldShow();
     }
 
@@ -157,16 +166,6 @@ public class PotionEffects extends BasicHud {
     @Override
     protected void draw(UMatrixStack matrices, float x, float y, float scale, boolean example) {
         UGraphics.disableLighting();
-
-        /*
-        In my opinion, this should only be set every time the potion effect gets updated. I haven't looked into making events for OneConfig, but I will later on.
-        If anyone wants to take a look at implementing this before I decide to, this is what I did for CheatBreaker: https://imgur.com/OOhV7H6 https://imgur.com/2BJAanz
-         */
-        if (this.mc.thePlayer != null) {
-            this.activeEffects = ImmutableList.copyOf(this.mc.thePlayer.getActivePotionEffects());
-        }
-
-        this.currentEffects = this.activeEffects.isEmpty() ? this.dummyEffects : this.activeEffects;
 
         this.softEffects(this.currentEffects);
 

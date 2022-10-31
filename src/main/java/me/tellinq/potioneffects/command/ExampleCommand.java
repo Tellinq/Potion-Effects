@@ -1,6 +1,6 @@
-package tk.tellinq.potioneffects.command;
+package me.tellinq.potioneffects.command;
 
-import tk.tellinq.potioneffects.PotionEffectsMod;
+import me.tellinq.potioneffects.PotionEffectsMod;
 import cc.polyfrost.oneconfig.utils.commands.annotations.Command;
 import cc.polyfrost.oneconfig.utils.commands.annotations.Main;
 
