@@ -224,8 +224,7 @@ public class PotionEffects extends BasicHud {
   protected void draw(UMatrixStack matrices, float x, float y, float scale, boolean example) {
     UGraphics.disableLighting();
 
-    final int actualHorizontal =
-        horizontalAlignment == 0 ? this.getAlignment() : horizontalAlignment - 1;
+    final int actualHorizontal = horizontalAlignment == 0 ? this.getAlignment() : horizontalAlignment - 1;
 
     this.sortEffects(this.currentEffects);
 
