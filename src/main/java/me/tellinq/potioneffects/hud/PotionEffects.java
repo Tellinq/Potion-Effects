@@ -32,7 +32,7 @@ public class PotionEffects extends BasicHud {
 
     @Dropdown(
             name = "Horizontal Alignment",
-            options = {/*"Auto", */"Left", "Center", "Right"}
+            options = {"Auto", "Left", "Center", "Right"}
     )
     public int horizontalAlignment = 0;
     @Slider(
@@ -167,6 +167,8 @@ public class PotionEffects extends BasicHud {
     protected void draw(UMatrixStack matrices, float x, float y, float scale, boolean example) {
         UGraphics.disableLighting();
 
+        final int actualHorizontal = horizontalAlignment == 0 ? getAlignment() : horizontalAlignment - 1;
+
         this.softEffects(this.currentEffects);
 
         float yOff = 0;
@@ -210,7 +212,7 @@ public class PotionEffects extends BasicHud {
                 UGraphics.color4f(1f, 1f, 1f, excluded ? 0.5f : 1f);
                 this.mc.getTextureManager().bindTexture(EFFECTS_RESOURCE);
                 float iconX = 0;
-                if (this.horizontalAlignment == 2) {
+                if (actualHorizontal == 2) {
                     iconX = this.width - ICON_SIZE;
                 }
                 if (showEffectDuringBlink(oBlinking, oBlinking.makeEffectIconBlink, effect.getDuration(), example)) {
@@ -266,7 +268,7 @@ public class PotionEffects extends BasicHud {
                 }
 
 
-                switch (this.horizontalAlignment) {
+                switch (actualHorizontal) {
                     case 0:
                         titleX = xOff;
                         break;
@@ -329,7 +331,7 @@ public class PotionEffects extends BasicHud {
                 }
 
                 if (showEffectDuringBlink(oBlinking, oBlinking.makeEffectDurationBlink, effect.getDuration(), example)) {
-                    switch (this.horizontalAlignment) {
+                    switch (actualHorizontal) {
                         case 0:
                             timeX = xOff;
                             break;
@@ -346,6 +348,25 @@ public class PotionEffects extends BasicHud {
             yOff += yAmt;
         }
         UGraphics.GL.popMatrix();
+    }
+
+    private int getAlignment() {
+        switch (position.anchor) {
+            case TOP_LEFT:
+            case MIDDLE_LEFT:
+            case BOTTOM_LEFT:
+                return 0;
+            case TOP_CENTER:
+            case MIDDLE_CENTER:
+            case BOTTOM_CENTER:
+                return 1;
+            case TOP_RIGHT:
+            case MIDDLE_RIGHT:
+            case BOTTOM_RIGHT:
+                return 2;
+            default:
+                return horizontalAlignment - 1;
+        }
     }
 
     /**
