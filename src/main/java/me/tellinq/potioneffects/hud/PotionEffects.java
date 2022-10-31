@@ -53,10 +53,10 @@ public class PotionEffects extends BasicHud {
             name = "Sorting Method",
             description =
                     "Vanilla: Sorts based off the default order\n"
-                        + "Alphabetical: Sorts from A-Z\n"
-                        + "Duration: Sorts from the effects with the lowest duration to the"
-                        + " highest\n"
-                        + "Amplifier: Sorts from the highest amplifier to the lowest",
+                            + "Alphabetical: Sorts from A-Z\n"
+                            + "Duration: Sorts from the effects with the lowest duration to the"
+                            + " highest\n"
+                            + "Amplifier: Sorts from the highest amplifier to the lowest",
             options = {"Vanilla", "Alphabetical", "Duration", "Amplifier"})
     public int sortingMethod = 0;
 
@@ -251,8 +251,7 @@ public class PotionEffects extends BasicHud {
                     this.useOverride(effectSetting, effectSetting.overrideBlinking);
             EffectConfig oFormatting =
                     this.useOverride(effectSetting, effectSetting.overrideFormatting);
-            EffectConfig oColor =
-                    this.useOverride(effectSetting, effectSetting.overrideColor);
+            EffectConfig oColor = this.useOverride(effectSetting, effectSetting.overrideColor);
             EffectConfig oExclusion =
                     this.useOverride(effectSetting, effectSetting.overrideExclusion);
 
@@ -748,7 +747,7 @@ public class PotionEffects extends BasicHud {
                 name = "Sync Blinking",
                 description =
                         "Make blinking synced with tick counts or make blinking go based off the"
-                            + " duration time.",
+                                + " duration time.",
                 subcategory = "Blinking")
         public boolean syncBlinking = true;
 
@@ -886,7 +885,7 @@ public class PotionEffects extends BasicHud {
                 name = "Exclude Duration Rule",
                 description =
                         "Exclude effects that are either above, below, at, or not at a certain"
-                            + " duration threshold",
+                                + " duration threshold",
                 options = {"None", "Above", "Below", "At", "Not At"},
                 subcategory = "Exclusion")
         public int excludeSetDuration = 0;
@@ -895,7 +894,7 @@ public class PotionEffects extends BasicHud {
                 name = "Exclude Amplifier Rule",
                 description =
                         "Exclude effects that are either above, below, at, or not at a certain"
-                            + " amplifier amount",
+                                + " amplifier amount",
                 options = {"None", "Above", "Below", "At", "Not At"},
                 subcategory = "Exclusion")
         public int excludeSetAmplifier = 0;
