@@ -139,19 +139,26 @@ public class PotionEffects extends BasicHud {
     }
 
     /**
-     * @return True if the active player effects are not empty and the basic HUD conditions are met.
+     * Gets the player's active effects and sets the current effect list to either:
+     * <br>
+     * 1. The actual active effect list (if not empty)
+     * <br>
+     * 2. The dummy list (if there are no active effects)
      */
-    @Override
-    protected boolean shouldShow() {
-        /*
-        In my opinion, this should only be set every time the potion effect gets updated. I haven't looked into making events for OneConfig, but I will later on.
-        If anyone wants to take a look at implementing this before I decide to, this is what I did for CheatBreaker: https://imgur.com/OOhV7H6 https://imgur.com/2BJAanz
-         */
+    @Subscribe
+    private void onUpdatePotionMetadata(UpdatePotionMetadataEvent event) {
         if (this.mc.thePlayer != null) {
             this.activeEffects = ImmutableList.copyOf(this.mc.thePlayer.getActivePotionEffects());
         }
 
         this.currentEffects = this.activeEffects.isEmpty() ? this.dummyEffects : this.activeEffects;
+    }
+
+    /**
+     * @return True if the active player effects are not empty and the basic HUD conditions are met.
+     */
+    @Override
+    protected boolean shouldShow() {
         return !this.activeEffects.isEmpty() && super.shouldShow();
     }
 
