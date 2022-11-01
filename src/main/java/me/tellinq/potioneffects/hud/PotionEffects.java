@@ -508,7 +508,9 @@ public class PotionEffects extends BasicHud {
                 currentEffects.sort(Comparator.comparing(PotionEffect::getIsShowParticles));
                 break;
             case 6:
-                currentEffects.sort(Comparator.comparing(effect -> Potion.potionTypes[effect.getPotionID()].isBadEffect()));
+                currentEffects.sort(
+                        Comparator.comparing(
+                                effect -> Potion.potionTypes[effect.getPotionID()].isBadEffect()));
         }
 
         if (this.verticalSorting) {
@@ -584,8 +586,9 @@ public class PotionEffects extends BasicHud {
             return true;
         if (this.excludeBulk(effectSetting.particlesExclusionRule, effect.getIsShowParticles()))
             return true;
-        if (this.excludeBulk(effectSetting.badEffectsExclusionRule, Potion.potionTypes[effect.getPotionID()].isBadEffect()))
-            return true;
+        if (this.excludeBulk(
+                effectSetting.badEffectsExclusionRule,
+                Potion.potionTypes[effect.getPotionID()].isBadEffect())) return true;
         if (this.excludeArrayOptions(
                         effectSetting.excludeSetDuration,
                         effect.getDuration(),
@@ -907,7 +910,13 @@ public class PotionEffects extends BasicHud {
                 description =
                         "Exclude effects that are either above, below, at, or not at a certain"
                                 + " duration threshold",
-                options = {"None", "Exclude All Above", "Exclude All Below", "Exclude All At", "Exclude All Not At"},
+                options = {
+                    "None",
+                    "Exclude All Above",
+                    "Exclude All Below",
+                    "Exclude All At",
+                    "Exclude All Not At"
+                },
                 subcategory = "Exclusion")
         public int excludeSetDuration = 0;
 
@@ -916,7 +925,13 @@ public class PotionEffects extends BasicHud {
                 description =
                         "Exclude effects that are either above, below, at, or not at a certain"
                                 + " amplifier amount",
-                options = {"None", "Exclude All Above", "Exclude All Below", "Exclude All At", "Exclude All Not At"},
+                options = {
+                    "None",
+                    "Exclude All Above",
+                    "Exclude All Below",
+                    "Exclude All At",
+                    "Exclude All Not At"
+                },
                 subcategory = "Exclusion")
         public int excludeSetAmplifier = 0;
 
@@ -924,19 +939,28 @@ public class PotionEffects extends BasicHud {
                 name = "Permanent Effects Rule",
                 description = "Decide if permanent or temporary effects should be excluded.",
                 subcategory = "Exclusion",
-                options = {"None", "Exclude All Permanent Effects", "Exclude All Temporary Effects"})
+                options = {
+                    "None",
+                    "Exclude All Permanent Effects",
+                    "Exclude All Temporary Effects"
+                })
         public int permanentExclusionRule = 0;
 
         @Dropdown(
                 name = "Ambient Effects Rule",
                 description = "Decide if effects from or not from a beacon should be excluded.",
                 subcategory = "Exclusion",
-                options = {"None", "Exclude All Ambient Effects", "Exclude All Non Ambient Effects"})
+                options = {
+                    "None",
+                    "Exclude All Ambient Effects",
+                    "Exclude All Non Ambient Effects"
+                })
         public int ambientExclusionRule = 0;
 
         @Dropdown(
                 name = "Emitting Particles Rule",
-                description = "Decide if effects that allow or disallow particles should be excluded.",
+                description =
+                        "Decide if effects that allow or disallow particles should be excluded.",
                 subcategory = "Exclusion",
                 options = {
                     "None",
@@ -949,11 +973,7 @@ public class PotionEffects extends BasicHud {
                 name = "Bad Effects Rule",
                 description = "Decide if good or bad effects should be excluded.",
                 subcategory = "Exclusion",
-                options = {
-                        "None",
-                        "Exclude All Bad Effects",
-                        "Exclude All Good Effects"
-                })
+                options = {"None", "Exclude All Bad Effects", "Exclude All Good Effects"})
         public int badEffectsExclusionRule = 0;
 
         @Number(
