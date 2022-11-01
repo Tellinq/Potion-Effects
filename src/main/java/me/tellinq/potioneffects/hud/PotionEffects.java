@@ -3,7 +3,6 @@ package me.tellinq.potioneffects.hud;
 import cc.polyfrost.oneconfig.events.event.InitializationEvent;
 import cc.polyfrost.oneconfig.libs.universal.UGraphics;
 import cc.polyfrost.oneconfig.libs.universal.UMinecraft;
-import com.google.common.collect.ImmutableList;
 import me.tellinq.potioneffects.config.PotionEffectsConfig;
 import me.tellinq.potioneffects.event.UpdatePotionMetadataEvent;
 import me.tellinq.potioneffects.util.RomanNumeral;
@@ -53,7 +52,7 @@ public class PotionEffects extends BasicHud {
             name = "Sorting Method",
             description =
                     "Choose how the potion effects should be sorted",
-            options = {"Vanilla", "Alphabetical", "Duration", "Amplifier", "Ambient", "Particles"})
+            options = {"Potion ID (Vanilla)", "Alphabetical", "Duration", "Amplifier", "Ambient", "Particles"})
     public int sortingMethod = 0;
 
     @Switch(
@@ -193,13 +192,10 @@ public class PotionEffects extends BasicHud {
      */
     @Subscribe
     private void onUpdatePotionMetadata(UpdatePotionMetadataEvent event) {
-        // I have to make it so a new array list is made every time. If I don't do this, sorting just breaks.
-        this.activeEffects = new ArrayList<>();
         if (this.mc.thePlayer != null) {
-            this.activeEffects.addAll(this.mc.thePlayer.getActivePotionEffects());
+            this.activeEffects = new ArrayList<>(this.mc.thePlayer.getActivePotionEffects());
+            this.currentEffects = this.activeEffects.isEmpty() ? this.dummyEffects : this.activeEffects;
         }
-
-        this.currentEffects = this.activeEffects.isEmpty() ? this.dummyEffects : this.activeEffects;
     }
 
     /**
@@ -223,8 +219,7 @@ public class PotionEffects extends BasicHud {
     protected void draw(UMatrixStack matrices, float x, float y, float scale, boolean example) {
         UGraphics.disableLighting();
 
-        final int actualHorizontal =
-                this.horizontalAlignment == 0 ? this.getAlignment() : this.horizontalAlignment - 1;
+        final int actualHorizontal = this.getHorizontalAlignment();
 
         this.sortEffects(this.currentEffects);
 
@@ -241,21 +236,21 @@ public class PotionEffects extends BasicHud {
         for (PotionEffect effect : this.currentEffects) {
             EffectConfig effectSetting = getEffectSetting(effect);
             // I wish there was a more efficient way of doing this...
-            EffectConfig oComponent =
+            EffectConfig componentConfig =
                     this.useOverride(effectSetting, effectSetting.overrideComponent);
-            EffectConfig oAmplifier =
+            EffectConfig amplifierConfig =
                     this.useOverride(effectSetting, effectSetting.overrideAmplifier);
-            EffectConfig oBlinking =
+            EffectConfig blinkingConfig =
                     this.useOverride(effectSetting, effectSetting.overrideBlinking);
-            EffectConfig oFormatting =
+            EffectConfig formattingConfig =
                     this.useOverride(effectSetting, effectSetting.overrideFormatting);
-            EffectConfig oColor =
+            EffectConfig colorConfig =
                     this.useOverride(effectSetting, effectSetting.overrideColor);
-            EffectConfig oExclusion =
+            EffectConfig exclusionConfig =
                     this.useOverride(effectSetting, effectSetting.overrideExclusion);
 
             boolean excluded = false;
-            if (this.excludePotions(oExclusion, effect)) {
+            if (this.excludePotions(exclusionConfig, effect)) {
                 if (example && this.showExcludedEffects) {
                     excluded = true;
                 } else {
@@ -269,7 +264,7 @@ public class PotionEffects extends BasicHud {
                 continue;
             }
 
-            if (oComponent.icon) {
+            if (componentConfig.icon) {
                 UGraphics.color4f(1f, 1f, 1f, excluded ? 0.5f : 1f);
                 this.mc.getTextureManager().bindTexture(EFFECTS_RESOURCE);
                 float iconX = 0;
@@ -277,7 +272,7 @@ public class PotionEffects extends BasicHud {
                     iconX = this.width - ICON_SIZE;
                 }
                 if (showEffectDuringBlink(
-                        oBlinking, oBlinking.makeEffectIconBlink, effect.getDuration(), example)) {
+                        blinkingConfig, blinkingConfig.makeEffectIconBlink, effect.getDuration(), example)) {
                     this.mc.ingameGUI.drawTexturedModalRect(
                             iconX,
                             yOffset,
@@ -290,35 +285,35 @@ public class PotionEffects extends BasicHud {
                 this.width = Math.max(this.width, xOffset);
             }
 
-            if (oComponent.effectName) {
-                if (oComponent.icon) {
+            if (componentConfig.effectName) {
+                if (componentConfig.icon) {
                     xOffset = (this.ICON_SIZE + 4);
                 }
 
                 StringBuilder titleSb = new StringBuilder();
                 // I really hope there's a more efficient way of setting this up...
-                if (oFormatting.boldEffectName) {
+                if (formattingConfig.boldEffectName) {
                     titleSb.append(EnumChatFormatting.BOLD);
                 }
 
-                if (oFormatting.italicEffectName) {
+                if (formattingConfig.italicEffectName) {
                     titleSb.append(EnumChatFormatting.ITALIC);
                 }
 
-                if (oFormatting.underlineEffectName) {
+                if (formattingConfig.underlineEffectName) {
                     titleSb.append(EnumChatFormatting.UNDERLINE);
                 }
 
-                if (oFormatting.customName.isEmpty()) {
+                if (formattingConfig.customName.isEmpty()) {
                     titleSb.append(I18n.format(potion.getName()));
                 } else {
-                    titleSb.append(oFormatting.customName);
+                    titleSb.append(formattingConfig.customName);
                 }
 
                 int amplifier = Math.max(1, effect.getAmplifier() + 1);
-                if (oAmplifier.amplifier && (amplifier != 1 || oAmplifier.levelOne)) {
+                if (amplifierConfig.amplifier && (amplifier != 1 || amplifierConfig.levelOne)) {
                     titleSb.append(" ");
-                    if (!oAmplifier.romanNumerals)
+                    if (!amplifierConfig.romanNumerals)
                         titleSb.append(RomanNumeral.INSTANCE.getCache(amplifier));
                     else titleSb.append(amplifier);
                 }
@@ -330,7 +325,7 @@ public class PotionEffects extends BasicHud {
 
                 float titleX = xOffset;
                 float titleY = yOffset;
-                if (!oComponent.duration) {
+                if (!componentConfig.duration) {
                     titleY += this.fontRenderer.FONT_HEIGHT / 2f + 0.5f;
                 }
 
@@ -345,40 +340,40 @@ public class PotionEffects extends BasicHud {
                         titleX = this.width - xOffset;
                 }
                 if (showEffectDuringBlink(
-                        oBlinking, oBlinking.makeEffectNameBlink, effect.getDuration(), example)) {
+                        blinkingConfig, blinkingConfig.makeEffectNameBlink, effect.getDuration(), example)) {
                     RenderManager.drawScaledString(
                             builtTitle,
                             titleX,
                             titleY,
-                            getColor(oColor.nameColor.getRGB(), excluded),
-                            RenderManager.TextType.toType(oFormatting.textType),
+                            getColor(colorConfig.nameColor.getRGB(), excluded),
+                            RenderManager.TextType.toType(formattingConfig.textType),
                             1);
                 }
             }
 
-            if (oComponent.duration) {
-                if (oComponent.icon) {
+            if (componentConfig.duration) {
+                if (componentConfig.icon) {
                     xOffset = (this.ICON_SIZE + 4);
                 }
 
                 StringBuilder timeSb = new StringBuilder();
                 // I really hope there's a more efficient way of setting this up...
-                if (oFormatting.boldDuration) {
+                if (formattingConfig.boldDuration) {
                     timeSb.append(EnumChatFormatting.BOLD);
                 }
 
-                if (oFormatting.italicDuration) {
+                if (formattingConfig.italicDuration) {
                     timeSb.append(EnumChatFormatting.ITALIC);
                 }
 
-                if (oFormatting.underlineDuration) {
+                if (formattingConfig.underlineDuration) {
                     timeSb.append(EnumChatFormatting.UNDERLINE);
                 }
 
                 if (effect.getIsPotionDurationMax()) {
-                    timeSb.append(oFormatting.maxDurationString);
+                    timeSb.append(formattingConfig.maxDurationString);
                 } else {
-                    switch (oFormatting.durationFormat) {
+                    switch (formattingConfig.durationFormat) {
                         case 0:
                             timeSb.append(Potion.getDurationString(effect));
                             break;
@@ -399,13 +394,13 @@ public class PotionEffects extends BasicHud {
                 float timeX = xOffset;
                 float timeY = yOffset + this.fontRenderer.FONT_HEIGHT + 1;
 
-                if (!oComponent.effectName) {
+                if (!componentConfig.effectName) {
                     timeY -= this.fontRenderer.FONT_HEIGHT / 2f + 0.5f;
                 }
 
                 if (showEffectDuringBlink(
-                        oBlinking,
-                        oBlinking.makeEffectDurationBlink,
+                        blinkingConfig,
+                        blinkingConfig.makeEffectDurationBlink,
                         effect.getDuration(),
                         example)) {
                     switch (actualHorizontal) {
@@ -422,8 +417,8 @@ public class PotionEffects extends BasicHud {
                             builtTime,
                             timeX,
                             timeY,
-                            getColor(oColor.durationColor.getRGB(), excluded),
-                            RenderManager.TextType.toType(oFormatting.textType),
+                            getColor(colorConfig.durationColor.getRGB(), excluded),
+                            RenderManager.TextType.toType(formattingConfig.textType),
                             1);
                 }
             }
@@ -434,63 +429,71 @@ public class PotionEffects extends BasicHud {
     }
 
     /**
-     * Gets the horizontal alignment based off the mod's anchor.
+     * Gets the horizontal alignment based off the mod's {@link #position} anchor (if {@link #horizontalAlignment} is 0 (Auto)) or the manual alignment via {@link #horizontalAlignment}.
      *
-     * @return The int corrosponding to the mod's alignment <br>
+     * @return The int corresponding to the mod's alignment <br>
      *     0: Left horizontal alignment <br>
      *     1: Center horizontal alignment <br>
      *     2: Right horizontal alignment
      */
-    private int getAlignment() {
-        switch (position.anchor) {
-            case TOP_LEFT:
-            case MIDDLE_LEFT:
-            case BOTTOM_LEFT:
-                return 0;
-            case TOP_CENTER:
-            case MIDDLE_CENTER:
-            case BOTTOM_CENTER:
-                return 1;
-            case TOP_RIGHT:
-            case MIDDLE_RIGHT:
-            case BOTTOM_RIGHT:
-                return 2;
-            default:
-                return horizontalAlignment - 1;
+    private int getHorizontalAlignment() {
+        if (this.horizontalAlignment == 0) {
+            switch (position.anchor) {
+                case TOP_LEFT:
+                case MIDDLE_LEFT:
+                case BOTTOM_LEFT:
+                    return 0;
+                case TOP_CENTER:
+                case MIDDLE_CENTER:
+                case BOTTOM_CENTER:
+                    return 1;
+                case TOP_RIGHT:
+                case MIDDLE_RIGHT:
+                case BOTTOM_RIGHT:
+                    return 2;
+                default:
+                    return horizontalAlignment - 1;
+            }
         }
+        return horizontalAlignment - 1;
     }
 
     /**
-     * Sorts all the current potion effects based off what sorting method the user set <br>
+     * Sorts all the current potion effects based off what the user set in {@link #sortingMethod} <br>
+     * 0: Sorts by Potion ID (Vanilla behavior) <br>
      * 1: Sorts by alphabetical name <br>
      * 2: Sorts based off duration. <br>
      * 3: Sorts based off amplifier. <br>
      * 4: Sorts prioritizing ambient (beacon) effects. <br>
-     * 4: Sorts prioritizing effects showing particles. <br>
-     * Optionally, the entire list can get reversed if the user enables Vertical Sorting.
+     * 5: Sorts prioritizing effects showing particles. <br>
+     * Optionally, the entire list can get reversed if the user enables {@link #verticalSorting}.
+     * @param currentEffects {@link #currentEffects}
      */
-    public void sortEffects(List<PotionEffect> potionEffects) {
+    public void sortEffects(List<PotionEffect> currentEffects) {
         switch (this.sortingMethod) {
+            case 0:
+                currentEffects.sort(Comparator.comparingInt(PotionEffect::getPotionID));
+                break;
             case 1:
-                potionEffects.sort(
+                currentEffects.sort(
                         Comparator.comparing(effect -> I18n.format(effect.getEffectName())));
                 break;
             case 2:
-                potionEffects.sort(Comparator.comparingInt(PotionEffect::getDuration));
+                currentEffects.sort(Comparator.comparingInt(PotionEffect::getDuration));
                 break;
             case 3:
-                potionEffects.sort(Comparator.comparingInt(PotionEffect::getAmplifier));
-                Collections.reverse(potionEffects);
+                currentEffects.sort(Comparator.comparingInt(PotionEffect::getAmplifier));
+                Collections.reverse(currentEffects);
                 break;
             case 4:
-                potionEffects.sort(Comparator.comparing(PotionEffect::getIsAmbient));
+                currentEffects.sort(Comparator.comparing(PotionEffect::getIsAmbient));
                 break;
             case 5:
-                potionEffects.sort(Comparator.comparing(PotionEffect::getIsShowParticles));
+                currentEffects.sort(Comparator.comparing(PotionEffect::getIsShowParticles));
         }
 
         if (this.verticalSorting) {
-            Collections.reverse(potionEffects);
+            Collections.reverse(currentEffects);
         }
     }
 
