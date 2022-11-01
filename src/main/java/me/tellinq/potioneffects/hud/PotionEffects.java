@@ -52,12 +52,8 @@ public class PotionEffects extends BasicHud {
     @Dropdown(
             name = "Sorting Method",
             description =
-                    "Vanilla: Sorts based off the default order\n"
-                        + "Alphabetical: Sorts from A-Z\n"
-                        + "Duration: Sorts from the effects with the lowest duration to the"
-                        + " highest\n"
-                        + "Amplifier: Sorts from the highest amplifier to the lowest",
-            options = {"Vanilla", "Alphabetical", "Duration", "Amplifier"})
+                    "Choose how the potion effects should be sorted",
+            options = {"Vanilla", "Alphabetical", "Duration", "Amplifier", "Ambient", "Particles"})
     public int sortingMethod = 0;
 
     @Switch(
@@ -227,6 +223,10 @@ public class PotionEffects extends BasicHud {
 
         final int actualHorizontal =
                 this.horizontalAlignment == 0 ? this.getAlignment() : this.horizontalAlignment - 1;
+        this.currentEffects = new ArrayList<>();
+        if (this.mc.thePlayer != null) {
+            this.currentEffects.addAll(this.mc.thePlayer.getActivePotionEffects());
+        }
 
         this.sortEffects(this.currentEffects);
 
@@ -464,9 +464,11 @@ public class PotionEffects extends BasicHud {
 
     /**
      * Sorts all the current potion effects based off what sorting method the user set <br>
-     * 1: Sorts alphabetically by name only <br>
-     * 2: Sorts alphabetically based off duration. <br>
-     * 3: Sorts alphabetically based off amplifier. <br>
+     * 1: Sorts by alphabetical name <br>
+     * 2: Sorts based off duration. <br>
+     * 3: Sorts based off amplifier. <br>
+     * 4: Sorts prioritizing ambient (beacon) effects. <br>
+     * 4: Sorts prioritizing effects showing particles. <br>
      * Optionally, the entire list can get reversed if the user enables Vertical Sorting.
      */
     public void sortEffects(List<PotionEffect> potionEffects) {
@@ -481,7 +483,14 @@ public class PotionEffects extends BasicHud {
             case 3:
                 potionEffects.sort(Comparator.comparingInt(PotionEffect::getAmplifier));
                 Collections.reverse(potionEffects);
+                break;
+            case 4:
+                potionEffects.sort(Comparator.comparing(PotionEffect::getIsAmbient));
+                break;
+            case 5:
+                potionEffects.sort(Comparator.comparing(PotionEffect::getIsShowParticles));
         }
+
 
         if (this.verticalSorting) {
             Collections.reverse(potionEffects);
@@ -489,7 +498,7 @@ public class PotionEffects extends BasicHud {
     }
 
     /**
-     * @param effectConfig The current effect's configuration (global or effect specific)
+     * @param config The current effect's configuration (global or effect specific)
      * @param makeComponentBlink If the set component should blink
      * @param duration The effect's duration
      * @param example If the user is currently in the HUD editor
@@ -501,23 +510,23 @@ public class PotionEffects extends BasicHud {
      *     (will explain in depth later)
      */
     private boolean showEffectDuringBlink(
-            EffectConfig effectConfig,
+            EffectConfig config,
             boolean makeComponentBlink,
             float duration,
             boolean example) {
-        if (effectConfig.blink && makeComponentBlink) {
-            if (effectConfig.syncBlinking || (example && this.activeEffects.isEmpty())) {
-                float blinkSpeed = effectConfig.blinkSpeed / 3.0f;
-                if (duration <= effectConfig.blinkDuration * 20.0F) {
+        if (config.blink && makeComponentBlink) {
+            if (config.syncBlinking || (example && this.activeEffects.isEmpty())) {
+                float blinkSpeed = config.blinkSpeed / 3.0f;
+                if (duration <= config.blinkDuration * 20.0F) {
                     if (this.ticks > blinkSpeed * 2) {
                         this.ticks = 0;
                     }
                     return this.ticks <= blinkSpeed;
                 }
             } else {
-                return duration / 20f > effectConfig.blinkDuration
-                        || duration % (50 - effectConfig.blinkSpeed)
-                                <= (50 - effectConfig.blinkSpeed) / 2f;
+                return duration / 20f > config.blinkDuration
+                        || duration % (50 - config.blinkSpeed)
+                                <= (50 - config.blinkSpeed) / 2f;
             }
         }
         return true;
