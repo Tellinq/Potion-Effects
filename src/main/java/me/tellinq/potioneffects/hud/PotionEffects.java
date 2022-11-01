@@ -3,7 +3,6 @@ package me.tellinq.potioneffects.hud;
 import cc.polyfrost.oneconfig.events.event.InitializationEvent;
 import cc.polyfrost.oneconfig.libs.universal.UGraphics;
 import cc.polyfrost.oneconfig.libs.universal.UMinecraft;
-import com.google.common.collect.ImmutableList;
 import me.tellinq.potioneffects.config.PotionEffectsConfig;
 import me.tellinq.potioneffects.event.UpdatePotionMetadataEvent;
 import me.tellinq.potioneffects.util.RomanNumeral;
@@ -51,8 +50,7 @@ public class PotionEffects extends BasicHud {
 
     @Dropdown(
             name = "Sorting Method",
-            description =
-                    "Choose how the potion effects should be sorted",
+            description = "Choose how the potion effects should be sorted",
             options = {"Vanilla", "Alphabetical", "Duration", "Amplifier", "Ambient", "Particles"})
     public int sortingMethod = 0;
 
@@ -193,7 +191,8 @@ public class PotionEffects extends BasicHud {
      */
     @Subscribe
     private void onUpdatePotionMetadata(UpdatePotionMetadataEvent event) {
-        // I have to make it so a new array list is made every time. If I don't do this, sorting just breaks.
+        // I have to make it so a new array list is made every time. If I don't do this, sorting
+        // just breaks.
         this.activeEffects = new ArrayList<>();
         if (this.mc.thePlayer != null) {
             this.activeEffects.addAll(this.mc.thePlayer.getActivePotionEffects());
@@ -249,8 +248,7 @@ public class PotionEffects extends BasicHud {
                     this.useOverride(effectSetting, effectSetting.overrideBlinking);
             EffectConfig oFormatting =
                     this.useOverride(effectSetting, effectSetting.overrideFormatting);
-            EffectConfig oColor =
-                    this.useOverride(effectSetting, effectSetting.overrideColor);
+            EffectConfig oColor = this.useOverride(effectSetting, effectSetting.overrideColor);
             EffectConfig oExclusion =
                     this.useOverride(effectSetting, effectSetting.overrideExclusion);
 
@@ -507,10 +505,7 @@ public class PotionEffects extends BasicHud {
      *     (will explain in depth later)
      */
     private boolean showEffectDuringBlink(
-            EffectConfig config,
-            boolean makeComponentBlink,
-            float duration,
-            boolean example) {
+            EffectConfig config, boolean makeComponentBlink, float duration, boolean example) {
         if (config.blink && makeComponentBlink) {
             if (config.syncBlinking || (example && this.activeEffects.isEmpty())) {
                 float blinkSpeed = config.blinkSpeed / 3.0f;
@@ -522,8 +517,7 @@ public class PotionEffects extends BasicHud {
                 }
             } else {
                 return duration / 20f > config.blinkDuration
-                        || duration % (50 - config.blinkSpeed)
-                                <= (50 - config.blinkSpeed) / 2f;
+                        || duration % (50 - config.blinkSpeed) <= (50 - config.blinkSpeed) / 2f;
             }
         }
         return true;
