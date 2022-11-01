@@ -1,4 +1,3 @@
-# Example workflow
 name: Format
 
 on:
@@ -15,8 +14,8 @@ jobs:
       - uses: axel-op/googlejavaformat-action@v3
         with:
           # Commit message
-          commitMessage: "Apply Google Java Format"
-          args: "--skip-sorting-imports --replace --aosp"
+          commitMessage: "Apply Google Java Style"
+          args: "--replace --aosp"
           # Recommended if you use MacOS:
           # githubToken: ${{ secrets.GITHUB_TOKEN }}
 
