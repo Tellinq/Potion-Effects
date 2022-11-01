@@ -1,5 +1,6 @@
 package me.tellinq.potioneffects.hud;
 
+import cc.polyfrost.oneconfig.config.annotations.Number;
 import cc.polyfrost.oneconfig.events.event.InitializationEvent;
 import cc.polyfrost.oneconfig.libs.universal.UGraphics;
 import cc.polyfrost.oneconfig.libs.universal.UMinecraft;
@@ -31,6 +32,7 @@ public class PotionEffects extends BasicHud {
 
     @Dropdown(
             name = "Horizontal Alignment",
+            description = "Choose if the alignment should be automatic or manual",
             options = {"Auto", "Left", "Center", "Right"})
     public int horizontalAlignment = 0;
 
@@ -57,15 +59,14 @@ public class PotionEffects extends BasicHud {
                 "Duration",
                 "Amplifier",
                 "Ambient",
-                "Particles"
+                "Particles",
+                "Bad Effects"
             })
     public int sortingMethod = 0;
 
     @Switch(
             name = "Show Excluded Effects in HUD Editor",
-            description =
-                    "Show potion effects that are excluded in the HUD editor"
-                            + "\nNot recommended to disable if all effects are excluded!")
+            description = "Show potion effects that are excluded in the HUD editor")
     public boolean showExcludedEffects = true;
 
     @Info(text = "Not recommended to disable if all effects are excluded!", type = InfoType.WARNING)
@@ -505,6 +506,9 @@ public class PotionEffects extends BasicHud {
                 break;
             case 5:
                 currentEffects.sort(Comparator.comparing(PotionEffect::getIsShowParticles));
+                break;
+            case 6:
+                currentEffects.sort(Comparator.comparing(effect -> Potion.potionTypes[effect.getPotionID()].isBadEffect()));
         }
 
         if (this.verticalSorting) {
@@ -574,10 +578,13 @@ public class PotionEffects extends BasicHud {
      * @return True if one of the exclusion conditions is set to true
      */
     private boolean excludePotions(EffectConfig effectSetting, PotionEffect effect) {
-        if (effectSetting.excludePermanentEffects && effect.getIsPotionDurationMax()) return true;
+        if (this.excludeBulk(effectSetting.permanentExclusionRule, effect.getIsPotionDurationMax()))
+            return true;
         if (this.excludeBulk(effectSetting.ambientExclusionRule, effect.getIsAmbient()))
             return true;
         if (this.excludeBulk(effectSetting.particlesExclusionRule, effect.getIsShowParticles()))
+            return true;
+        if (this.excludeBulk(effectSetting.badEffectsExclusionRule, Potion.potionTypes[effect.getPotionID()].isBadEffect()))
             return true;
         if (this.excludeArrayOptions(
                         effectSetting.excludeSetDuration,
@@ -895,50 +902,61 @@ public class PotionEffects extends BasicHud {
                 size = 2)
         public boolean exclude = false;
 
-        @Checkbox(
-                name = "Permanent Effects",
-                description = "Exclude the effect(s) when the duration is permanent",
-                subcategory = "Exclusion",
-                size = 2)
-        public boolean excludePermanentEffects = false;
-
         @Dropdown(
-                name = "Exclude Duration Rule",
+                name = "Duration Amount Rule",
                 description =
                         "Exclude effects that are either above, below, at, or not at a certain"
                                 + " duration threshold",
-                options = {"None", "Above", "Below", "At", "Not At"},
+                options = {"None", "Exclude All Above", "Exclude All Below", "Exclude All At", "Exclude All Not At"},
                 subcategory = "Exclusion")
         public int excludeSetDuration = 0;
 
         @Dropdown(
-                name = "Exclude Amplifier Rule",
+                name = "Amplifier Amount Rule",
                 description =
                         "Exclude effects that are either above, below, at, or not at a certain"
                                 + " amplifier amount",
-                options = {"None", "Above", "Below", "At", "Not At"},
+                options = {"None", "Exclude All Above", "Exclude All Below", "Exclude All At", "Exclude All Not At"},
                 subcategory = "Exclusion")
         public int excludeSetAmplifier = 0;
 
         @Dropdown(
-                name = "Ambient Effects Rule",
-                description = "Decide if effects from a beacon should be excluded.",
+                name = "Permanent Effects Rule",
+                description = "Decide if permanent or temporary effects should be excluded.",
                 subcategory = "Exclusion",
-                options = {"None", "Exclude All Ambient", "Exclude All Non Ambient"})
+                options = {"None", "Exclude All Permanent Effects", "Exclude All Temporary Effects"})
+        public int permanentExclusionRule = 0;
+
+        @Dropdown(
+                name = "Ambient Effects Rule",
+                description = "Decide if effects from or not from a beacon should be excluded.",
+                subcategory = "Exclusion",
+                options = {"None", "Exclude All Ambient Effects", "Exclude All Non Ambient Effects"})
         public int ambientExclusionRule = 0;
 
         @Dropdown(
                 name = "Emitting Particles Rule",
-                description = "Decide if effects that allow particles should be excluded.",
+                description = "Decide if effects that allow or disallow particles should be excluded.",
                 subcategory = "Exclusion",
                 options = {
                     "None",
-                    "Exclude All Emitting particles",
-                    "Exclude All Disallowing particles"
+                    "Exclude All Emitting Particles",
+                    "Exclude All Disallowing Particles"
                 })
         public int particlesExclusionRule = 0;
 
-        @Slider(
+        @Dropdown(
+                name = "Bad Effects Rule",
+                description = "Decide if good or bad effects should be excluded.",
+                subcategory = "Exclusion",
+                options = {
+                        "None",
+                        "Exclude All Bad Effects",
+                        "Exclude All Good Effects"
+                })
+        public int badEffectsExclusionRule = 0;
+
+        @Number(
                 name = "Excluded Duration Threshold",
                 description = "The value(s) that will be excluded based off the duration rule",
                 subcategory = "Exclusion",
