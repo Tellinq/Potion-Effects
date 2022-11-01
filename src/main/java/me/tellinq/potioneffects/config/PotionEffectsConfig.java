@@ -1,12 +1,13 @@
 package me.tellinq.potioneffects.config;
 
-import me.tellinq.potioneffects.PotionEffectsMod;
-import me.tellinq.potioneffects.hud.PotionEffects;
 import cc.polyfrost.oneconfig.config.Config;
 import cc.polyfrost.oneconfig.config.annotations.*;
 import cc.polyfrost.oneconfig.config.data.Mod;
 import cc.polyfrost.oneconfig.config.data.ModType;
 import cc.polyfrost.oneconfig.config.data.PageLocation;
+
+import me.tellinq.potioneffects.PotionEffectsMod;
+import me.tellinq.potioneffects.hud.PotionEffects;
 
 import java.util.ArrayList;
 import java.util.List;

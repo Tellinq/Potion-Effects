@@ -1,25 +1,28 @@
 package me.tellinq.potioneffects.hud;
 
-import cc.polyfrost.oneconfig.config.annotations.Number;
-import cc.polyfrost.oneconfig.events.event.InitializationEvent;
-import cc.polyfrost.oneconfig.libs.universal.UGraphics;
-import cc.polyfrost.oneconfig.libs.universal.UMinecraft;
-import me.tellinq.potioneffects.config.PotionEffectsConfig;
-import me.tellinq.potioneffects.event.UpdatePotionMetadataEvent;
-import me.tellinq.potioneffects.util.RomanNumeral;
-import net.minecraft.client.gui.FontRenderer;
 import cc.polyfrost.oneconfig.config.annotations.*;
+import cc.polyfrost.oneconfig.config.annotations.Number;
 import cc.polyfrost.oneconfig.config.core.OneColor;
 import cc.polyfrost.oneconfig.config.data.InfoType;
 import cc.polyfrost.oneconfig.events.EventManager;
+import cc.polyfrost.oneconfig.events.event.InitializationEvent;
 import cc.polyfrost.oneconfig.events.event.Stage;
 import cc.polyfrost.oneconfig.events.event.TickEvent;
 import cc.polyfrost.oneconfig.hud.BasicHud;
 import cc.polyfrost.oneconfig.libs.eventbus.Subscribe;
+import cc.polyfrost.oneconfig.libs.universal.UGraphics;
 import cc.polyfrost.oneconfig.libs.universal.UMatrixStack;
+import cc.polyfrost.oneconfig.libs.universal.UMinecraft;
 import cc.polyfrost.oneconfig.renderer.RenderManager;
+
 import com.google.common.collect.ImmutableMap;
+
+import me.tellinq.potioneffects.config.PotionEffectsConfig;
+import me.tellinq.potioneffects.event.UpdatePotionMetadataEvent;
+import me.tellinq.potioneffects.util.RomanNumeral;
+
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;

@@ -1,8 +1,9 @@
 package me.tellinq.potioneffects;
 
-import me.tellinq.potioneffects.config.PotionEffectsConfig;
-import me.tellinq.potioneffects.command.ExampleCommand;
 import cc.polyfrost.oneconfig.utils.commands.CommandManager;
+
+import me.tellinq.potioneffects.command.ExampleCommand;
+import me.tellinq.potioneffects.config.PotionEffectsConfig;
 
 @net.minecraftforge.fml.common.Mod(
         modid = PotionEffectsMod.MODID,
