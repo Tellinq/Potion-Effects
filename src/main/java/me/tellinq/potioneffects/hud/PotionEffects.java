@@ -3,7 +3,6 @@ package me.tellinq.potioneffects.hud;
 import cc.polyfrost.oneconfig.events.event.InitializationEvent;
 import cc.polyfrost.oneconfig.libs.universal.UGraphics;
 import cc.polyfrost.oneconfig.libs.universal.UMinecraft;
-import com.google.common.collect.ImmutableList;
 import me.tellinq.potioneffects.config.PotionEffectsConfig;
 import me.tellinq.potioneffects.event.UpdatePotionMetadataEvent;
 import me.tellinq.potioneffects.util.RomanNumeral;
@@ -52,7 +51,14 @@ public class PotionEffects extends BasicHud {
     @Dropdown(
             name = "Sorting Method",
             description = "Choose how the potion effects should be sorted",
-            options = {"Potion ID (Vanilla)", "Alphabetical", "Duration", "Amplifier", "Ambient", "Particles"})
+            options = {
+                "Potion ID (Vanilla)",
+                "Alphabetical",
+                "Duration",
+                "Amplifier",
+                "Ambient",
+                "Particles"
+            })
     public int sortingMethod = 0;
 
     @Switch(
@@ -194,7 +200,8 @@ public class PotionEffects extends BasicHud {
     private void onUpdatePotionMetadata(UpdatePotionMetadataEvent event) {
         if (this.mc.thePlayer != null) {
             this.activeEffects = new ArrayList<>(this.mc.thePlayer.getActivePotionEffects());
-            this.currentEffects = this.activeEffects.isEmpty() ? this.dummyEffects : this.activeEffects;
+            this.currentEffects =
+                    this.activeEffects.isEmpty() ? this.dummyEffects : this.activeEffects;
         }
     }
 
@@ -244,8 +251,7 @@ public class PotionEffects extends BasicHud {
                     this.useOverride(effectSetting, effectSetting.overrideBlinking);
             EffectConfig formattingConfig =
                     this.useOverride(effectSetting, effectSetting.overrideFormatting);
-            EffectConfig colorConfig =
-                    this.useOverride(effectSetting, effectSetting.overrideColor);
+            EffectConfig colorConfig = this.useOverride(effectSetting, effectSetting.overrideColor);
             EffectConfig exclusionConfig =
                     this.useOverride(effectSetting, effectSetting.overrideExclusion);
 
@@ -272,7 +278,10 @@ public class PotionEffects extends BasicHud {
                     iconX = this.width - ICON_SIZE;
                 }
                 if (showEffectDuringBlink(
-                        blinkingConfig, blinkingConfig.makeEffectIconBlink, effect.getDuration(), example)) {
+                        blinkingConfig,
+                        blinkingConfig.makeEffectIconBlink,
+                        effect.getDuration(),
+                        example)) {
                     this.mc.ingameGUI.drawTexturedModalRect(
                             iconX,
                             yOffset,
@@ -340,7 +349,10 @@ public class PotionEffects extends BasicHud {
                         titleX = this.width - xOffset;
                 }
                 if (showEffectDuringBlink(
-                        blinkingConfig, blinkingConfig.makeEffectNameBlink, effect.getDuration(), example)) {
+                        blinkingConfig,
+                        blinkingConfig.makeEffectNameBlink,
+                        effect.getDuration(),
+                        example)) {
                     RenderManager.drawScaledString(
                             builtTitle,
                             titleX,
@@ -429,7 +441,8 @@ public class PotionEffects extends BasicHud {
     }
 
     /**
-     * Gets the horizontal alignment based off the mod's {@link #position} anchor (if {@link #horizontalAlignment} is 0 (Auto)) or the manual alignment via {@link #horizontalAlignment}.
+     * Gets the horizontal alignment based off the mod's {@link #position} anchor (if {@link
+     * #horizontalAlignment} is 0 (Auto)) or the manual alignment via {@link #horizontalAlignment}.
      *
      * @return The int corresponding to the mod's alignment <br>
      *     0: Left horizontal alignment <br>
@@ -459,7 +472,8 @@ public class PotionEffects extends BasicHud {
     }
 
     /**
-     * Sorts all the current potion effects based off what the user set in {@link #sortingMethod} <br>
+     * Sorts all the current potion effects based off what the user set in {@link #sortingMethod}
+     * <br>
      * 0: Sorts by Potion ID (Vanilla behavior) <br>
      * 1: Sorts by alphabetical name <br>
      * 2: Sorts based off duration. <br>
@@ -467,6 +481,7 @@ public class PotionEffects extends BasicHud {
      * 4: Sorts prioritizing ambient (beacon) effects. <br>
      * 5: Sorts prioritizing effects showing particles. <br>
      * Optionally, the entire list can get reversed if the user enables {@link #verticalSorting}.
+     *
      * @param currentEffects {@link #currentEffects}
      */
     public void sortEffects(List<PotionEffect> currentEffects) {
