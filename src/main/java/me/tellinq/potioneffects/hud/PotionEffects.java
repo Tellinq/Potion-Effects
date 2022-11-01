@@ -3,6 +3,7 @@ package me.tellinq.potioneffects.hud;
 import cc.polyfrost.oneconfig.events.event.InitializationEvent;
 import cc.polyfrost.oneconfig.libs.universal.UGraphics;
 import cc.polyfrost.oneconfig.libs.universal.UMinecraft;
+import com.google.common.collect.ImmutableList;
 import me.tellinq.potioneffects.config.PotionEffectsConfig;
 import me.tellinq.potioneffects.event.UpdatePotionMetadataEvent;
 import me.tellinq.potioneffects.util.RomanNumeral;
@@ -50,8 +51,7 @@ public class PotionEffects extends BasicHud {
 
     @Dropdown(
             name = "Sorting Method",
-            description =
-                    "Choose how the potion effects should be sorted",
+            description = "Choose how the potion effects should be sorted",
             options = {"Potion ID (Vanilla)", "Alphabetical", "Duration", "Amplifier", "Ambient", "Particles"})
     public int sortingMethod = 0;
 
@@ -510,10 +510,7 @@ public class PotionEffects extends BasicHud {
      *     (will explain in depth later)
      */
     private boolean showEffectDuringBlink(
-            EffectConfig config,
-            boolean makeComponentBlink,
-            float duration,
-            boolean example) {
+            EffectConfig config, boolean makeComponentBlink, float duration, boolean example) {
         if (config.blink && makeComponentBlink) {
             if (config.syncBlinking || (example && this.activeEffects.isEmpty())) {
                 float blinkSpeed = config.blinkSpeed / 3.0f;
@@ -525,8 +522,7 @@ public class PotionEffects extends BasicHud {
                 }
             } else {
                 return duration / 20f > config.blinkDuration
-                        || duration % (50 - config.blinkSpeed)
-                                <= (50 - config.blinkSpeed) / 2f;
+                        || duration % (50 - config.blinkSpeed) <= (50 - config.blinkSpeed) / 2f;
             }
         }
         return true;
