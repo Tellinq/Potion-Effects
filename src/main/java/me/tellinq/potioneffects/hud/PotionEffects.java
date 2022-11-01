@@ -193,8 +193,10 @@ public class PotionEffects extends BasicHud {
      */
     @Subscribe
     private void onUpdatePotionMetadata(UpdatePotionMetadataEvent event) {
+        // I have to make it so a new array list is made every time. If I don't do this, sorting just breaks.
+        this.activeEffects = new ArrayList<>();
         if (this.mc.thePlayer != null) {
-            this.activeEffects = ImmutableList.copyOf(this.mc.thePlayer.getActivePotionEffects());
+            this.activeEffects.addAll(this.mc.thePlayer.getActivePotionEffects());
         }
 
         this.currentEffects = this.activeEffects.isEmpty() ? this.dummyEffects : this.activeEffects;
@@ -223,10 +225,6 @@ public class PotionEffects extends BasicHud {
 
         final int actualHorizontal =
                 this.horizontalAlignment == 0 ? this.getAlignment() : this.horizontalAlignment - 1;
-        this.currentEffects = new ArrayList<>();
-        if (this.mc.thePlayer != null) {
-            this.currentEffects.addAll(this.mc.thePlayer.getActivePotionEffects());
-        }
 
         this.sortEffects(this.currentEffects);
 
@@ -490,7 +488,6 @@ public class PotionEffects extends BasicHud {
             case 5:
                 potionEffects.sort(Comparator.comparing(PotionEffect::getIsShowParticles));
         }
-
 
         if (this.verticalSorting) {
             Collections.reverse(potionEffects);
@@ -757,7 +754,7 @@ public class PotionEffects extends BasicHud {
                 name = "Sync Blinking",
                 description =
                         "Make blinking synced with tick counts or make blinking go based off the"
-                            + " duration time.",
+                                + " duration time.",
                 subcategory = "Blinking")
         public boolean syncBlinking = true;
 
@@ -895,7 +892,7 @@ public class PotionEffects extends BasicHud {
                 name = "Exclude Duration Rule",
                 description =
                         "Exclude effects that are either above, below, at, or not at a certain"
-                            + " duration threshold",
+                                + " duration threshold",
                 options = {"None", "Above", "Below", "At", "Not At"},
                 subcategory = "Exclusion")
         public int excludeSetDuration = 0;
@@ -904,7 +901,7 @@ public class PotionEffects extends BasicHud {
                 name = "Exclude Amplifier Rule",
                 description =
                         "Exclude effects that are either above, below, at, or not at a certain"
-                            + " amplifier amount",
+                                + " amplifier amount",
                 options = {"None", "Above", "Below", "At", "Not At"},
                 subcategory = "Exclusion")
         public int excludeSetAmplifier = 0;
