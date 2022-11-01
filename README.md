@@ -1,10 +1,7 @@
 # Potion Effects
 Display your active potion effects from a glance! **Powered by [OneConfig](https://github.com/Polyfrost/OneConfig)**.
 
-# NOTE
-### This mod is not completed. [OneConfig](https://github.com/Polyfrost/OneConfig) is currently in a public beta, but during development they made some changes that resulted in this mod breaking. Unfortunately, I do not have much time to fix this yet.
-
-This mod also has some limitations as I am waiting for certain functions in OneConfig to either be implemented or accessible (mainly anchor points being private, and I need them to shift text and icon positions when you move the potion effects around)
+***
 
 ## Main Features
 
@@ -30,3 +27,7 @@ I originally made improvements from the original Potion Effects mod in [CheatBre
 - Mojang themselves actually display Potion Effects in your inventory
 - [bsprks and jadedcat](https://www.curseforge.com/minecraft/mc-mods/statuseffecthud) for making the original StatusEffectsHUD mod, allowing you to see effects active outside of your inventory.
 - [powns](https://www.youtube.com/c/pownsdev) for originally making a potion effects mod that allowed individual potion effects customization and allowing name formatting
+
+***
+
+This project follows the [Google Java Style Guide](http://google.github.io/styleguide/javaguide.html).
