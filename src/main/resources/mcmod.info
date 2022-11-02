@@ -3,7 +3,7 @@
     "modid": "potioneffects",
     "name": "Potion Effects",
     "description": "Display active potion effects on your player.",
-    "version": "0.0.1",
+    "version": "1.0-beta-2",
     "mcversion": "1.8.9",
     "url": "https://github.com/Tellinq/Potion-Effects",
     "updateUrl": "",

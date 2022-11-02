@@ -204,11 +204,7 @@ public class PotionEffects extends BasicHud {
      */
     @Subscribe
     private void onUpdatePotionMetadata(UpdatePotionMetadataEvent event) {
-        if (this.mc.thePlayer != null) {
-            this.activeEffects = new ArrayList<>(this.mc.thePlayer.getActivePotionEffects());
-            this.currentEffects =
-                    this.activeEffects.isEmpty() ? this.dummyEffects : this.activeEffects;
-        }
+
     }
 
     /**
@@ -216,6 +212,12 @@ public class PotionEffects extends BasicHud {
      */
     @Override
     protected boolean shouldShow() {
+        if (this.mc.thePlayer != null) {
+            this.activeEffects = new ArrayList<>(this.mc.thePlayer.getActivePotionEffects());
+            this.currentEffects =
+                    this.activeEffects.isEmpty() ? this.dummyEffects : this.activeEffects;
+        }
+
         return !this.activeEffects.isEmpty() && super.shouldShow();
     }
 
@@ -841,7 +843,7 @@ public class PotionEffects extends BasicHud {
         public boolean makeEffectNameBlink = false;
 
         @Checkbox(
-                name = "Duration Text",
+                name = "Duration",
                 description = "Make the duration blink",
                 subcategory = "Blinking")
         public boolean makeEffectDurationBlink = true;
