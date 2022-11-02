@@ -203,9 +203,7 @@ public class PotionEffects extends BasicHud {
      * 2. The dummy list (if there are no active effects)
      */
     @Subscribe
-    private void onUpdatePotionMetadata(UpdatePotionMetadataEvent event) {
-
-    }
+    private void onUpdatePotionMetadata(UpdatePotionMetadataEvent event) {}
 
     /**
      * @return True if the active player effects are not empty and the basic HUD conditions are met.
