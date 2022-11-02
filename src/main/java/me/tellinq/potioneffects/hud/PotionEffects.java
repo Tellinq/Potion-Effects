@@ -1,7 +1,6 @@
 package me.tellinq.potioneffects.hud;
 
 import cc.polyfrost.oneconfig.config.annotations.*;
-import cc.polyfrost.oneconfig.config.annotations.Number;
 import cc.polyfrost.oneconfig.config.core.OneColor;
 import cc.polyfrost.oneconfig.config.data.InfoType;
 import cc.polyfrost.oneconfig.events.EventManager;
@@ -122,8 +121,10 @@ public class PotionEffects extends BasicHud {
 
     /** Determines the mod's dimensional width. */
     private float width = 0f;
+
     /** Determines the mod's dimensional height. */
     private float height = 0f;
+
     /**
      * Continuously counts up every tick, and resets back to 0 if the current amount is over a
      * specific threshold determined by blinkSpeed.
@@ -134,6 +135,7 @@ public class PotionEffects extends BasicHud {
      * Also determines if the mod should show if the mod is not empty, or if {@link #currentEffects}
      * should reference this list if not empty, or use {@link #dummyEffects}..
      */
+
     @Exclude private List<PotionEffect> activeEffects = new ArrayList<>();
 
     /**
@@ -143,6 +145,7 @@ public class PotionEffects extends BasicHud {
      * effect to render independently.
      */
     @Exclude private List<PotionEffect> currentEffects = new ArrayList<>();
+
     /**
      * Used to list example effects that will not get updated at all. <br>
      * Only called after to set {@link #currentEffects} to this list if there are no active effects.
@@ -234,12 +237,11 @@ public class PotionEffects extends BasicHud {
 
         this.sortEffects(this.currentEffects);
 
-        float xOffset = 0;
         float yOffset = 0;
+        float tempWidth = 0;
         int yAmount = (int) (this.ICON_SIZE + this.verticalSpacing);
 
         this.height = (this.currentEffects.size() * yAmount) - this.verticalSpacing;
-        this.width = 0f;
 
         UGraphics.GL.pushMatrix();
         UGraphics.GL.scale(scale, scale, 1);
@@ -248,16 +250,17 @@ public class PotionEffects extends BasicHud {
             EffectConfig effectSetting = getEffectSetting(effect);
             // I wish there was a more efficient way of doing this...
             EffectConfig componentConfig =
-                    this.useOverride(effectSetting, effectSetting.overrideComponent);
+                    this.checkCategoryOverride(effectSetting, effectSetting.overrideComponent);
             EffectConfig amplifierConfig =
-                    this.useOverride(effectSetting, effectSetting.overrideAmplifier);
+                    this.checkCategoryOverride(effectSetting, effectSetting.overrideAmplifier);
             EffectConfig blinkingConfig =
-                    this.useOverride(effectSetting, effectSetting.overrideBlinking);
+                    this.checkCategoryOverride(effectSetting, effectSetting.overrideBlinking);
             EffectConfig formattingConfig =
-                    this.useOverride(effectSetting, effectSetting.overrideFormatting);
-            EffectConfig colorConfig = this.useOverride(effectSetting, effectSetting.overrideColor);
+                    this.checkCategoryOverride(effectSetting, effectSetting.overrideFormatting);
+            EffectConfig colorConfig =
+                    this.checkCategoryOverride(effectSetting, effectSetting.overrideColor);
             EffectConfig exclusionConfig =
-                    this.useOverride(effectSetting, effectSetting.overrideExclusion);
+                    this.checkCategoryOverride(effectSetting, effectSetting.overrideExclusion);
 
             boolean excluded = false;
             if (this.excludePotions(exclusionConfig, effect)) {
@@ -274,12 +277,162 @@ public class PotionEffects extends BasicHud {
                 continue;
             }
 
+            float iconPos = componentConfig.icon ? 20.0F : 0.0F;
+
+            int titleWidth = 0;
+            if (componentConfig.effectName) {
+                StringBuilder titleBuilder = new StringBuilder();
+                // I really hope there's a more efficient way of setting this up...
+                if (formattingConfig.boldEffectName) {
+                    titleBuilder.append(EnumChatFormatting.BOLD);
+                }
+
+                if (formattingConfig.italicEffectName) {
+                    titleBuilder.append(EnumChatFormatting.ITALIC);
+                }
+
+                if (formattingConfig.underlineEffectName) {
+                    titleBuilder.append(EnumChatFormatting.UNDERLINE);
+                }
+
+                if (formattingConfig.customName.isEmpty()) {
+                    titleBuilder.append(I18n.format(potion.getName()));
+                } else {
+                    titleBuilder.append(formattingConfig.customName);
+                }
+
+                int amplifier = Math.max(1, effect.getAmplifier() + 1);
+                if (amplifierConfig.amplifier && (amplifier != 1 || amplifierConfig.levelOne)) {
+                    titleBuilder.append(" ");
+                    if (!amplifierConfig.romanNumerals) {
+                        titleBuilder.append(RomanNumeral.INSTANCE.getCache(amplifier));
+                    } else {
+                        titleBuilder.append(amplifier);
+                    }
+                }
+
+                String builtTitle = titleBuilder.toString();
+
+                titleWidth = this.fontRenderer.getStringWidth(builtTitle);
+
+                float titleX = 0;
+                float titleY = yOffset;
+                if (!componentConfig.duration) {
+                    titleY += this.fontRenderer.FONT_HEIGHT / 2f + 0.5f;
+                }
+
+                switch (actualHorizontal) {
+                    case 0:
+                        titleX = iconPos;
+                        break;
+                    case 1:
+                        titleX = this.width / 2.0f - (float) (titleWidth / 2) + iconPos - (iconPos / 2);
+                        break;
+                    case 2:
+                        titleX = this.width - titleWidth - iconPos;
+                }
+
+                if (showEffectDuringBlink(
+                        blinkingConfig,
+                        blinkingConfig.makeEffectNameBlink,
+                        effect.getDuration(),
+                        example)) {
+                    RenderManager.drawScaledString(
+                            builtTitle,
+                            titleX,
+                            titleY,
+                            getColor(colorConfig.nameColor.getRGB(), excluded),
+                            RenderManager.TextType.toType(formattingConfig.textType),
+                            1);
+                }
+
+                tempWidth = Math.max(tempWidth, titleWidth + iconPos);
+            }
+
+            int timeWidth = 0;
+            if (componentConfig.duration) {
+
+                StringBuilder timeBuilder = new StringBuilder();
+                // I really hope there's a more efficient way of setting this up...
+                if (formattingConfig.boldDuration) {
+                    timeBuilder.append(EnumChatFormatting.BOLD);
+                }
+
+                if (formattingConfig.italicDuration) {
+                    timeBuilder.append(EnumChatFormatting.ITALIC);
+                }
+
+                if (formattingConfig.underlineDuration) {
+                    timeBuilder.append(EnumChatFormatting.UNDERLINE);
+                }
+
+                if (effect.getIsPotionDurationMax()) {
+                    timeBuilder.append(formattingConfig.maxDurationString);
+                } else {
+                    switch (formattingConfig.durationFormat) {
+                        case 0:
+                            timeBuilder.append(Potion.getDurationString(effect));
+                            break;
+                        case 1:
+                            timeBuilder.append(effect.getDuration() / 20).append("s");
+                            break;
+                        case 2:
+                            timeBuilder.append(
+                                    RomanNumeral.INSTANCE.getCache(effect.getDuration() / 20));
+                    }
+                }
+
+                String builtTime = timeBuilder.toString();
+
+                timeWidth = this.fontRenderer.getStringWidth(builtTime);
+
+                float timeX = 0;
+                float timeY = yOffset + this.fontRenderer.FONT_HEIGHT + 1;
+
+                if (!componentConfig.effectName) {
+                    timeY -= this.fontRenderer.FONT_HEIGHT / 2f + 0.5f;
+                }
+
+                if (showEffectDuringBlink(
+                        blinkingConfig,
+                        blinkingConfig.makeEffectDurationBlink,
+                        effect.getDuration(),
+                        example)) {
+                    switch (actualHorizontal) {
+                        case 0:
+                            timeX = iconPos;
+                            break;
+                        case 1:
+                            timeX = this.width / 2f - (float) (timeWidth / 2) + iconPos - (iconPos / 2);
+                            break;
+                        case 2:
+                            timeX = this.width - timeWidth - iconPos;
+                    }
+                    RenderManager.drawScaledString(
+                            builtTime,
+                            timeX,
+                            timeY,
+                            getColor(colorConfig.durationColor.getRGB(), excluded),
+                            RenderManager.TextType.toType(formattingConfig.textType),
+                            1);
+                }
+
+                tempWidth = Math.max(tempWidth, iconPos + timeWidth);
+            }
+
             if (componentConfig.icon) {
                 UGraphics.color4f(1f, 1f, 1f, excluded ? 0.5f : 1f);
                 this.mc.getTextureManager().bindTexture(EFFECTS_RESOURCE);
                 float iconX = 0;
-                if (actualHorizontal == 2) {
-                    iconX = this.width - ICON_SIZE;
+                switch (actualHorizontal) {
+                    case 0:
+                        iconX = 0.0f;
+                        break;
+                    case 1:
+                        iconX = this.width / 2f - (float) ((componentConfig.effectName ? titleWidth : timeWidth) / 2) - (iconPos / 2);
+                        break;
+                    case 2:
+                        iconX = this.width - iconPos;
                 }
                 if (showEffectDuringBlink(
                         blinkingConfig,
@@ -294,153 +447,14 @@ public class PotionEffects extends BasicHud {
                             18,
                             18);
                 }
-                xOffset = this.ICON_SIZE;
-                this.width = Math.max(this.width, xOffset);
-            }
 
-            if (componentConfig.effectName) {
-                if (componentConfig.icon) {
-                    xOffset = (this.ICON_SIZE + 4);
-                }
+                tempWidth = Math.max(tempWidth, iconPos);
 
-                StringBuilder titleSb = new StringBuilder();
-                // I really hope there's a more efficient way of setting this up...
-                if (formattingConfig.boldEffectName) {
-                    titleSb.append(EnumChatFormatting.BOLD);
-                }
-
-                if (formattingConfig.italicEffectName) {
-                    titleSb.append(EnumChatFormatting.ITALIC);
-                }
-
-                if (formattingConfig.underlineEffectName) {
-                    titleSb.append(EnumChatFormatting.UNDERLINE);
-                }
-
-                if (formattingConfig.customName.isEmpty()) {
-                    titleSb.append(I18n.format(potion.getName()));
-                } else {
-                    titleSb.append(formattingConfig.customName);
-                }
-
-                int amplifier = Math.max(1, effect.getAmplifier() + 1);
-                if (amplifierConfig.amplifier && (amplifier != 1 || amplifierConfig.levelOne)) {
-                    titleSb.append(" ");
-                    if (!amplifierConfig.romanNumerals)
-                        titleSb.append(RomanNumeral.INSTANCE.getCache(amplifier));
-                    else titleSb.append(amplifier);
-                }
-
-                String builtTitle = titleSb.toString();
-
-                int titleWidth = this.fontRenderer.getStringWidth(builtTitle);
-                this.width = Math.max(this.width, xOffset + titleWidth);
-
-                float titleX = xOffset;
-                float titleY = yOffset;
-                if (!componentConfig.duration) {
-                    titleY += this.fontRenderer.FONT_HEIGHT / 2f + 0.5f;
-                }
-
-                switch (actualHorizontal) {
-                    case 0:
-                        titleX = xOffset;
-                        break;
-                    case 1:
-                        titleX = this.width / 2f - xOffset;
-                        break;
-                    case 2:
-                        titleX = this.width - xOffset;
-                }
-                if (showEffectDuringBlink(
-                        blinkingConfig,
-                        blinkingConfig.makeEffectNameBlink,
-                        effect.getDuration(),
-                        example)) {
-                    RenderManager.drawScaledString(
-                            builtTitle,
-                            titleX,
-                            titleY,
-                            getColor(colorConfig.nameColor.getRGB(), excluded),
-                            RenderManager.TextType.toType(formattingConfig.textType),
-                            1);
-                }
-            }
-
-            if (componentConfig.duration) {
-                if (componentConfig.icon) {
-                    xOffset = (this.ICON_SIZE + 4);
-                }
-
-                StringBuilder timeSb = new StringBuilder();
-                // I really hope there's a more efficient way of setting this up...
-                if (formattingConfig.boldDuration) {
-                    timeSb.append(EnumChatFormatting.BOLD);
-                }
-
-                if (formattingConfig.italicDuration) {
-                    timeSb.append(EnumChatFormatting.ITALIC);
-                }
-
-                if (formattingConfig.underlineDuration) {
-                    timeSb.append(EnumChatFormatting.UNDERLINE);
-                }
-
-                if (effect.getIsPotionDurationMax()) {
-                    timeSb.append(formattingConfig.maxDurationString);
-                } else {
-                    switch (formattingConfig.durationFormat) {
-                        case 0:
-                            timeSb.append(Potion.getDurationString(effect));
-                            break;
-                        case 1:
-                            timeSb.append(effect.getDuration() / 20).append("s");
-                            break;
-                        case 2:
-                            timeSb.append(
-                                    RomanNumeral.INSTANCE.getCache(effect.getDuration() / 20));
-                    }
-                }
-
-                String builtTime = timeSb.toString();
-
-                int timeWidth = this.fontRenderer.getStringWidth(builtTime);
-                this.width = Math.max(width, xOffset + timeWidth);
-
-                float timeX = xOffset;
-                float timeY = yOffset + this.fontRenderer.FONT_HEIGHT + 1;
-
-                if (!componentConfig.effectName) {
-                    timeY -= this.fontRenderer.FONT_HEIGHT / 2f + 0.5f;
-                }
-
-                if (showEffectDuringBlink(
-                        blinkingConfig,
-                        blinkingConfig.makeEffectDurationBlink,
-                        effect.getDuration(),
-                        example)) {
-                    switch (actualHorizontal) {
-                        case 0:
-                            timeX = xOffset;
-                            break;
-                        case 1:
-                            timeX = this.width / 2f - xOffset;
-                            break;
-                        case 2:
-                            timeX = this.width - xOffset;
-                    }
-                    RenderManager.drawScaledString(
-                            builtTime,
-                            timeX,
-                            timeY,
-                            getColor(colorConfig.durationColor.getRGB(), excluded),
-                            RenderManager.TextType.toType(formattingConfig.textType),
-                            1);
-                }
             }
 
             yOffset += yAmount;
         }
+        this.width = tempWidth;
         UGraphics.GL.popMatrix();
     }
 
@@ -567,58 +581,64 @@ public class PotionEffects extends BasicHud {
     }
 
     /**
-     * @param effectSetting The current effect setting.
-     * @param overrideBoolean The override check based off the category's override check.
+     * Checks if a certain category is overridden, or resorts to global.
+     *
+     * @param category The current effect setting.
+     * @param override The override check based off the category's override check.
      * @return True if the category's override check is enabled.
      */
-    public EffectConfig useOverride(EffectConfig effectSetting, boolean overrideBoolean) {
-        return overrideBoolean ? effectSetting : PotionEffectsConfig.global;
+    public EffectConfig checkCategoryOverride(EffectConfig category, boolean override) {
+        return override ? category : PotionEffectsConfig.global;
     }
 
     /**
      * Exclude the current effect depending on exclusion configuration
      *
-     * @param effectSetting The current effect's setting.
+     * @param setting The current effect's setting.
      * @param effect The current potion effect
      * @return True if one of the exclusion conditions is set to true
      */
-    private boolean excludePotions(EffectConfig effectSetting, PotionEffect effect) {
-        if (this.excludeBulk(effectSetting.permanentExclusionRule, effect.getIsPotionDurationMax()))
+    private boolean excludePotions(EffectConfig setting, PotionEffect effect) {
+        if (this.excludeCondition(setting.permanentExclusionRule, effect.getIsPotionDurationMax())) {
             return true;
-        if (this.excludeBulk(effectSetting.ambientExclusionRule, effect.getIsAmbient()))
+        }
+
+        if (this.excludeCondition(setting.ambientExclusionRule, effect.getIsAmbient())) {
             return true;
-        if (this.excludeBulk(effectSetting.particlesExclusionRule, effect.getIsShowParticles()))
+        }
+
+        if (this.excludeCondition(setting.particlesExclusionRule, effect.getIsShowParticles())){
             return true;
-        if (this.excludeBulk(
-                effectSetting.badEffectsExclusionRule,
-                Potion.potionTypes[effect.getPotionID()].isBadEffect())) return true;
-        if (this.excludeArrayOptions(
-                        effectSetting.excludeSetDuration,
-                        effect.getDuration(),
-                        effectSetting.excludedDurationValues * 20.0F)
-                && !effect.getIsPotionDurationMax()) return true;
-        if (this.excludeArrayOptions(
-                effectSetting.excludeSetAmplifier,
-                effect.getAmplifier(),
-                effectSetting.excludedAmplifierValues - 1)) return true;
-        return effectSetting.exclude;
+        }
+
+        if (this.excludeCondition(setting.badEffectsExclusionRule, Potion.potionTypes[effect.getPotionID()].isBadEffect())) {
+            return true;
+        }
+
+        if (this.excludeArrayOptions(setting.excludeSetDuration, effect.getDuration(), setting.excludedDurationValues * 20.0F) && !effect.getIsPotionDurationMax()) {
+            return true;
+        }
+
+        if (this.excludeArrayOptions(setting.excludeSetAmplifier, effect.getAmplifier(), setting.excludedAmplifierValues - 1)) {
+            return true;
+        }
+
+        return setting.exclude;
     }
 
     /**
-     * Explanation is not very well explained. Will be revised.
-     *
      * @param rule The configuration rule
-     * @param currentValue The current effect's value
-     * @return True depending on the config's rule <br>
+     * @param value The current effect's value
+     * @return True depending on if the current value satisfies the exclusion rule <br>
      *     1: Matches the effect's value <br>
      *     2: Does not match the effect's value
      */
-    protected boolean excludeBulk(int rule, boolean currentValue) {
+    protected boolean excludeCondition(int rule, boolean value) {
         switch (rule) {
             case 1:
-                return currentValue;
+                return value;
             case 2:
-                return !currentValue;
+                return !value;
             default:
                 return false;
         }
@@ -626,7 +646,7 @@ public class PotionEffects extends BasicHud {
 
     /**
      * @param rule The configuration rule
-     * @param currentValue The current effect's value
+     * @param value The current effect's value
      * @param threshold The threshold amount
      * @return True depending on the rule number set <br>
      *     1: Current value exceeds threshold <br>
@@ -634,16 +654,16 @@ public class PotionEffects extends BasicHud {
      *     3: Current value matches threshold <br>
      *     4: Current value does not match threshold
      */
-    protected boolean excludeArrayOptions(int rule, int currentValue, float threshold) {
+    protected boolean excludeArrayOptions(int rule, int value, float threshold) {
         switch (rule) {
             case 1:
-                return currentValue > threshold;
+                return value > threshold;
             case 2:
-                return currentValue < threshold;
+                return value < threshold;
             case 3:
-                return currentValue == threshold;
+                return value == threshold;
             case 4:
-                return currentValue != threshold;
+                return value != threshold;
             default:
                 return false;
         }
@@ -963,7 +983,7 @@ public class PotionEffects extends BasicHud {
         @Dropdown(
                 name = "Emitting Particles Rule",
                 description =
-                        "Decide if effects that allow or disallow particles should be excluded.",
+                        "Decide if emitting/disallowing particle effects should be excluded.",
                 subcategory = "Exclusion",
                 options = {
                     "None",
@@ -979,12 +999,13 @@ public class PotionEffects extends BasicHud {
                 options = {"None", "Exclude All Bad Effects", "Exclude All Good Effects"})
         public int badEffectsExclusionRule = 0;
 
-        @Number(
+        @Slider(
                 name = "Excluded Duration Threshold",
                 description = "The value(s) that will be excluded based off the duration rule",
                 subcategory = "Exclusion",
                 min = 2,
-                max = 90)
+                max = 90,
+                step = 1)
         public float excludedDurationValues = 30f;
 
         @Slider(
