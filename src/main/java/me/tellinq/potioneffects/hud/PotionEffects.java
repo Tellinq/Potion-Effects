@@ -135,7 +135,6 @@ public class PotionEffects extends BasicHud {
      * Also determines if the mod should show if the mod is not empty, or if {@link #currentEffects}
      * should reference this list if not empty, or use {@link #dummyEffects}..
      */
-
     @Exclude private List<PotionEffect> activeEffects = new ArrayList<>();
 
     /**
@@ -326,7 +325,11 @@ public class PotionEffects extends BasicHud {
                         titleX = iconPos;
                         break;
                     case 1:
-                        titleX = this.width / 2.0f - (float) (titleWidth / 2) + iconPos - (iconPos / 2);
+                        titleX =
+                                this.width / 2.0f
+                                        - (float) (titleWidth / 2)
+                                        + iconPos
+                                        - (iconPos / 2);
                         break;
                     case 2:
                         titleX = this.width - titleWidth - iconPos;
@@ -403,7 +406,11 @@ public class PotionEffects extends BasicHud {
                             timeX = iconPos;
                             break;
                         case 1:
-                            timeX = this.width / 2f - (float) (timeWidth / 2) + iconPos - (iconPos / 2);
+                            timeX =
+                                    this.width / 2f
+                                            - (float) (timeWidth / 2)
+                                            + iconPos
+                                            - (iconPos / 2);
                             break;
                         case 2:
                             timeX = this.width - timeWidth - iconPos;
@@ -429,7 +436,14 @@ public class PotionEffects extends BasicHud {
                         iconX = 0.0f;
                         break;
                     case 1:
-                        iconX = this.width / 2f - (float) ((componentConfig.effectName ? titleWidth : timeWidth) / 2) - (iconPos / 2);
+                        iconX =
+                                this.width / 2f
+                                        - (float)
+                                                ((componentConfig.effectName
+                                                                ? titleWidth
+                                                                : timeWidth)
+                                                        / 2)
+                                        - (iconPos / 2);
                         break;
                     case 2:
                         iconX = this.width - iconPos;
@@ -449,7 +463,6 @@ public class PotionEffects extends BasicHud {
                 }
 
                 tempWidth = Math.max(tempWidth, iconPos);
-
             }
 
             yOffset += yAmount;
@@ -599,7 +612,8 @@ public class PotionEffects extends BasicHud {
      * @return True if one of the exclusion conditions is set to true
      */
     private boolean excludePotions(EffectConfig setting, PotionEffect effect) {
-        if (this.excludeCondition(setting.permanentExclusionRule, effect.getIsPotionDurationMax())) {
+        if (this.excludeCondition(
+                setting.permanentExclusionRule, effect.getIsPotionDurationMax())) {
             return true;
         }
 
@@ -607,19 +621,28 @@ public class PotionEffects extends BasicHud {
             return true;
         }
 
-        if (this.excludeCondition(setting.particlesExclusionRule, effect.getIsShowParticles())){
+        if (this.excludeCondition(setting.particlesExclusionRule, effect.getIsShowParticles())) {
             return true;
         }
 
-        if (this.excludeCondition(setting.badEffectsExclusionRule, Potion.potionTypes[effect.getPotionID()].isBadEffect())) {
+        if (this.excludeCondition(
+                setting.badEffectsExclusionRule,
+                Potion.potionTypes[effect.getPotionID()].isBadEffect())) {
             return true;
         }
 
-        if (this.excludeArrayOptions(setting.excludeSetDuration, effect.getDuration(), setting.excludedDurationValues * 20.0F) && !effect.getIsPotionDurationMax()) {
+        if (this.excludeArrayOptions(
+                        setting.excludeSetDuration,
+                        effect.getDuration(),
+                        setting.excludedDurationValues * 20.0F)
+                && !effect.getIsPotionDurationMax()) {
             return true;
         }
 
-        if (this.excludeArrayOptions(setting.excludeSetAmplifier, effect.getAmplifier(), setting.excludedAmplifierValues - 1)) {
+        if (this.excludeArrayOptions(
+                setting.excludeSetAmplifier,
+                effect.getAmplifier(),
+                setting.excludedAmplifierValues - 1)) {
             return true;
         }
 
@@ -982,8 +1005,7 @@ public class PotionEffects extends BasicHud {
 
         @Dropdown(
                 name = "Emitting Particles Rule",
-                description =
-                        "Decide if emitting/disallowing particle effects should be excluded.",
+                description = "Decide if emitting/disallowing particle effects should be excluded.",
                 subcategory = "Exclusion",
                 options = {
                     "None",
