@@ -198,10 +198,9 @@ public class PotionEffects extends BasicHud {
     }
 
     /**
-     * Updates the potion list when the potion metadata is finished updating.
-     * Found that this only works in Singleplayer. Will be investigating further to see
-     * if I can find another method that can update the potion list only when it needs to
-     * instead of resorting to every render tick.
+     * Updates the potion list when the potion metadata is finished updating. Found that this only
+     * works in Singleplayer. Will be investigating further to see if I can find another method that
+     * can update the potion list only when it needs to instead of resorting to every render tick.
      */
     @Subscribe
     private void onUpdatePotionMetadata(UpdatePotionMetadataEvent event) {
