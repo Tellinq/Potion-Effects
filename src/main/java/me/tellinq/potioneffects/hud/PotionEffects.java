@@ -521,8 +521,7 @@ public class PotionEffects extends BasicHud {
                 effects.sort(Comparator.comparingInt(PotionEffect::getPotionID));
                 break;
             case 1:
-                effects.sort(
-                        Comparator.comparing(effect -> I18n.format(effect.getEffectName())));
+                effects.sort(Comparator.comparing(effect -> I18n.format(effect.getEffectName())));
                 break;
             case 2:
                 effects.sort(Comparator.comparingInt(PotionEffect::getDuration));
@@ -560,7 +559,8 @@ public class PotionEffects extends BasicHud {
      *     - Depending on the effect's duration, that will determine if the effect should blink
      *     (will explain in depth later)
      */
-    private boolean showDuringBlink(EffectConfig config, boolean blinkComponent, float duration, boolean example) {
+    private boolean showDuringBlink(
+            EffectConfig config, boolean blinkComponent, float duration, boolean example) {
         if (config.blink && blinkComponent) {
             if (config.syncBlinking || (example && this.activeEffects.isEmpty())) {
                 float blinkSpeed = config.blinkSpeed / 3.0f;
