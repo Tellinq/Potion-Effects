@@ -521,8 +521,7 @@ public class PotionEffects extends BasicHud {
                 effects.sort(Comparator.comparingInt(PotionEffect::getPotionID));
                 break;
             case 1:
-                effects.sort(
-                        Comparator.comparing(effect -> I18n.format(effect.getEffectName())));
+                effects.sort(Comparator.comparing(effect -> I18n.format(effect.getEffectName())));
                 break;
             case 2:
                 effects.sort(Comparator.comparingInt(PotionEffect::getDuration));
@@ -555,7 +554,8 @@ public class PotionEffects extends BasicHud {
      * @param example If the HUD is being rendered in example form
      * @return False if the duration amount or tick counter is over the threshold determined by blinkSpeed.
      */
-    private boolean showDuringBlink(EffectConfig config, boolean blinkComponent, float duration, boolean example) {
+    private boolean showDuringBlink(
+            EffectConfig config, boolean blinkComponent, float duration, boolean example) {
         if (config.blink && blinkComponent) {
             if (duration <= config.blinkDuration * 20.0f) {
                 if (config.syncBlinking || (example && this.activeEffects.isEmpty())) {
