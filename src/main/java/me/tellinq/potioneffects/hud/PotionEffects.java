@@ -446,7 +446,7 @@ public class PotionEffects extends BasicHud {
                                         - (iconPos / 2);
                         break;
                     case 2:
-                        iconX = this.width - iconPos;
+                        iconX = this.width - this.ICON_SIZE;
                 }
                 if (showDuringBlink(
                         blinkingConfig,
