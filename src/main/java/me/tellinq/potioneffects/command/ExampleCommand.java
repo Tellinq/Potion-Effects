@@ -10,6 +10,9 @@ import me.tellinq.potioneffects.PotionEffectsMod;
         description = "Access the " + PotionEffectsMod.NAME + " GUI.")
 public class ExampleCommand {
 
+    /**
+     * Opens OneConfig's GUI when the user runs /potioneffects
+     */
     @Main
     private static void main() {
         PotionEffectsMod.INSTANCE.config.openGui();

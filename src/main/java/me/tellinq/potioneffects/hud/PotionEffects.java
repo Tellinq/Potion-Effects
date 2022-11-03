@@ -203,19 +203,19 @@ public class PotionEffects extends BasicHud {
      * 2. The dummy list (if there are no active effects)
      */
     @Subscribe
-    private void onUpdatePotionMetadata(UpdatePotionMetadataEvent event) {}
+    private void onUpdatePotionMetadata(UpdatePotionMetadataEvent event) {
+        if (this.mc.thePlayer != null) {
+            this.activeEffects = new ArrayList<>(this.mc.thePlayer.getActivePotionEffects());
+            this.currentEffects =
+                    this.activeEffects.isEmpty() ? this.dummyEffects : this.activeEffects;
+        }
+    }
 
     /**
      * @return True if the active player effects are not empty and the basic HUD conditions are met.
      */
     @Override
     protected boolean shouldShow() {
-        if (this.mc.thePlayer != null) {
-            this.activeEffects = new ArrayList<>(this.mc.thePlayer.getActivePotionEffects());
-            this.currentEffects =
-                    this.activeEffects.isEmpty() ? this.dummyEffects : this.activeEffects;
-        }
-
         return !this.activeEffects.isEmpty() && super.shouldShow();
     }
 
@@ -335,7 +335,7 @@ public class PotionEffects extends BasicHud {
                         titleX = this.width - titleWidth - iconPos;
                 }
 
-                if (showEffectDuringBlink(
+                if (showDuringBlink(
                         blinkingConfig,
                         blinkingConfig.makeEffectNameBlink,
                         effect.getDuration(),
@@ -396,7 +396,7 @@ public class PotionEffects extends BasicHud {
                     timeY -= this.fontRenderer.FONT_HEIGHT / 2f + 0.5f;
                 }
 
-                if (showEffectDuringBlink(
+                if (showDuringBlink(
                         blinkingConfig,
                         blinkingConfig.makeEffectDurationBlink,
                         effect.getDuration(),
@@ -448,7 +448,7 @@ public class PotionEffects extends BasicHud {
                     case 2:
                         iconX = this.width - iconPos;
                 }
-                if (showEffectDuringBlink(
+                if (showDuringBlink(
                         blinkingConfig,
                         blinkingConfig.makeEffectIconBlink,
                         effect.getDuration(),
@@ -496,10 +496,10 @@ public class PotionEffects extends BasicHud {
                 case BOTTOM_RIGHT:
                     return 2;
                 default:
-                    return horizontalAlignment - 1;
+                    return this.horizontalAlignment - 1;
             }
         }
-        return horizontalAlignment - 1;
+        return this.horizontalAlignment - 1;
     }
 
     /**
@@ -513,46 +513,46 @@ public class PotionEffects extends BasicHud {
      * 5: Sorts prioritizing effects showing particles. <br>
      * Optionally, the entire list can get reversed if the user enables {@link #verticalSorting}.
      *
-     * @param currentEffects {@link #currentEffects}
+     * @param effects {@link #currentEffects}
      */
-    public void sortEffects(List<PotionEffect> currentEffects) {
+    public void sortEffects(List<PotionEffect> effects) {
         switch (this.sortingMethod) {
             case 0:
-                currentEffects.sort(Comparator.comparingInt(PotionEffect::getPotionID));
+                effects.sort(Comparator.comparingInt(PotionEffect::getPotionID));
                 break;
             case 1:
-                currentEffects.sort(
+                effects.sort(
                         Comparator.comparing(effect -> I18n.format(effect.getEffectName())));
                 break;
             case 2:
-                currentEffects.sort(Comparator.comparingInt(PotionEffect::getDuration));
+                effects.sort(Comparator.comparingInt(PotionEffect::getDuration));
                 break;
             case 3:
-                currentEffects.sort(Comparator.comparingInt(PotionEffect::getAmplifier));
-                Collections.reverse(currentEffects);
+                effects.sort(Comparator.comparingInt(PotionEffect::getAmplifier));
+                Collections.reverse(effects);
                 break;
             case 4:
-                currentEffects.sort(Comparator.comparing(PotionEffect::getIsAmbient));
+                effects.sort(Comparator.comparing(PotionEffect::getIsAmbient));
                 break;
             case 5:
-                currentEffects.sort(Comparator.comparing(PotionEffect::getIsShowParticles));
+                effects.sort(Comparator.comparing(PotionEffect::getIsShowParticles));
                 break;
             case 6:
-                currentEffects.sort(
+                effects.sort(
                         Comparator.comparing(
                                 effect -> Potion.potionTypes[effect.getPotionID()].isBadEffect()));
         }
 
         if (this.verticalSorting) {
-            Collections.reverse(currentEffects);
+            Collections.reverse(effects);
         }
     }
 
     /**
      * @param config The current effect's configuration (global or effect specific)
-     * @param makeComponentBlink If the set component should blink
+     * @param blinkComponent If the set component should blink
      * @param duration The effect's duration
-     * @param example If the user is currently in the HUD editor
+     * @param example If the HUD is being rendered in example form
      * @return False if either: <br>
      *     - If synced or if the example effects are running: Depending on the amount of counted
      *     ticks and the "speed" slider amount set, those two main factors determine if the element
@@ -560,9 +560,8 @@ public class PotionEffects extends BasicHud {
      *     - Depending on the effect's duration, that will determine if the effect should blink
      *     (will explain in depth later)
      */
-    private boolean showEffectDuringBlink(
-            EffectConfig config, boolean makeComponentBlink, float duration, boolean example) {
-        if (config.blink && makeComponentBlink) {
+    private boolean showDuringBlink(EffectConfig config, boolean blinkComponent, float duration, boolean example) {
+        if (config.blink && blinkComponent) {
             if (config.syncBlinking || (example && this.activeEffects.isEmpty())) {
                 float blinkSpeed = config.blinkSpeed / 3.0f;
                 if (duration <= config.blinkDuration * 20.0F) {
@@ -631,7 +630,7 @@ public class PotionEffects extends BasicHud {
             return true;
         }
 
-        if (this.excludeArrayOptions(
+        if (this.excludeAmount(
                         setting.excludeSetDuration,
                         effect.getDuration(),
                         setting.excludedDurationValues * 20.0F)
@@ -639,7 +638,7 @@ public class PotionEffects extends BasicHud {
             return true;
         }
 
-        if (this.excludeArrayOptions(
+        if (this.excludeAmount(
                 setting.excludeSetAmplifier,
                 effect.getAmplifier(),
                 setting.excludedAmplifierValues - 1)) {
@@ -677,7 +676,7 @@ public class PotionEffects extends BasicHud {
      *     3: Current value matches threshold <br>
      *     4: Current value does not match threshold
      */
-    protected boolean excludeArrayOptions(int rule, int value, float threshold) {
+    protected boolean excludeAmount(int rule, int value, float threshold) {
         switch (rule) {
             case 1:
                 return value > threshold;

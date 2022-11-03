@@ -13,6 +13,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(EntityLivingBase.class)
 public class EntityLivingBaseMixin {
+    /**
+     * Makes UpdatePotionMetadataEvent run when potion metadata finishes updating.
+     */
     @Inject(method = "updatePotionMetadata", at = @At(value = "TAIL"))
     private void onUpdatePotionMetadata(CallbackInfo ci) {
         EventManager.INSTANCE.post(new UpdatePotionMetadataEvent());
