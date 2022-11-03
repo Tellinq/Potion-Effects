@@ -553,26 +553,21 @@ public class PotionEffects extends BasicHud {
      * @param blinkComponent If the set component should blink
      * @param duration The effect's duration
      * @param example If the HUD is being rendered in example form
-     * @return False if either: <br>
-     *     - If synced or if the example effects are running: Depending on the amount of counted
-     *     ticks and the "speed" slider amount set, those two main factors determine if the element
-     *     set should show while blinking. <br>
-     *     - Depending on the effect's duration, that will determine if the effect should blink
-     *     (will explain in depth later)
+     * @return False if the duration amount or tick counter is over the threshold determined by blinkSpeed.
      */
     private boolean showDuringBlink(EffectConfig config, boolean blinkComponent, float duration, boolean example) {
         if (config.blink && blinkComponent) {
-            if (config.syncBlinking || (example && this.activeEffects.isEmpty())) {
-                float blinkSpeed = config.blinkSpeed / 3.0f;
-                if (duration <= config.blinkDuration * 20.0F) {
-                    if (this.ticks > blinkSpeed * 2) {
+            if (duration <= config.blinkDuration * 20.0f) {
+                if (config.syncBlinking || (example && this.activeEffects.isEmpty())) {
+                    float threshold = config.blinkSpeed / 3.0f;
+                    if (this.ticks > threshold * 2) {
                         this.ticks = 0;
                     }
-                    return this.ticks <= blinkSpeed;
+                    return this.ticks <= threshold;
+                } else {
+                    float threshold = 50 - config.blinkSpeed;
+                    return duration % threshold <= threshold / 2.0f;
                 }
-            } else {
-                return duration / 20f > config.blinkDuration
-                        || duration % (50 - config.blinkSpeed) <= (50 - config.blinkSpeed) / 2f;
             }
         }
         return true;
