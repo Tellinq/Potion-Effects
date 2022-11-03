@@ -552,7 +552,8 @@ public class PotionEffects extends BasicHud {
      * @param blinkComponent If the set component should blink
      * @param duration The effect's duration
      * @param example If the HUD is being rendered in example form
-     * @return False if the duration amount or tick counter is over the threshold determined by blinkSpeed.
+     * @return False if the duration amount or tick counter is over the threshold determined by
+     *     blinkSpeed.
      */
     private boolean showDuringBlink(
             EffectConfig config, boolean blinkComponent, float duration, boolean example) {
