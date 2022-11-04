@@ -17,7 +17,7 @@ import cc.polyfrost.oneconfig.renderer.RenderManager;
 import com.google.common.collect.ImmutableMap;
 
 import me.tellinq.potioneffects.config.PotionEffectsConfig;
-import me.tellinq.potioneffects.event.UpdatePotionMetadataEvent;
+import me.tellinq.potioneffects.event.UpdatePotionEffectsEvent;
 import me.tellinq.potioneffects.util.RomanNumeral;
 
 import net.minecraft.client.Minecraft;
@@ -198,22 +198,12 @@ public class PotionEffects extends BasicHud {
     }
 
     /**
-     * Updates the potion list when the potion metadata is finished updating.
-     * Found that this only works in Singleplayer. Will be investigating further to see
-     * if I can find another method that can update the potion list only when it needs to
-     * instead of resorting to every render tick.
-     */
-    @Subscribe
-    private void onUpdatePotionMetadata(UpdatePotionMetadataEvent event) {
-        this.updatePotionList();
-    }
-
-    /**
      * Gets the player's active effects and sets the current effect list to either: <br>
      * 1. The actual active effect list (if not empty) <br>
      * 2. The dummy list (if there are no active effects)
      */
-    public void updatePotionList() {
+    @Subscribe
+    private void onUpdatePotionEffects(UpdatePotionEffectsEvent event) {
         if (this.mc.thePlayer != null) {
             this.activeEffects = new ArrayList<>(this.mc.thePlayer.getActivePotionEffects());
             this.currentEffects =
@@ -226,14 +216,6 @@ public class PotionEffects extends BasicHud {
      */
     @Override
     protected boolean shouldShow() {
-        /*
-         * Temporary check. I only want to do this because this won't make a new list every render tick,
-         * but this check still will happen every render tick, which can be problematic.
-         */
-        if (!this.mc.isSingleplayer()) {
-            this.updatePotionList();
-        }
-
         return !this.activeEffects.isEmpty() && super.shouldShow();
     }
 
