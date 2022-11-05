@@ -130,6 +130,7 @@ public class PotionEffects extends BasicHud {
      * specific threshold determined by blinkSpeed.
      */
     @Exclude private int ticks = 0;
+
     /**
      * Used to set the current active potion effects. <br>
      * Also determines if the mod should show if the mod is not empty, or if {@link #currentEffects}
@@ -238,7 +239,7 @@ public class PotionEffects extends BasicHud {
 
         float yOffset = 0;
         float tempWidth = 0;
-        int yAmount = (int) (this.ICON_SIZE + this.verticalSpacing);
+        float yAmount = this.ICON_SIZE + this.verticalSpacing;
 
         this.height = (this.currentEffects.size() * yAmount) - this.verticalSpacing;
 

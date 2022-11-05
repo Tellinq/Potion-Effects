@@ -200,13 +200,13 @@ public class PotionEffectsConfig extends Config {
     public PotionEffectsConfig() {
         super(new Mod(PotionEffectsMod.NAME, ModType.HUD), PotionEffectsMod.MODID + ".json");
         initialize();
-        hideIf("Global Effects.override", true);
-        hideIf("Global Effects.overrideComponent", true);
-        hideIf("Global Effects.overrideAmplifier", true);
-        hideIf("Global Effects.overrideBlinking", true);
-        hideIf("Global Effects.overrideFormatting", true);
-        hideIf("Global Effects.overrideColor", true);
-        hideIf("Global Effects.overrideExclusion", true);
+        hideIf("Global Effects.override", () -> true);
+        hideIf("Global Effects.overrideComponent", () -> true);
+        hideIf("Global Effects.overrideAmplifier", () -> true);
+        hideIf("Global Effects.overrideBlinking", () -> true);
+        hideIf("Global Effects.overrideFormatting", () -> true);
+        hideIf("Global Effects.overrideColor", () -> true);
+        hideIf("Global Effects.overrideExclusion", () -> true);
 
         for (String effectName : effectNames) {
             addDependency(effectName + ".overrideComponent", effectName + ".override");
@@ -216,5 +216,7 @@ public class PotionEffectsConfig extends Config {
             addDependency(effectName + ".overrideColor", effectName + ".override");
             addDependency(effectName + ".overrideExclusion", effectName + ".override");
         }
+
+
     }
 }
