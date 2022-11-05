@@ -216,7 +216,5 @@ public class PotionEffectsConfig extends Config {
             addDependency(effectName + ".overrideColor", effectName + ".override");
             addDependency(effectName + ".overrideExclusion", effectName + ".override");
         }
-
-
     }
 }
