@@ -90,8 +90,7 @@ public class PotionEffects extends BasicHud {
 
     /**
      * Map of all of Minecraft's effect IDs, to the mod's config potion type respectively. <br>
-     * Used to get if each potion config override is enabled or not in {@link
-     * #getEffectSetting(PotionEffect)}
+     * Used to check each effect config's override status ({@link #getEffectSetting(PotionEffect)})
      */
     @Exclude
     public Map<Integer, EffectConfig> effectMap =
@@ -187,7 +186,7 @@ public class PotionEffects extends BasicHud {
     }
 
     /**
-     * On Forge's initialization, add the two example/dummy effects. <br>
+     * Add example/dummy effects when Forge is initialized. <br>
      * Historically, in CheatBreaker, current versions of Lunar Client, and in early versions of the
      * mod, this used to constantly be re-added every partial tick as the field used to make an
      * array list was made every partial tick as well.
@@ -504,7 +503,7 @@ public class PotionEffects extends BasicHud {
     }
 
     /**
-     * Sorts all the current potion effects based off what the user set in {@link #sortingMethod}
+     * Sorts all the current potion effects determined by {@link #sortingMethod}
      * <br>
      * 0: Sorts by Potion ID (Vanilla behavior) <br>
      * 1: Sorts by alphabetical name <br>
@@ -512,7 +511,7 @@ public class PotionEffects extends BasicHud {
      * 3: Sorts based off amplifier. <br>
      * 4: Sorts prioritizing ambient (beacon) effects. <br>
      * 5: Sorts prioritizing effects showing particles. <br>
-     * Optionally, the entire list can get reversed if the user enables {@link #verticalSorting}.
+     * Optionally, the entire list will reverse if the user enables {@link #verticalSorting}.
      *
      * @param effects {@link #currentEffects}
      */
@@ -553,8 +552,7 @@ public class PotionEffects extends BasicHud {
      * @param blinkComponent If the set component should blink
      * @param duration The effect's duration
      * @param example If the HUD is being rendered in example form
-     * @return False if the duration amount or tick counter is over the threshold determined by
-     *     blinkSpeed.
+     * @return False if the duration amount or tick counter is over the threshold.
      */
     private boolean showDuringBlink(
             EffectConfig config, boolean blinkComponent, float duration, boolean example) {
@@ -609,20 +607,20 @@ public class PotionEffects extends BasicHud {
      */
     private boolean excludePotions(EffectConfig setting, PotionEffect effect) {
         if (this.excludeCondition(
-                setting.permanentExclusionRule, effect.getIsPotionDurationMax())) {
+                setting.permanentEffectsRule, effect.getIsPotionDurationMax())) {
             return true;
         }
 
-        if (this.excludeCondition(setting.ambientExclusionRule, effect.getIsAmbient())) {
+        if (this.excludeCondition(setting.ambientEffectsRule, effect.getIsAmbient())) {
             return true;
         }
 
-        if (this.excludeCondition(setting.particlesExclusionRule, effect.getIsShowParticles())) {
+        if (this.excludeCondition(setting.emittingParticlesRule, effect.getIsShowParticles())) {
             return true;
         }
 
         if (this.excludeCondition(
-                setting.badEffectsExclusionRule,
+                setting.badEffectsRule,
                 Potion.potionTypes[effect.getPotionID()].isBadEffect())) {
             return true;
         }
@@ -630,7 +628,7 @@ public class PotionEffects extends BasicHud {
         if (this.excludeAmount(
                         setting.excludeSetDuration,
                         effect.getDuration(),
-                        setting.excludedDurationValues * 20.0F)
+                        setting.excludedDurationThreshold * 20.0F)
                 && !effect.getIsPotionDurationMax()) {
             return true;
         }
@@ -986,7 +984,7 @@ public class PotionEffects extends BasicHud {
                     "Exclude All Permanent Effects",
                     "Exclude All Temporary Effects"
                 })
-        public int permanentExclusionRule = 0;
+        public int permanentEffectsRule = 0;
 
         @Dropdown(
                 name = "Ambient Effects Rule",
@@ -997,7 +995,7 @@ public class PotionEffects extends BasicHud {
                     "Exclude All Ambient Effects",
                     "Exclude All Non Ambient Effects"
                 })
-        public int ambientExclusionRule = 0;
+        public int ambientEffectsRule = 0;
 
         @Dropdown(
                 name = "Emitting Particles Rule",
@@ -1008,14 +1006,14 @@ public class PotionEffects extends BasicHud {
                     "Exclude All Emitting Particles",
                     "Exclude All Disallowing Particles"
                 })
-        public int particlesExclusionRule = 0;
+        public int emittingParticlesRule = 0;
 
         @Dropdown(
                 name = "Bad Effects Rule",
                 description = "Decide if good or bad effects should be excluded.",
                 subcategory = "Exclusion",
                 options = {"None", "Exclude All Bad Effects", "Exclude All Good Effects"})
-        public int badEffectsExclusionRule = 0;
+        public int badEffectsRule = 0;
 
         @Slider(
                 name = "Excluded Duration Threshold",
@@ -1024,7 +1022,7 @@ public class PotionEffects extends BasicHud {
                 min = 2,
                 max = 90,
                 step = 1)
-        public float excludedDurationValues = 30f;
+        public float excludedDurationThreshold = 30f;
 
         @Slider(
                 name = "Excluded Amplifier Value(s)",
