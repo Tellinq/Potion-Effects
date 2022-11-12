@@ -503,8 +503,7 @@ public class PotionEffects extends BasicHud {
     }
 
     /**
-     * Sorts all the current potion effects determined by {@link #sortingMethod}
-     * <br>
+     * Sorts all the current potion effects determined by {@link #sortingMethod} <br>
      * 0: Sorts by Potion ID (Vanilla behavior) <br>
      * 1: Sorts by alphabetical name <br>
      * 2: Sorts based off duration. <br>
@@ -606,8 +605,7 @@ public class PotionEffects extends BasicHud {
      * @return True if one of the exclusion conditions is set to true
      */
     private boolean excludePotions(EffectConfig setting, PotionEffect effect) {
-        if (this.excludeCondition(
-                setting.permanentEffectsRule, effect.getIsPotionDurationMax())) {
+        if (this.excludeCondition(setting.permanentEffectsRule, effect.getIsPotionDurationMax())) {
             return true;
         }
 
@@ -620,8 +618,7 @@ public class PotionEffects extends BasicHud {
         }
 
         if (this.excludeCondition(
-                setting.badEffectsRule,
-                Potion.potionTypes[effect.getPotionID()].isBadEffect())) {
+                setting.badEffectsRule, Potion.potionTypes[effect.getPotionID()].isBadEffect())) {
             return true;
         }
 
