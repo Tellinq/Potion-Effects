@@ -340,12 +340,12 @@ public class PotionEffects extends BasicHud {
                         blinkingConfig.makeEffectNameBlink,
                         effect.getDuration(),
                         example)) {
-                    RenderManager.drawScaledString(
+                    NanoVGHelper.INSTANCE.drawScaledString(
                             builtTitle,
                             titleX,
                             titleY,
                             getColor(colorConfig.nameColor.getRGB(), excluded),
-                            RenderManager.TextType.toType(formattingConfig.textType),
+                            NanoVGHelper.TextType.toType(formattingConfig.textType),
                             1);
                 }
 
@@ -415,12 +415,12 @@ public class PotionEffects extends BasicHud {
                         case 2:
                             timeX = this.width - timeWidth - iconPos;
                     }
-                    RenderManager.drawScaledString(
+                    NanoVGHelper.INSTANCE.drawScaledString(
                             builtTime,
                             timeX,
                             timeY,
                             getColor(colorConfig.durationColor.getRGB(), excluded),
-                            RenderManager.TextType.toType(formattingConfig.textType),
+                            NanoVGHelper.TextType.toType(formattingConfig.textType),
                             1);
                 }
 
