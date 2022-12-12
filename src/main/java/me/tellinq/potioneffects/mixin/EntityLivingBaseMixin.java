@@ -15,14 +15,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(EntityLivingBase.class)
 public class EntityLivingBaseMixin {
     /** Makes UpdatePotionEffectsEvent run right before potionsNeedUpdate is set to false. */
-    @Inject(
-            method = "updatePotionEffects",
-            at =
-                    @At(
-                            value = "FIELD",
-                            target = "Lnet/minecraft/entity/EntityLivingBase;potionsNeedUpdate:Z",
-                            shift = At.Shift.BEFORE,
-                            opcode = Opcodes.PUTFIELD))
+    @Inject(method = "updatePotionEffects", at = @At(value = "HEAD"))
     private void onPotionFinishNeededUpdate(CallbackInfo ci) {
         EventManager.INSTANCE.post(new UpdatePotionEffectsEvent());
     }
