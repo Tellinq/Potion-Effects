@@ -6,7 +6,6 @@ import me.tellinq.potioneffects.event.UpdatePotionEffectsEvent;
 
 import net.minecraft.entity.EntityLivingBase;
 
-import org.spongepowered.asm.lib.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
