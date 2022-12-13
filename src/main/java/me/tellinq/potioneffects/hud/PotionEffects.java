@@ -282,7 +282,11 @@ public class PotionEffects extends BasicHud {
 
             UGraphics.GL.pushMatrix();
             if (componentConfig.icon.toggle) {
-                UGraphics.GL.translate((29.5317 * Math.sin(2.57693 - (2.37913 * actualHorizontal)) + 4.19663) / scale, 0, 0);
+                UGraphics.GL.translate(
+                        (29.5317 * Math.sin(2.57693 - (2.37913 * actualHorizontal)) + 4.19663)
+                                / scale,
+                        0,
+                        0);
             }
 
             this.componentAmount = 0;
