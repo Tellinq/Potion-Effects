@@ -77,6 +77,7 @@ public class PotionEffects extends BasicHud {
 
     /** Each effect's icon texture size is 18 pixels. */
     @Exclude public final int ICON_SIZE = 18;
+
     @Exclude public int componentAmount = 0;
     @Exclude public boolean oneComponentActive = false;
 
@@ -282,16 +283,19 @@ public class PotionEffects extends BasicHud {
             float iconPos = componentConfig.icon.toggle ? 20.0F : 0.0F;
             componentAmount = 0;
 
-            this.oneComponentActive = !componentConfig.effectName.toggle || !componentConfig.duration.toggle;
+            this.oneComponentActive =
+                    !componentConfig.effectName.toggle || !componentConfig.duration.toggle;
             if (componentConfig.effectName.toggle) {
                 StringBuilder titleBuilder = new StringBuilder();
 
-
-                titleBuilder.append(formattingConfig.effectName.customName.isEmpty() ? I18n.format(potion.getName()) : formattingConfig.effectName.customName);
-
+                titleBuilder.append(
+                        formattingConfig.effectName.customName.isEmpty()
+                                ? I18n.format(potion.getName())
+                                : formattingConfig.effectName.customName);
 
                 int amplifier = Math.max(1, effect.getAmplifier() + 1);
-                if (amplifierConfig.effectName.amplifier && (amplifier != 1 || amplifierConfig.effectName.levelOne)) {
+                if (amplifierConfig.effectName.amplifier
+                        && (amplifier != 1 || amplifierConfig.effectName.levelOne)) {
                     titleBuilder.append(" ");
                     if (!amplifierConfig.effectName.romanNumerals) {
                         titleBuilder.append(RomanNumeral.INSTANCE.getCache(amplifier));
@@ -300,9 +304,19 @@ public class PotionEffects extends BasicHud {
                     }
                 }
                 ++componentAmount;
-                tempWidth = Math.max(tempWidth, this.textBuilder(titleBuilder.toString(), componentConfig.effectName, blinkingConfig, effect.getDuration(), yOffset, iconPos, example, excluded));
+                tempWidth =
+                        Math.max(
+                                tempWidth,
+                                this.textBuilder(
+                                        titleBuilder.toString(),
+                                        componentConfig.effectName,
+                                        blinkingConfig,
+                                        effect.getDuration(),
+                                        yOffset,
+                                        iconPos,
+                                        example,
+                                        excluded));
             }
-
 
             if (componentConfig.duration.toggle) {
                 String durationText = "";
@@ -317,11 +331,23 @@ public class PotionEffects extends BasicHud {
                             durationText = effect.getDuration() / 20 + "s";
                             break;
                         case 2:
-                            durationText = RomanNumeral.INSTANCE.getCache(effect.getDuration() / 20);
+                            durationText =
+                                    RomanNumeral.INSTANCE.getCache(effect.getDuration() / 20);
                     }
                 }
                 ++componentAmount;
-                tempWidth = Math.max(tempWidth, this.textBuilder(durationText, componentConfig.duration, blinkingConfig, effect.getDuration(), yOffset, iconPos, example, excluded));
+                tempWidth =
+                        Math.max(
+                                tempWidth,
+                                this.textBuilder(
+                                        durationText,
+                                        componentConfig.duration,
+                                        blinkingConfig,
+                                        effect.getDuration(),
+                                        yOffset,
+                                        iconPos,
+                                        example,
+                                        excluded));
             }
 
             if (componentConfig.icon.toggle) {
@@ -340,10 +366,7 @@ public class PotionEffects extends BasicHud {
                 }
 
                 if (showDuringBlink(
-                        blinkingConfig,
-                        blinkingConfig.icon.blink,
-                        effect.getDuration(),
-                        example)) {
+                        blinkingConfig, blinkingConfig.icon.blink, effect.getDuration(), example)) {
                     this.mc.ingameGUI.drawTexturedModalRect(
                             iconX,
                             yOffset,
@@ -362,7 +385,15 @@ public class PotionEffects extends BasicHud {
         UGraphics.GL.popMatrix();
     }
 
-    public float textBuilder(String text, TextComponent component, Effect blinkingConfig, float value, float yOffset, float iconPos, boolean example, boolean excluded) {
+    public float textBuilder(
+            String text,
+            TextComponent component,
+            Effect blinkingConfig,
+            float value,
+            float yOffset,
+            float iconPos,
+            boolean example,
+            boolean excluded) {
         StringBuilder builder = new StringBuilder();
         // I really hope there's a more efficient way of setting this up...
         if (component.boldText) {
@@ -396,11 +427,7 @@ public class PotionEffects extends BasicHud {
                     x = iconPos;
                     break;
                 case 1:
-                    x =
-                            this.width / 2f
-                                    - (float) width / 2
-                                    + iconPos
-                                    - iconPos / 2;
+                    x = this.width / 2f - (float) width / 2 + iconPos - iconPos / 2;
                     break;
                 case 2:
                     x = this.width - width - iconPos;
@@ -499,7 +526,8 @@ public class PotionEffects extends BasicHud {
      * @param example If the HUD is being rendered in example form
      * @return False if the duration amount or tick counter is over the threshold.
      */
-    private boolean showDuringBlink(Effect config, boolean blinkComponent, float duration, boolean example) {
+    private boolean showDuringBlink(
+            Effect config, boolean blinkComponent, float duration, boolean example) {
         if (config.blink && blinkComponent && duration <= config.blinkDuration * 20.0f) {
             if (config.syncBlinking || (example && this.activeEffects.isEmpty())) {
                 float threshold = config.blinkSpeed / 3.0f;
@@ -702,11 +730,18 @@ public class PotionEffects extends BasicHud {
                 subcategory = "Override")
         public boolean overrideExclusion = true;
 
-        @Page(name = "Icon", location = PageLocation.TOP, description = "Show the effect icon", subcategory = "Component")
+        @Page(
+                name = "Icon",
+                location = PageLocation.TOP,
+                description = "Show the effect icon",
+                subcategory = "Component")
         public Component icon = new Component();
 
         @Page(
-                name = "Effect Name", location = PageLocation.TOP, description = "Show the effect name", subcategory = "Component")
+                name = "Effect Name",
+                location = PageLocation.TOP,
+                description = "Show the effect name",
+                subcategory = "Component")
         public EffectNameComponent effectName = new EffectNameComponent();
 
         @Page(
@@ -770,11 +805,11 @@ public class PotionEffects extends BasicHud {
                         "Exclude effects that are either above, below, at, or not at a certain"
                                 + " duration threshold",
                 options = {
-                        "None",
-                        "Exclude All Above",
-                        "Exclude All Below",
-                        "Exclude All At",
-                        "Exclude All Not At"
+                    "None",
+                    "Exclude All Above",
+                    "Exclude All Below",
+                    "Exclude All At",
+                    "Exclude All Not At"
                 },
                 subcategory = "Exclusion")
         public int excludeSetDuration = 0;
@@ -785,11 +820,11 @@ public class PotionEffects extends BasicHud {
                         "Exclude effects that are either above, below, at, or not at a certain"
                                 + " amplifier amount",
                 options = {
-                        "None",
-                        "Exclude All Above",
-                        "Exclude All Below",
-                        "Exclude All At",
-                        "Exclude All Not At"
+                    "None",
+                    "Exclude All Above",
+                    "Exclude All Below",
+                    "Exclude All At",
+                    "Exclude All Not At"
                 },
                 subcategory = "Exclusion")
         public int excludeSetAmplifier = 0;
@@ -799,9 +834,9 @@ public class PotionEffects extends BasicHud {
                 description = "Decide if permanent or temporary effects should be excluded.",
                 subcategory = "Exclusion",
                 options = {
-                        "None",
-                        "Exclude All Permanent Effects",
-                        "Exclude All Temporary Effects"
+                    "None",
+                    "Exclude All Permanent Effects",
+                    "Exclude All Temporary Effects"
                 })
         public int permanentEffectsRule = 0;
 
@@ -810,9 +845,9 @@ public class PotionEffects extends BasicHud {
                 description = "Decide if effects from or not from a beacon should be excluded.",
                 subcategory = "Exclusion",
                 options = {
-                        "None",
-                        "Exclude All Ambient Effects",
-                        "Exclude All Non Ambient Effects"
+                    "None",
+                    "Exclude All Ambient Effects",
+                    "Exclude All Non Ambient Effects"
                 })
         public int ambientEffectsRule = 0;
 
@@ -821,9 +856,9 @@ public class PotionEffects extends BasicHud {
                 description = "Decide if emitting/disallowing particle effects should be excluded.",
                 subcategory = "Exclusion",
                 options = {
-                        "None",
-                        "Exclude All Emitting Particles",
-                        "Exclude All Disallowing Particles"
+                    "None",
+                    "Exclude All Emitting Particles",
+                    "Exclude All Disallowing Particles"
                 })
         public int emittingParticlesRule = 0;
 
@@ -853,6 +888,7 @@ public class PotionEffects extends BasicHud {
         public int excludedAmplifierValues = 10;
 
         @Exclude public int id;
+
         public Effect(String name) {
             PotionEffectsConfig.effectNames.add(name);
         }
@@ -952,6 +988,7 @@ public class PotionEffects extends BasicHud {
     public static class Component {
         @Switch(name = "Enable Component")
         public boolean toggle = true;
+
         @Switch(name = "Blink")
         public boolean blink = true;
 
