@@ -13,6 +13,7 @@ import cc.polyfrost.oneconfig.libs.universal.UGraphics;
 import cc.polyfrost.oneconfig.libs.universal.UMatrixStack;
 import cc.polyfrost.oneconfig.libs.universal.UMinecraft;
 
+import cc.polyfrost.oneconfig.renderer.NanoVGHelper;
 import com.google.common.collect.ImmutableMap;
 
 import me.tellinq.potioneffects.config.PotionEffectsConfig;
