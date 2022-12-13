@@ -248,7 +248,7 @@ public class PotionEffects extends BasicHud {
 
         UGraphics.GL.pushMatrix();
         UGraphics.GL.scale(scale, scale, 1);
-        UGraphics.GL.translate(x / scale, y / scale, 1);
+        UGraphics.GL.translate(x / scale, y / scale, 0);
         for (PotionEffect effect : this.currentEffects) {
             Effect effectSetting = getEffectSetting(effect);
             // I wish there was a more efficient way of doing this...
@@ -280,9 +280,12 @@ public class PotionEffects extends BasicHud {
                 continue;
             }
 
-            float iconPos = componentConfig.icon.toggle ? 20.0F : 0.0F;
-            componentAmount = 0;
+            UGraphics.GL.pushMatrix();
+            if (componentConfig.icon.toggle) {
+                UGraphics.GL.translate((29.5317 * Math.sin(2.57693 - (2.37913 * actualHorizontal)) + 4.19663) / scale, 0, 0);
+            }
 
+            this.componentAmount = 0;
             this.oneComponentActive =
                     !componentConfig.effectName.toggle || !componentConfig.duration.toggle;
             if (componentConfig.effectName.toggle) {
@@ -303,7 +306,8 @@ public class PotionEffects extends BasicHud {
                         titleBuilder.append(amplifier);
                     }
                 }
-                ++componentAmount;
+
+                ++this.componentAmount;
                 tempWidth =
                         Math.max(
                                 tempWidth,
@@ -313,7 +317,6 @@ public class PotionEffects extends BasicHud {
                                         blinkingConfig,
                                         effect.getDuration(),
                                         yOffset,
-                                        iconPos,
                                         example,
                                         excluded));
             }
@@ -335,7 +338,8 @@ public class PotionEffects extends BasicHud {
                                     RomanNumeral.INSTANCE.getCache(effect.getDuration() / 20);
                     }
                 }
-                ++componentAmount;
+
+                ++this.componentAmount;
                 tempWidth =
                         Math.max(
                                 tempWidth,
@@ -345,21 +349,18 @@ public class PotionEffects extends BasicHud {
                                         blinkingConfig,
                                         effect.getDuration(),
                                         yOffset,
-                                        iconPos,
                                         example,
                                         excluded));
             }
+            UGraphics.GL.popMatrix();
 
             if (componentConfig.icon.toggle) {
                 UGraphics.color4f(1f, 1f, 1f, excluded ? 0.5f : 1f);
-                this.mc.getTextureManager().bindTexture(EFFECTS_RESOURCE);
+                this.mc.getTextureManager().bindTexture(this.EFFECTS_RESOURCE);
                 float iconX = 0;
                 switch (actualHorizontal) {
-                    case 0:
-                        iconX = 0.0f;
-                        break;
                     case 1:
-                        iconX = this.width / 2f - (tempWidth - 20.0f) / 2 - (iconPos / 2);
+                        iconX = this.width / 2f - (tempWidth - 20.0f) / 2 - 20.0f;
                         break;
                     case 2:
                         iconX = this.width - this.ICON_SIZE;
@@ -376,7 +377,7 @@ public class PotionEffects extends BasicHud {
                             18);
                 }
 
-                tempWidth = Math.max(tempWidth, iconPos);
+                tempWidth += this.ICON_SIZE;
             }
 
             yOffset += yAmount;
@@ -391,7 +392,6 @@ public class PotionEffects extends BasicHud {
             Effect blinkingConfig,
             float value,
             float yOffset,
-            float iconPos,
             boolean example,
             boolean excluded) {
         StringBuilder builder = new StringBuilder();
@@ -423,14 +423,11 @@ public class PotionEffects extends BasicHud {
 
         if (showDuringBlink(blinkingConfig, component.blink, value, example)) {
             switch (this.getHorizontalAlignment()) {
-                case 0:
-                    x = iconPos;
-                    break;
                 case 1:
-                    x = this.width / 2f - (float) width / 2 + iconPos - iconPos / 2;
+                    x = this.width / 2f - (float) width / 2;
                     break;
                 case 2:
-                    x = this.width - width - iconPos;
+                    x = this.width - width;
             }
             NanoVGHelper.INSTANCE.drawScaledString(
                     builtTime,
@@ -441,7 +438,7 @@ public class PotionEffects extends BasicHud {
                     1);
         }
 
-        return iconPos + width;
+        return width;
     }
 
     /**
@@ -468,8 +465,6 @@ public class PotionEffects extends BasicHud {
                 case MIDDLE_RIGHT:
                 case BOTTOM_RIGHT:
                     return 2;
-                default:
-                    return this.horizontalAlignment - 1;
             }
         }
         return this.horizontalAlignment - 1;
