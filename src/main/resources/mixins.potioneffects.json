@@ -5,6 +5,7 @@
   "refmap": "mixins.potioneffects.refmap.json",
   "verbose": true,
   "client": [
-    "EntityLivingBaseMixin"
+    "EntityLivingBaseMixin",
+    "InventoryEffectRendererMixin"
   ]
 }

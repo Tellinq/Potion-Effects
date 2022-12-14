@@ -68,6 +68,12 @@ public class PotionEffects extends BasicHud {
     public int sortingMethod = 0;
 
     @Switch(
+            name = "Overwrite Inventory",
+            description = "Overwrites the vanilla PotionHUD in the inventory to instead display this element."
+    )
+    public boolean overwriteIER = false;
+
+    @Switch(
             name = "Show Excluded Effects in HUD Editor",
             description = "Show potion effects that are excluded in the HUD editor")
     public boolean showExcludedEffects = true;
@@ -181,6 +187,7 @@ public class PotionEffects extends BasicHud {
     private void onInitialization(InitializationEvent event) {
         this.dummyEffects.add(new PotionEffect(Potion.moveSpeed.id, 1200, 1));
         this.dummyEffects.add(new PotionEffect(Potion.damageBoost.id, 30, 3));
+        PotionHUDTracker.INSTANCE.instances.add(this);
     }
 
     /**
@@ -192,12 +199,7 @@ public class PotionEffects extends BasicHud {
     private void onUpdatePotionEffects(UpdatePotionEffectsEvent event) {
         if (this.mc.thePlayer != null) {
             this.activeEffects = new ArrayList<>(this.mc.thePlayer.getActivePotionEffects());
-            try {
-                this.currentEffects = this.activeEffects.isEmpty() ? this.dummyEffects : this.activeEffects;
-                this.sortEffects(this.currentEffects);
-            } catch (ConcurrentModificationException ignored) {
-            }
-
+            this.currentEffects = this.activeEffects.isEmpty() ? this.dummyEffects : this.activeEffects;
         }
     }
 
@@ -223,6 +225,8 @@ public class PotionEffects extends BasicHud {
         UGraphics.disableLighting();
 
         final int actualHorizontal = this.getHorizontalAlignment();
+
+        this.sortEffects(this.currentEffects);
 
         float yOffset = 0;
         float tempWidth = 0;
@@ -328,6 +332,7 @@ public class PotionEffects extends BasicHud {
 
             yOffset += yAmount;
         }
+
         this.width = tempWidth;
         UGraphics.GL.popMatrix();
     }
@@ -602,6 +607,18 @@ public class PotionEffects extends BasicHud {
         return this.height * scale;
     }
 
+    public static class PotionHUDTracker {
+
+        public static final PotionHUDTracker INSTANCE = new PotionHUDTracker();
+
+        public final Set<PotionEffects> instances;
+
+        private PotionHUDTracker() {
+            this.instances = new HashSet<>();
+        }
+
+    }
+
     /** All the individual config settings. */
     public static class Effect {
         @Switch(
@@ -681,7 +698,6 @@ public class PotionEffects extends BasicHud {
                 max = 15
         )
         public float orderPriority = 0;
-        // To be implemented
 
         @Switch(
                 name = "Blink",
