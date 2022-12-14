@@ -15,7 +15,7 @@ jobs:
         with:
           # Commit message
           commitMessage: "Apply Google Java Style"
-          args: "--replace --aosp"
+          args: "--replace --aosp --length 125"
           # Recommended if you use MacOS:
           # githubToken: ${{ secrets.GITHUB_TOKEN }}
 

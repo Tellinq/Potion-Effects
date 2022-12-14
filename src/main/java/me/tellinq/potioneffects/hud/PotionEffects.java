@@ -129,23 +129,20 @@ public class PotionEffects extends BasicHud {
     private float height = 0f;
 
     /**
-     * Continuously counts up every tick, and resets back to 0 if the current amount is over a
-     * specific threshold determined by blinkSpeed.
+     * Continuously counts up every tick, and resets back to 0 if the current amount is over a specific threshold determined by blinkSpeed.
      */
     @Exclude private int ticks = 0;
 
     /**
      * Used to set the current active potion effects. <br>
-     * Also determines if the mod should show if the mod is not empty, or if {@link #currentEffects}
-     * should reference this list if not empty, or use {@link #dummyEffects}..
+     * Also determines if the mod should show if the mod is not empty, or if {@link #currentEffects} should reference this list if not empty, or use {@link #dummyEffects}..
      */
     @Exclude private List<PotionEffect> activeEffects = new ArrayList<>();
 
     /**
      * Set by either {@link #activeEffects} or {@link #dummyEffects} depending on if {@link
      * #activeEffects} is empty. <br>
-     * Used to sort (see {@link #sortEffects(List)}), help set the height of the mod, and split each
-     * effect to render independently.
+     * Used to sort (see {@link #sortEffects(List)}), help set the height of the mod, and split each effect to render independently.
      */
     @Exclude private List<PotionEffect> currentEffects = new ArrayList<>();
 
@@ -161,20 +158,7 @@ public class PotionEffects extends BasicHud {
      * Padding is set to 0 by default
      */
     public PotionEffects() {
-        super(
-                true,
-                0,
-                0,
-                1,
-                false,
-                false,
-                0,
-                0,
-                0,
-                new OneColor(0, 0, 0, 120),
-                false,
-                2,
-                new OneColor(0, 0, 0));
+        super(true, 0, 0, 1, false, false, 0, 0, 0, new OneColor(0, 0, 0, 120), false, 2, new OneColor(0, 0, 0));
         EventManager.INSTANCE.register(this);
     }
 
@@ -191,9 +175,7 @@ public class PotionEffects extends BasicHud {
 
     /**
      * Add example/dummy effects when Forge is initialized. <br>
-     * Historically, in CheatBreaker, current versions of Lunar Client, and in early versions of the
-     * mod, this used to constantly be re-added every partial tick as the field used to make an
-     * array list was made every partial tick as well.
+     * Historically, in CheatBreaker, current versions of Lunar Client, and in early versions of the mod, this used to constantly be re-added every partial tick as the field used to make an array list was made every partial tick as well.
      */
     @Subscribe
     private void onInitialization(InitializationEvent event) {
@@ -210,8 +192,12 @@ public class PotionEffects extends BasicHud {
     private void onUpdatePotionEffects(UpdatePotionEffectsEvent event) {
         if (this.mc.thePlayer != null) {
             this.activeEffects = new ArrayList<>(this.mc.thePlayer.getActivePotionEffects());
-            this.currentEffects =
-                    this.activeEffects.isEmpty() ? this.dummyEffects : this.activeEffects;
+            try {
+                this.currentEffects = this.activeEffects.isEmpty() ? this.dummyEffects : this.activeEffects;
+                this.sortEffects(this.currentEffects);
+            } catch (ConcurrentModificationException ignored) {
+            }
+
         }
     }
 
@@ -238,8 +224,6 @@ public class PotionEffects extends BasicHud {
 
         final int actualHorizontal = this.getHorizontalAlignment();
 
-        this.sortEffects(this.currentEffects);
-
         float yOffset = 0;
         float tempWidth = 0;
         float yAmount = this.ICON_SIZE + this.verticalSpacing;
@@ -250,20 +234,14 @@ public class PotionEffects extends BasicHud {
         UGraphics.GL.scale(scale, scale, 1);
         UGraphics.GL.translate(x / scale, y / scale, 0);
         for (PotionEffect effect : this.currentEffects) {
-            Effect effectSetting = getEffectSetting(effect);
+            Effect effectSetting = this.getEffectSetting(effect);
             // I wish there was a more efficient way of doing this...
-            Effect componentConfig =
-                    this.checkCategoryOverride(effectSetting, effectSetting.overrideComponent);
-            Effect amplifierConfig =
-                    this.checkCategoryOverride(effectSetting, effectSetting.overrideAmplifier);
-            Effect blinkingConfig =
-                    this.checkCategoryOverride(effectSetting, effectSetting.overrideBlinking);
-            Effect formattingConfig =
-                    this.checkCategoryOverride(effectSetting, effectSetting.overrideFormatting);
-            Effect colorConfig =
-                    this.checkCategoryOverride(effectSetting, effectSetting.overrideColor);
-            Effect exclusionConfig =
-                    this.checkCategoryOverride(effectSetting, effectSetting.overrideExclusion);
+            Effect componentConfig = this.checkCategoryOverride(effectSetting, effectSetting.overrideComponent);
+            Effect amplifierConfig = this.checkCategoryOverride(effectSetting, effectSetting.overrideAmplifier);
+            Effect blinkingConfig = this.checkCategoryOverride(effectSetting, effectSetting.overrideBlinking);
+            Effect formattingConfig = this.checkCategoryOverride(effectSetting, effectSetting.overrideFormatting);
+            Effect colorConfig = this.checkCategoryOverride(effectSetting, effectSetting.overrideColor);
+            Effect exclusionConfig = this.checkCategoryOverride(effectSetting, effectSetting.overrideExclusion);
 
             boolean excluded = false;
             if (this.excludePotions(exclusionConfig, effect)) {
@@ -282,23 +260,15 @@ public class PotionEffects extends BasicHud {
 
             UGraphics.GL.pushMatrix();
             if (componentConfig.icon.toggle) {
-                UGraphics.GL.translate(
-                        (29.5317 * Math.sin(2.57693 - (2.37913 * actualHorizontal)) + 4.19663)
-                                / scale,
-                        0,
-                        0);
+                UGraphics.GL.translate((29.5317 * Math.sin(2.57693 - (2.37913 * actualHorizontal)) + 4.19663) / scale, 0, 0);
             }
 
             this.componentAmount = 0;
-            this.oneComponentActive =
-                    !componentConfig.effectName.toggle || !componentConfig.duration.toggle;
+            this.oneComponentActive = !componentConfig.effectName.toggle || !componentConfig.duration.toggle;
             if (componentConfig.effectName.toggle) {
                 StringBuilder titleBuilder = new StringBuilder();
 
-                titleBuilder.append(
-                        formattingConfig.effectName.customName.isEmpty()
-                                ? I18n.format(potion.getName())
-                                : formattingConfig.effectName.customName);
+                titleBuilder.append(formattingConfig.effectName.customName.isEmpty() ? I18n.format(potion.getName()) : formattingConfig.effectName.customName);
 
                 int amplifier = Math.max(1, effect.getAmplifier() + 1);
                 if (amplifierConfig.effectName.amplifier
@@ -312,17 +282,7 @@ public class PotionEffects extends BasicHud {
                 }
 
                 ++this.componentAmount;
-                tempWidth =
-                        Math.max(
-                                tempWidth,
-                                this.textBuilder(
-                                        titleBuilder.toString(),
-                                        componentConfig.effectName,
-                                        blinkingConfig,
-                                        effect.getDuration(),
-                                        yOffset,
-                                        example,
-                                        excluded));
+                tempWidth = Math.max(tempWidth, this.textBuilder(titleBuilder.toString(), componentConfig.effectName, blinkingConfig, effect.getDuration(), yOffset, example, excluded));
             }
 
             if (componentConfig.duration.toggle) {
@@ -338,23 +298,12 @@ public class PotionEffects extends BasicHud {
                             durationText = effect.getDuration() / 20 + "s";
                             break;
                         case 2:
-                            durationText =
-                                    RomanNumeral.INSTANCE.getCache(effect.getDuration() / 20);
+                            durationText = RomanNumeral.INSTANCE.getCache(effect.getDuration() / 20);
                     }
                 }
 
                 ++this.componentAmount;
-                tempWidth =
-                        Math.max(
-                                tempWidth,
-                                this.textBuilder(
-                                        durationText,
-                                        componentConfig.duration,
-                                        blinkingConfig,
-                                        effect.getDuration(),
-                                        yOffset,
-                                        example,
-                                        excluded));
+                tempWidth = Math.max(tempWidth, this.textBuilder(durationText, componentConfig.duration, blinkingConfig, effect.getDuration(), yOffset, example, excluded));
             }
             UGraphics.GL.popMatrix();
 
@@ -370,15 +319,8 @@ public class PotionEffects extends BasicHud {
                         iconX = this.width - this.ICON_SIZE;
                 }
 
-                if (showDuringBlink(
-                        blinkingConfig, blinkingConfig.icon.blink, effect.getDuration(), example)) {
-                    this.mc.ingameGUI.drawTexturedModalRect(
-                            iconX,
-                            yOffset,
-                            potion.getStatusIconIndex() % 8 * 18,
-                            198 + potion.getStatusIconIndex() / 8 * 18,
-                            18,
-                            18);
+                if (showDuringBlink(blinkingConfig, blinkingConfig.icon.blink, effect.getDuration(), example)) {
+                    this.mc.ingameGUI.drawTexturedModalRect(iconX, yOffset, potion.getStatusIconIndex() % 8 * 18, 198 + potion.getStatusIconIndex() / 8 * 18, 18, 18);
                 }
 
                 tempWidth += this.ICON_SIZE;
@@ -390,14 +332,7 @@ public class PotionEffects extends BasicHud {
         UGraphics.GL.popMatrix();
     }
 
-    public float textBuilder(
-            String text,
-            TextComponent component,
-            Effect blinkingConfig,
-            float value,
-            float yOffset,
-            boolean example,
-            boolean excluded) {
+    public float textBuilder(String text, TextComponent component, Effect blinkingConfig, float value, float yOffset, boolean example, boolean excluded) {
         StringBuilder builder = new StringBuilder();
         // I really hope there's a more efficient way of setting this up...
         if (component.boldText) {
@@ -433,13 +368,7 @@ public class PotionEffects extends BasicHud {
                 case 2:
                     x = this.width - width;
             }
-            NanoVGHelper.INSTANCE.drawScaledString(
-                    builtTime,
-                    x,
-                    timeY,
-                    getColor(component.color.getRGB(), excluded),
-                    NanoVGHelper.TextType.toType(component.textType),
-                    1);
+            NanoVGHelper.INSTANCE.drawScaledString(builtTime, x, timeY, getColor(component.color.getRGB(), excluded), NanoVGHelper.TextType.toType(component.textType), 1);
         }
 
         return width;
@@ -508,10 +437,9 @@ public class PotionEffects extends BasicHud {
                 effects.sort(Comparator.comparing(PotionEffect::getIsShowParticles));
                 break;
             case 6:
-                effects.sort(
-                        Comparator.comparing(
-                                effect -> Potion.potionTypes[effect.getPotionID()].isBadEffect()));
+                effects.sort(Comparator.comparing(effect -> Potion.potionTypes[effect.getPotionID()].isBadEffect()));
         }
+        effects.sort(Comparator.comparingDouble(effect -> -this.getEffectSetting(effect).orderPriority));
 
         if (this.verticalSorting) {
             Collections.reverse(effects);
@@ -525,8 +453,7 @@ public class PotionEffects extends BasicHud {
      * @param example If the HUD is being rendered in example form
      * @return False if the duration amount or tick counter is over the threshold.
      */
-    private boolean showDuringBlink(
-            Effect config, boolean blinkComponent, float duration, boolean example) {
+    private boolean showDuringBlink(Effect config, boolean blinkComponent, float duration, boolean example) {
         if (config.blink && blinkComponent && duration <= config.blinkDuration * 20.0f) {
             if (config.syncBlinking || (example && this.activeEffects.isEmpty())) {
                 float threshold = config.blinkSpeed / 3.0f;
@@ -544,8 +471,7 @@ public class PotionEffects extends BasicHud {
 
     /**
      * @param effect The current potion effect
-     * @return The specific effect config's based off the effectMap if overridden, or the global
-     *     configuration if not overridden.
+     * @return The specific effect config's based off the effectMap if overridden, or the global configuration if not overridden.
      */
     public Effect getEffectSetting(PotionEffect effect) {
         for (Map.Entry<Integer, Effect> entry : effects.entrySet()) {
@@ -587,23 +513,15 @@ public class PotionEffects extends BasicHud {
             return true;
         }
 
-        if (this.excludeCondition(
-                setting.badEffectsRule, Potion.potionTypes[effect.getPotionID()].isBadEffect())) {
+        if (this.excludeCondition(setting.badEffectsRule, Potion.potionTypes[effect.getPotionID()].isBadEffect())) {
             return true;
         }
 
-        if (this.excludeAmount(
-                        setting.excludeSetDuration,
-                        effect.getDuration(),
-                        setting.excludedDurationThreshold * 20.0F)
-                && !effect.getIsPotionDurationMax()) {
+        if (this.excludeAmount(setting.excludeSetDuration, effect.getDuration(), setting.excludedDurationThreshold * 20.0F) && !effect.getIsPotionDurationMax()) {
             return true;
         }
 
-        if (this.excludeAmount(
-                setting.excludeSetAmplifier,
-                effect.getAmplifier(),
-                setting.excludedAmplifierValues - 1)) {
+        if (this.excludeAmount(setting.excludeSetAmplifier, effect.getAmplifier(), setting.excludedAmplifierValues - 1)) {
             return true;
         }
 
@@ -726,31 +644,35 @@ public class PotionEffects extends BasicHud {
         @Checkbox(
                 name = "Override Exclusion",
                 description = "Override the exclusion category",
-                subcategory = "Override")
+                subcategory = "Override"
+        )
         public boolean overrideExclusion = true;
 
         @Page(
                 name = "Icon",
                 location = PageLocation.TOP,
                 description = "Show the effect icon",
-                subcategory = "Component")
+                subcategory = "Component"
+        )
         public Component icon = new Component();
 
         @Page(
                 name = "Effect Name",
                 location = PageLocation.TOP,
                 description = "Show the effect name",
-                subcategory = "Component")
+                subcategory = "Component"
+        )
         public EffectNameComponent effectName = new EffectNameComponent();
 
         @Page(
                 name = "Duration",
                 location = PageLocation.TOP,
                 description = "Show the effect duration",
-                subcategory = "Component")
+                subcategory = "Component"
+        )
         public DurationComponent duration = new DurationComponent();
 
-        /*@Slider(
+        @Slider(
                 name = "Order Priority",
                 description = "Higher numbers will indicate higher priority",
                 subcategory = "Sorting",
@@ -758,21 +680,21 @@ public class PotionEffects extends BasicHud {
                 min = -15,
                 max = 15
         )
-        public int orderPriority = 0;*/
+        public float orderPriority = 0;
         // To be implemented
 
         @Switch(
                 name = "Blink",
                 description = "Make the potion effects blink when the duration is low",
-                subcategory = "Blinking")
+                subcategory = "Blinking"
+        )
         public boolean blink = true;
 
         @Switch(
                 name = "Sync Blinking",
-                description =
-                        "Make blinking synced with tick counts or make blinking go based off the"
-                                + " duration time.",
-                subcategory = "Blinking")
+                description = "Make blinking synced with tick counts or make blinking go based off the duration time.",
+                subcategory = "Blinking"
+        )
         public boolean syncBlinking = true;
 
         @Slider(
@@ -780,7 +702,8 @@ public class PotionEffects extends BasicHud {
                 description = "The duration the effect should start blinking at",
                 subcategory = "Blinking",
                 min = 0,
-                max = 60)
+                max = 60
+        )
         public float blinkDuration = 10;
 
         @Slider(
@@ -788,21 +711,21 @@ public class PotionEffects extends BasicHud {
                 description = "The speed of which the effect should blink at",
                 subcategory = "Blinking",
                 min = 0,
-                max = 60)
+                max = 60
+        )
         public float blinkSpeed = 30;
 
         @Checkbox(
                 name = "Exclude",
                 description = "Completely exclude the effect(s)",
                 subcategory = "Exclusion",
-                size = 2)
+                size = 2
+        )
         public boolean exclude = false;
 
         @Dropdown(
                 name = "Duration Amount Rule",
-                description =
-                        "Exclude effects that are either above, below, at, or not at a certain"
-                                + " duration threshold",
+                description = "Exclude effects that are either above, below, at, or not at a certain duration threshold",
                 options = {
                     "None",
                     "Exclude All Above",
@@ -810,14 +733,13 @@ public class PotionEffects extends BasicHud {
                     "Exclude All At",
                     "Exclude All Not At"
                 },
-                subcategory = "Exclusion")
+                subcategory = "Exclusion"
+        )
         public int excludeSetDuration = 0;
 
         @Dropdown(
                 name = "Amplifier Amount Rule",
-                description =
-                        "Exclude effects that are either above, below, at, or not at a certain"
-                                + " amplifier amount",
+                description = "Exclude effects that are either above, below, at, or not at a certain amplifier amount",
                 options = {
                     "None",
                     "Exclude All Above",
@@ -825,7 +747,8 @@ public class PotionEffects extends BasicHud {
                     "Exclude All At",
                     "Exclude All Not At"
                 },
-                subcategory = "Exclusion")
+                subcategory = "Exclusion"
+        )
         public int excludeSetAmplifier = 0;
 
         @Dropdown(
@@ -865,7 +788,8 @@ public class PotionEffects extends BasicHud {
                 name = "Bad Effects Rule",
                 description = "Decide if good or bad effects should be excluded.",
                 subcategory = "Exclusion",
-                options = {"None", "Exclude All Bad Effects", "Exclude All Good Effects"})
+                options = {"None", "Exclude All Bad Effects", "Exclude All Good Effects"}
+        )
         public int badEffectsRule = 0;
 
         @Slider(
@@ -874,7 +798,8 @@ public class PotionEffects extends BasicHud {
                 subcategory = "Exclusion",
                 min = 2,
                 max = 90,
-                step = 1)
+                step = 1
+        )
         public float excludedDurationThreshold = 30f;
 
         @Slider(
@@ -883,7 +808,8 @@ public class PotionEffects extends BasicHud {
                 subcategory = "Exclusion",
                 min = 0,
                 max = 20,
-                step = 1)
+                step = 1
+        )
         public int excludedAmplifierValues = 10;
 
         @Exclude public int id;
@@ -904,19 +830,22 @@ public class PotionEffects extends BasicHud {
                 name = "Custom Name",
                 description = "Override the effect name with a custom one",
                 subcategory = "Formatting",
-                size = 2)
+                size = 2
+        )
         public String customName = "";
 
         @Switch(
                 name = "Show Amplifier",
                 description = "Show the amplifier amount next to the effect name",
-                subcategory = "Amplifier")
+                subcategory = "Amplifier"
+        )
         public boolean amplifier = true;
 
         @Switch(
                 name = "Show Level One",
                 description = "Show the amplifier if the effect level is one",
-                subcategory = "Amplifier")
+                subcategory = "Amplifier"
+        )
         public boolean levelOne = false;
 
         @DualOption(
@@ -924,7 +853,8 @@ public class PotionEffects extends BasicHud {
                 description = "Choose to show roman numerals or arabic amount",
                 subcategory = "Amplifier",
                 left = "Roman",
-                right = "Arabic")
+                right = "Arabic"
+        )
         public boolean romanNumerals = false;
 
         public EffectNameComponent() {}
@@ -936,7 +866,8 @@ public class PotionEffects extends BasicHud {
                 name = "Max Duration String",
                 description = "The text that should show when you have a permanent effect",
                 subcategory = "Formatting",
-                size = 2)
+                size = 2
+        )
         public String maxDurationString = "**:**";
 
         @Dropdown(
@@ -944,7 +875,8 @@ public class PotionEffects extends BasicHud {
                 description = "Choose how the duration text should be formatted",
                 subcategory = "Formatting",
                 options = {"Standard", "Split Format", "Roman Numerals"},
-                size = 2)
+                size = 2
+        )
         public int durationFormat = 0;
 
         public DurationComponent() {}
@@ -954,31 +886,36 @@ public class PotionEffects extends BasicHud {
         @Checkbox(
                 name = "Bold Text",
                 description = "Bold the component text",
-                subcategory = "Formatting")
+                subcategory = "Formatting"
+        )
         public boolean boldText = false;
 
         @Checkbox(
                 name = "Italic Text",
                 description = "Make the component text italic",
-                subcategory = "Formatting")
+                subcategory = "Formatting"
+        )
         public boolean italicText = false;
 
         @Checkbox(
                 name = "Underline Text",
                 description = "Underline the component text",
-                subcategory = "Formatting")
+                subcategory = "Formatting"
+        )
         public boolean underlineText = false;
 
         @Dropdown(
                 name = "Text Type",
                 subcategory = "Formatting",
-                options = {"No Shadow", "Shadow", "Full Shadow"})
+                options = {"No Shadow", "Shadow", "Full Shadow"}
+        )
         public int textType = 1;
 
         @Color(
                 name = "Color",
                 description = "The color of the component text",
-                subcategory = "Color")
+                subcategory = "Color"
+        )
         public OneColor color = new OneColor(255, 255, 255);
 
         public TextComponent() {}
