@@ -1,12 +1,9 @@
 package me.tellinq.potioneffects.mixin;
 
-import cc.polyfrost.oneconfig.events.EventManager;
-import cc.polyfrost.oneconfig.libs.universal.UMatrixStack;
+import me.tellinq.potioneffects.PotionEffectsMod;
 import me.tellinq.potioneffects.config.PotionEffectsConfig;
-import me.tellinq.potioneffects.event.UpdatePotionEffectsEvent;
 import me.tellinq.potioneffects.hud.PotionEffects;
 import net.minecraft.client.renderer.InventoryEffectRenderer;
-import net.minecraft.entity.EntityLivingBase;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -21,7 +18,7 @@ public class InventoryEffectRendererMixin {
     @Inject(method = "updateActivePotionEffects", at = @At("HEAD"), cancellable = true)
     protected void injectUpdateActivePotionEffects(CallbackInfo ci) {
         for (PotionEffects potionHUD : PotionEffects.PotionHUDTracker.INSTANCE.instances) {
-            if (PotionEffectsConfig.INSTANCE.overwriteIER && potionHUD.isEnabled()) {
+            if (!PotionEffectsConfig.INSTANCE.showPotionInfo && potionHUD.isEnabled()) {
                 hasActivePotionEffects = true;
                 ci.cancel();
                 break;
@@ -31,17 +28,16 @@ public class InventoryEffectRendererMixin {
 
     @Inject(method = "drawActivePotionEffects", at = @At("HEAD"), cancellable = true)
     private void injectDrawActivePotionEffects(CallbackInfo ci) {
-        boolean cancel = false;
-
         for (PotionEffects potionHUD : PotionEffects.PotionHUDTracker.INSTANCE.instances) {
-            if (PotionEffectsConfig.INSTANCE.overwriteIER && potionHUD.isEnabled()) {
-                cancel = true;
-
-                potionHUD.renderFromInventory();
+            if (PotionEffectsConfig.INSTANCE.showHudInForeground && potionHUD.isEnabled()) {
+                if (PotionEffectsConfig.INSTANCE.showHudInForeground) {
+                    potionHUD.renderFromInventory();
+                }
             }
+
         }
 
-        if (cancel) {
+        if (!PotionEffectsConfig.INSTANCE.showPotionInfo && PotionEffectsMod.INSTANCE.config.enabled) {
             ci.cancel();
         }
     }

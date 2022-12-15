@@ -2,7 +2,6 @@ package me.tellinq.potioneffects.hud;
 
 import cc.polyfrost.oneconfig.config.annotations.*;
 import cc.polyfrost.oneconfig.config.core.OneColor;
-import cc.polyfrost.oneconfig.config.data.InfoType;
 import cc.polyfrost.oneconfig.config.data.PageLocation;
 import cc.polyfrost.oneconfig.events.EventManager;
 import cc.polyfrost.oneconfig.events.event.InitializationEvent;
@@ -18,14 +17,11 @@ import cc.polyfrost.oneconfig.renderer.NanoVGHelper;
 import com.google.common.collect.ImmutableMap;
 
 import me.tellinq.potioneffects.config.PotionEffectsConfig;
-import me.tellinq.potioneffects.event.UpdatePotionEffectsEvent;
 import me.tellinq.potioneffects.mixin.GuiAccessor;
 import me.tellinq.potioneffects.util.RomanNumeral;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.client.gui.inventory.GuiContainer;
-import net.minecraft.client.gui.inventory.GuiInventory;
 import net.minecraft.client.renderer.InventoryEffectRenderer;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.potion.Potion;
@@ -180,7 +176,7 @@ public class PotionEffects extends BasicHud {
         }
 
         // Prevent from rendering twice when in inventory
-        if (!this.fromInventory && PotionEffectsConfig.INSTANCE.overwriteIER && this.mc.currentScreen instanceof InventoryEffectRenderer) {
+        if (!this.fromInventory && PotionEffectsConfig.INSTANCE.showHudInForeground && this.mc.currentScreen instanceof InventoryEffectRenderer) {
             return false;
         }
 
@@ -212,6 +208,7 @@ public class PotionEffects extends BasicHud {
         UGraphics.GL.scale(scale, scale, 1);
         UGraphics.GL.translate(x / scale, y / scale, 0);
         for (PotionEffect effect : this.currentEffects) {
+            float tempTempWidth = 0;
             Effect effectSetting = this.getEffectSetting(effect);
             // I wish there was a more efficient way of doing this...
             Effect componentConfig = this.checkCategoryOverride(effectSetting, effectSetting.overrideComponent);
@@ -260,7 +257,7 @@ public class PotionEffects extends BasicHud {
                 }
 
                 ++this.componentAmount;
-                tempWidth = Math.max(tempWidth, this.textBuilder(titleBuilder.toString(), componentConfig.effectName, blinkingConfig, effect.getDuration(), yOffset, example, excluded));
+                tempTempWidth = Math.max(tempTempWidth, this.textBuilder(titleBuilder.toString(), componentConfig.effectName, blinkingConfig, effect.getDuration(), yOffset, example, excluded));
             }
 
             if (componentConfig.duration.toggle) {
@@ -281,17 +278,16 @@ public class PotionEffects extends BasicHud {
                 }
 
                 ++this.componentAmount;
-                tempWidth = Math.max(tempWidth, this.textBuilder(durationText, componentConfig.duration, blinkingConfig, effect.getDuration(), yOffset, example, excluded));
+                tempTempWidth = Math.max(tempTempWidth, this.textBuilder(durationText, componentConfig.duration, blinkingConfig, effect.getDuration(), yOffset, example, excluded));
             }
             UGraphics.GL.popMatrix();
-
             if (componentConfig.icon.toggle) {
                 UGraphics.color4f(1f, 1f, 1f, excluded ? 0.5f : 1f);
                 this.mc.getTextureManager().bindTexture(this.EFFECTS_RESOURCE);
                 float iconX = 0;
                 switch (actualHorizontal) {
                     case 1:
-                        iconX = this.width / 2f - (tempWidth - 20.0f) / 2 - 20.0f;
+                        iconX = this.width / 2f - (tempTempWidth - 20.0f) / 2 - 20.0f;
                         break;
                     case 2:
                         iconX = this.width - this.ICON_SIZE;
@@ -304,10 +300,11 @@ public class PotionEffects extends BasicHud {
                     ((GuiAccessor) this.mc.ingameGUI).setZLevel(zLevel);
                 }
 
-                tempWidth += this.ICON_SIZE;
+                tempTempWidth += this.ICON_SIZE + 2;
             }
 
             yOffset += yAmount;
+            tempWidth = Math.max(tempTempWidth, tempWidth);
         }
 
         this.width = tempWidth;
@@ -357,8 +354,7 @@ public class PotionEffects extends BasicHud {
     }
 
     /**
-     * Gets the horizontal alignment based off the mod's {@link #position} anchor (if {@link
-     * #horizontalAlignment} is 0 (Auto)) or the manual alignment via {@link #horizontalAlignment}.
+     * Gets the horizontal alignment based off the mod's {@link #position} anchor.
      *
      * @return The int corresponding to the mod's alignment <br>
      *     0: Left horizontal alignment <br>
@@ -386,14 +382,14 @@ public class PotionEffects extends BasicHud {
     }
 
     /**
-     * Sorts all the current potion effects determined by {@link #sortingMethod} <br>
+     * Sorts all the current potion effects determined by the user's sorting method and order priority. <br>
      * 0: Sorts by Potion ID (Vanilla behavior) <br>
      * 1: Sorts by alphabetical name <br>
      * 2: Sorts based off duration. <br>
      * 3: Sorts based off amplifier. <br>
      * 4: Sorts prioritizing ambient (beacon) effects. <br>
      * 5: Sorts prioritizing effects showing particles. <br>
-     * Optionally, the entire list will reverse if the user enables {@link #verticalSorting}.
+     * Optionally, the entire list will reverse if the user enables Vertical Sorting.
      *
      * @param effects {@link #currentEffects}
      */

@@ -268,11 +268,18 @@ public class PotionEffectsConfig extends Config {
     public String excludedAllWarning;
 
     @Switch(
-            name = "Overwrite Inventory",
-            description = "Overwrites the vanilla PotionHUD in the inventory to instead display this element.",
+            name = "Show Inventory Potion Info",
+            description = "Show the vanilla potion info",
             subcategory = "Misc"
     )
-    public boolean overwriteIER = false;
+    public boolean showPotionInfo = false;
+
+    @Switch(
+            name = "Show HUD in Foreground",
+            description = "Show the HUD element in foreground",
+            subcategory = "Misc"
+    )
+    public boolean showHudInForeground = false;
 
     @HUD(name = "General HUD")
     public static PotionEffects hud = new PotionEffects();
