@@ -2,6 +2,7 @@ package me.tellinq.potioneffects.config;
 
 import cc.polyfrost.oneconfig.config.Config;
 import cc.polyfrost.oneconfig.config.annotations.*;
+import cc.polyfrost.oneconfig.config.data.InfoType;
 import cc.polyfrost.oneconfig.config.data.Mod;
 import cc.polyfrost.oneconfig.config.data.ModType;
 import cc.polyfrost.oneconfig.config.data.PageLocation;
@@ -20,14 +21,16 @@ public class PotionEffectsConfig extends Config {
     @Page(
             name = "Global Effects",
             description = "Change all non-overridden effects",
-            location = PageLocation.TOP)
+            location = PageLocation.TOP
+    )
     public static PotionEffects.Effect global = new PotionEffects.Effect("Global Effects");
 
     @Page(
             name = "Speed",
             description = "Change the speed effect's appearance",
             location = PageLocation.TOP,
-            category = "Effects")
+            category = "Effects"
+    )
     public static PotionEffects.Effect speed =
             new PotionEffects.Effect("Speed", Potion.moveSpeed.id);
 
@@ -35,7 +38,8 @@ public class PotionEffectsConfig extends Config {
             name = "Slowness",
             description = "Change the slowness effect's appearance",
             location = PageLocation.TOP,
-            category = "Effects")
+            category = "Effects"
+    )
     public static PotionEffects.Effect slowness =
             new PotionEffects.Effect("Slowness", Potion.moveSlowdown.id);
 
@@ -43,7 +47,8 @@ public class PotionEffectsConfig extends Config {
             name = "Haste",
             description = "Change the haste effect's appearance",
             location = PageLocation.TOP,
-            category = "Effects")
+            category = "Effects"
+    )
     public static PotionEffects.Effect haste =
             new PotionEffects.Effect("Haste", Potion.digSpeed.id);
 
@@ -51,7 +56,8 @@ public class PotionEffectsConfig extends Config {
             name = "Mining Fatigue",
             description = "Change the mining fatigue effect's appearance",
             location = PageLocation.TOP,
-            category = "Effects")
+            category = "Effects"
+    )
     public static PotionEffects.Effect miningFatigue =
             new PotionEffects.Effect("Mining Fatigue", Potion.digSlowdown.id);
 
@@ -59,7 +65,8 @@ public class PotionEffectsConfig extends Config {
             name = "Strength",
             description = "Change the strength effect's appearance",
             location = PageLocation.TOP,
-            category = "Effects")
+            category = "Effects"
+    )
     public static PotionEffects.Effect strength =
             new PotionEffects.Effect("Strength", Potion.damageBoost.id);
 
@@ -67,7 +74,8 @@ public class PotionEffectsConfig extends Config {
             name = "Jump Boost",
             description = "Change the jump boost effect's appearance",
             location = PageLocation.TOP,
-            category = "Effects")
+            category = "Effects"
+    )
     public static PotionEffects.Effect jumpBoost =
             new PotionEffects.Effect("Jump Boost", Potion.jump.id);
 
@@ -75,7 +83,8 @@ public class PotionEffectsConfig extends Config {
             name = "Nausea",
             description = "Change the nausea effect's appearance",
             location = PageLocation.TOP,
-            category = "Effects")
+            category = "Effects"
+    )
     public static PotionEffects.Effect nausea =
             new PotionEffects.Effect("Nausea", Potion.confusion.id);
 
@@ -83,7 +92,8 @@ public class PotionEffectsConfig extends Config {
             name = "Regeneration",
             description = "Change the regeneration effect's appearance",
             location = PageLocation.TOP,
-            category = "Effects")
+            category = "Effects"
+    )
     public static PotionEffects.Effect regeneration =
             new PotionEffects.Effect("Regeneration", Potion.regeneration.id);
 
@@ -91,7 +101,8 @@ public class PotionEffectsConfig extends Config {
             name = "Resistance",
             description = "Change the resistance effect's appearance",
             location = PageLocation.TOP,
-            category = "Effects")
+            category = "Effects"
+    )
     public static PotionEffects.Effect resistance =
             new PotionEffects.Effect("Resistance", Potion.resistance.id);
 
@@ -99,7 +110,8 @@ public class PotionEffectsConfig extends Config {
             name = "Fire Resistance",
             description = "Change the fire resistance effect's appearance",
             location = PageLocation.TOP,
-            category = "Effects")
+            category = "Effects"
+    )
     public static PotionEffects.Effect fireResistance =
             new PotionEffects.Effect("Fire Resistance", Potion.fireResistance.id);
 
@@ -107,7 +119,8 @@ public class PotionEffectsConfig extends Config {
             name = "Water Breathing",
             description = "Change the water breathing effect's appearance",
             location = PageLocation.TOP,
-            category = "Effects")
+            category = "Effects"
+    )
     public static PotionEffects.Effect waterBreathing =
             new PotionEffects.Effect("Water Breathing", Potion.waterBreathing.id);
 
@@ -115,7 +128,8 @@ public class PotionEffectsConfig extends Config {
             name = "Invisibility",
             description = "Change the invisibility effect's appearance",
             location = PageLocation.TOP,
-            category = "Effects")
+            category = "Effects"
+    )
     public static PotionEffects.Effect invisibility =
             new PotionEffects.Effect("Invisibility", Potion.invisibility.id);
 
@@ -123,7 +137,8 @@ public class PotionEffectsConfig extends Config {
             name = "Blindness",
             description = "Change the blindness effect's appearance",
             location = PageLocation.TOP,
-            category = "Effects")
+            category = "Effects"
+    )
     public static PotionEffects.Effect blindness =
             new PotionEffects.Effect("Blindness", Potion.blindness.id);
 
@@ -131,7 +146,8 @@ public class PotionEffectsConfig extends Config {
             name = "Night Vision",
             description = "Change the night vision effect's appearance",
             location = PageLocation.TOP,
-            category = "Effects")
+            category = "Effects"
+    )
     public static PotionEffects.Effect nightVision =
             new PotionEffects.Effect("Night Vision", Potion.nightVision.id);
 
@@ -139,7 +155,8 @@ public class PotionEffectsConfig extends Config {
             name = "Hunger",
             description = "Change the hunger effect's appearance",
             location = PageLocation.TOP,
-            category = "Effects")
+            category = "Effects"
+    )
     public static PotionEffects.Effect hunger =
             new PotionEffects.Effect("Hunger", Potion.hunger.id);
 
@@ -147,7 +164,8 @@ public class PotionEffectsConfig extends Config {
             name = "Weakness",
             description = "Change the weakness effect's appearance",
             location = PageLocation.TOP,
-            category = "Effects")
+            category = "Effects"
+    )
     public static PotionEffects.Effect weakness =
             new PotionEffects.Effect("Weakness", Potion.weakness.id);
 
@@ -155,7 +173,8 @@ public class PotionEffectsConfig extends Config {
             name = "Poison",
             description = "Change the poison effect's appearance",
             location = PageLocation.TOP,
-            category = "Effects")
+            category = "Effects"
+    )
     public static PotionEffects.Effect poison =
             new PotionEffects.Effect("Poison", Potion.poison.id);
 
@@ -163,7 +182,8 @@ public class PotionEffectsConfig extends Config {
             name = "Wither",
             description = "Change the wither effect's appearance",
             location = PageLocation.TOP,
-            category = "Effects")
+            category = "Effects"
+    )
     public static PotionEffects.Effect wither =
             new PotionEffects.Effect("Wither", Potion.wither.id);
 
@@ -191,28 +211,98 @@ public class PotionEffectsConfig extends Config {
     public static PotionEffects.Effect saturation =
             new PotionEffects.Effect("Saturation", Potion.saturation.id);
 
+    @Dropdown(
+            name = "Horizontal Alignment",
+            description = "Choose if the alignment should be automatic or manual",
+            options = {"Auto", "Left", "Center", "Right"},
+            subcategory = "Dimensions"
+    )
+    public int horizontalAlignment = 0;
+
+    @Slider(
+            name = "Vertical Spacing",
+            description = "Adjust the spacing between effects",
+            min = 0,
+            max = 10,
+            subcategory = "Dimensions"
+    )
+    public float verticalSpacing = 4f;
+
+    @Dropdown(
+            name = "Sorting Method",
+            description = "Choose how the potion effects should be sorted",
+            options = {
+                    "Potion ID (Vanilla)",
+                    "Alphabetical",
+                    "Duration",
+                    "Amplifier",
+                    "Ambient",
+                    "Particles",
+                    "Bad Effects"
+            },
+            subcategory = "Sorting"
+    )
+    public int sortingMethod = 0;
+
+    @DualOption(
+            name = "Vertical Sorting",
+            description = "Make sorting start from the top or bottom",
+            left = "Top",
+            right = "Bottom",
+            subcategory = "Sorting"
+    )
+    public boolean verticalSorting = false;
+
+    @Switch(
+            name = "Show Excluded Effects in HUD Editor",
+            description = "Show potion effects that are excluded in the HUD editor",
+            subcategory = "Misc"
+    )
+    public boolean showExcludedEffects = true;
+
+    @Info(
+            text = "Not recommended to disable if all effects are excluded!",
+            type = InfoType.WARNING,
+            subcategory = "Misc"
+    )
+    public String excludedAllWarning;
+
+    @Switch(
+            name = "Overwrite Inventory",
+            description = "Overwrites the vanilla PotionHUD in the inventory to instead display this element.",
+            subcategory = "Misc"
+    )
+    public boolean overwriteIER = false;
+
+    @Info(
+            text = "Icons may not appear properly in inventory!",
+            type = InfoType.WARNING,
+            subcategory = "Misc"
+    )
+    public String overwriteWarning;
+
     @HUD(name = "General HUD")
-    public static PotionEffects testHud = new PotionEffects();
+    public static PotionEffects hud = new PotionEffects();
 
     public PotionEffectsConfig() {
         super(new Mod(PotionEffectsMod.NAME, ModType.HUD), PotionEffectsMod.MODID + ".json");
         INSTANCE = this;
-        initialize();
-        hideIf("Global Effects.override", () -> true);
-        hideIf("Global Effects.overrideComponent", () -> true);
-        hideIf("Global Effects.overrideAmplifier", () -> true);
-        hideIf("Global Effects.overrideBlinking", () -> true);
-        hideIf("Global Effects.overrideFormatting", () -> true);
-        hideIf("Global Effects.overrideColor", () -> true);
-        hideIf("Global Effects.overrideExclusion", () -> true);
+        this.initialize();
+        this.hideIf("Global Effects.override", () -> true);
+        this.hideIf("Global Effects.overrideComponent", () -> true);
+        this.hideIf("Global Effects.overrideAmplifier", () -> true);
+        this.hideIf("Global Effects.overrideBlinking", () -> true);
+        this.hideIf("Global Effects.overrideFormatting", () -> true);
+        this.hideIf("Global Effects.overrideColor", () -> true);
+        this.hideIf("Global Effects.overrideExclusion", () -> true);
 
         for (String effectName : effectNames) {
-            addDependency(effectName + ".overrideComponent", effectName + ".override");
-            addDependency(effectName + ".overrideAmplifier", effectName + ".override");
-            addDependency(effectName + ".overrideBlinking", effectName + ".override");
-            addDependency(effectName + ".overrideFormatting", effectName + ".override");
-            addDependency(effectName + ".overrideColor", effectName + ".override");
-            addDependency(effectName + ".overrideExclusion", effectName + ".override");
+            this.addDependency(effectName + ".overrideComponent", effectName + ".override");
+            this.addDependency(effectName + ".overrideAmplifier", effectName + ".override");
+            this.addDependency(effectName + ".overrideBlinking", effectName + ".override");
+            this.addDependency(effectName + ".overrideFormatting", effectName + ".override");
+            this.addDependency(effectName + ".overrideColor", effectName + ".override");
+            this.addDependency(effectName + ".overrideExclusion", effectName + ".override");
         }
     }
 }

@@ -33,54 +33,6 @@ import java.util.*;
 
 public class PotionEffects extends BasicHud {
 
-    @Dropdown(
-            name = "Horizontal Alignment",
-            description = "Choose if the alignment should be automatic or manual",
-            options = {"Auto", "Left", "Center", "Right"})
-    public int horizontalAlignment = 0;
-
-    @Slider(
-            name = "Vertical Spacing",
-            description = "Adjust the spacing between effects",
-            min = 0,
-            max = 10)
-    public float verticalSpacing = 4f;
-
-    @DualOption(
-            name = "Vertical Sorting",
-            description = "Make sorting start from the top or bottom",
-            left = "Top",
-            right = "Bottom")
-    public boolean verticalSorting = false;
-
-    @Dropdown(
-            name = "Sorting Method",
-            description = "Choose how the potion effects should be sorted",
-            options = {
-                "Potion ID (Vanilla)",
-                "Alphabetical",
-                "Duration",
-                "Amplifier",
-                "Ambient",
-                "Particles",
-                "Bad Effects"
-            })
-    public int sortingMethod = 0;
-
-    @Switch(
-            name = "Overwrite Inventory",
-            description = "Overwrites the vanilla PotionHUD in the inventory to instead display this element."
-    )
-    public boolean overwriteIER = false;
-
-    @Switch(
-            name = "Show Excluded Effects in HUD Editor",
-            description = "Show potion effects that are excluded in the HUD editor")
-    public boolean showExcludedEffects = true;
-
-    @Info(text = "Not recommended to disable if all effects are excluded!", type = InfoType.WARNING)
-    public String info;
-
     /** Each effect's icon texture size is 18 pixels. */
     @Exclude public final int ICON_SIZE = 18;
 
@@ -197,10 +149,7 @@ public class PotionEffects extends BasicHud {
      */
     @Subscribe
     private void onUpdatePotionEffects(UpdatePotionEffectsEvent event) {
-        if (this.mc.thePlayer != null) {
-            this.activeEffects = new ArrayList<>(this.mc.thePlayer.getActivePotionEffects());
-            this.currentEffects = this.activeEffects.isEmpty() ? this.dummyEffects : this.activeEffects;
-        }
+
     }
 
     /**
@@ -226,13 +175,17 @@ public class PotionEffects extends BasicHud {
 
         final int actualHorizontal = this.getHorizontalAlignment();
 
-        this.sortEffects(this.currentEffects);
+        if (this.mc.thePlayer != null) {
+            this.activeEffects = new ArrayList<>(this.mc.thePlayer.getActivePotionEffects());
+            this.currentEffects = this.activeEffects.isEmpty() ? this.dummyEffects : this.activeEffects;
+            this.sortEffects(this.currentEffects);
+        }
 
         float yOffset = 0;
         float tempWidth = 0;
-        float yAmount = this.ICON_SIZE + this.verticalSpacing;
+        float yAmount = this.ICON_SIZE + PotionEffectsConfig.INSTANCE.verticalSpacing;
 
-        this.height = (this.currentEffects.size() * yAmount) - this.verticalSpacing;
+        this.height = (this.currentEffects.size() * yAmount) - PotionEffectsConfig.INSTANCE.verticalSpacing;
 
         UGraphics.GL.pushMatrix();
         UGraphics.GL.scale(scale, scale, 1);
@@ -249,7 +202,7 @@ public class PotionEffects extends BasicHud {
 
             boolean excluded = false;
             if (this.excludePotions(exclusionConfig, effect)) {
-                if (example && this.showExcludedEffects) {
+                if (example && PotionEffectsConfig.INSTANCE.showExcludedEffects) {
                     excluded = true;
                 } else {
                     this.height -= yAmount;
@@ -389,7 +342,7 @@ public class PotionEffects extends BasicHud {
      *     2: Right horizontal alignment
      */
     private int getHorizontalAlignment() {
-        if (this.horizontalAlignment == 0) {
+        if (PotionEffectsConfig.INSTANCE.horizontalAlignment == 0) {
             switch (position.anchor) {
                 case TOP_LEFT:
                 case MIDDLE_LEFT:
@@ -405,7 +358,7 @@ public class PotionEffects extends BasicHud {
                     return 2;
             }
         }
-        return this.horizontalAlignment - 1;
+        return PotionEffectsConfig.INSTANCE.horizontalAlignment - 1;
     }
 
     /**
@@ -421,7 +374,7 @@ public class PotionEffects extends BasicHud {
      * @param effects {@link #currentEffects}
      */
     public void sortEffects(List<PotionEffect> effects) {
-        switch (this.sortingMethod) {
+        switch (PotionEffectsConfig.INSTANCE.sortingMethod) {
             case 0:
                 effects.sort(Comparator.comparingInt(PotionEffect::getPotionID));
                 break;
@@ -444,9 +397,10 @@ public class PotionEffects extends BasicHud {
             case 6:
                 effects.sort(Comparator.comparing(effect -> Potion.potionTypes[effect.getPotionID()].isBadEffect()));
         }
+
         effects.sort(Comparator.comparingDouble(effect -> -this.getEffectSetting(effect).orderPriority));
 
-        if (this.verticalSorting) {
+        if (PotionEffectsConfig.INSTANCE.verticalSorting) {
             Collections.reverse(effects);
         }
     }
