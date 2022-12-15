@@ -19,10 +19,14 @@ import com.google.common.collect.ImmutableMap;
 
 import me.tellinq.potioneffects.config.PotionEffectsConfig;
 import me.tellinq.potioneffects.event.UpdatePotionEffectsEvent;
+import me.tellinq.potioneffects.mixin.GuiAccessor;
 import me.tellinq.potioneffects.util.RomanNumeral;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.client.gui.inventory.GuiContainer;
+import net.minecraft.client.gui.inventory.GuiInventory;
+import net.minecraft.client.renderer.InventoryEffectRenderer;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
@@ -90,6 +94,7 @@ public class PotionEffects extends BasicHud {
      * Continuously counts up every tick, and resets back to 0 if the current amount is over a specific threshold determined by blinkSpeed.
      */
     @Exclude private int ticks = 0;
+    @Exclude private boolean fromInventory = false;
 
     /**
      * Used to set the current active potion effects. <br>
@@ -139,17 +144,28 @@ public class PotionEffects extends BasicHud {
     private void onInitialization(InitializationEvent event) {
         this.dummyEffects.add(new PotionEffect(Potion.moveSpeed.id, 1200, 1));
         this.dummyEffects.add(new PotionEffect(Potion.damageBoost.id, 30, 3));
+        PotionHUDTracker.INSTANCE.instances.clear();
         PotionHUDTracker.INSTANCE.instances.add(this);
     }
 
-    /**
-     * Gets the player's active effects and sets the current effect list to either: <br>
-     * 1. The actual active effect list (if not empty) <br>
-     * 2. The dummy list (if there are no active effects)
-     */
-    @Subscribe
-    private void onUpdatePotionEffects(UpdatePotionEffectsEvent event) {
+//    /**
+//     * Gets the player's active effects and sets the current effect list to either: <br>
+//     * 1. The actual active effect list (if not empty) <br>
+//     * 2. The dummy list (if there are no active effects)
+//     */
+//    @Subscribe
+//    private void onUpdatePotionEffects(UpdatePotionEffectsEvent event) {
+//        if (this.mc.thePlayer != null) {
+//            this.activeEffects = new ArrayList<>(this.mc.thePlayer.getActivePotionEffects());
+//            this.currentEffects = this.activeEffects.isEmpty() ? this.dummyEffects : this.activeEffects;
+//            this.sortEffects(this.currentEffects);
+//        }
+//    }
 
+    public void renderFromInventory() {
+        this.fromInventory = true;
+        this.drawAll(new UMatrixStack(), false);
+        this.fromInventory = false;
     }
 
     /**
@@ -157,6 +173,17 @@ public class PotionEffects extends BasicHud {
      */
     @Override
     protected boolean shouldShow() {
+        if (this.mc.thePlayer != null) {
+            this.activeEffects = new ArrayList<>(this.mc.thePlayer.getActivePotionEffects());
+            this.currentEffects = this.activeEffects.isEmpty() ? this.dummyEffects : this.activeEffects;
+            this.sortEffects(this.currentEffects);
+        }
+
+        // Prevent from rendering twice when in inventory
+        if (!this.fromInventory && PotionEffectsConfig.INSTANCE.overwriteIER && this.mc.currentScreen instanceof InventoryEffectRenderer) {
+            return false;
+        }
+
         return !this.activeEffects.isEmpty() && super.shouldShow();
     }
 
@@ -174,12 +201,6 @@ public class PotionEffects extends BasicHud {
         UGraphics.disableLighting();
 
         final int actualHorizontal = this.getHorizontalAlignment();
-
-        if (this.mc.thePlayer != null) {
-            this.activeEffects = new ArrayList<>(this.mc.thePlayer.getActivePotionEffects());
-            this.currentEffects = this.activeEffects.isEmpty() ? this.dummyEffects : this.activeEffects;
-            this.sortEffects(this.currentEffects);
-        }
 
         float yOffset = 0;
         float tempWidth = 0;
@@ -277,7 +298,10 @@ public class PotionEffects extends BasicHud {
                 }
 
                 if (showDuringBlink(blinkingConfig, blinkingConfig.icon.blink, effect.getDuration(), example)) {
+                    float zLevel = ((GuiAccessor) this.mc.ingameGUI).getZLevel();
+                    ((GuiAccessor) this.mc.ingameGUI).setZLevel(999);
                     this.mc.ingameGUI.drawTexturedModalRect(iconX, yOffset, potion.getStatusIconIndex() % 8 * 18, 198 + potion.getStatusIconIndex() / 8 * 18, 18, 18);
+                    ((GuiAccessor) this.mc.ingameGUI).setZLevel(zLevel);
                 }
 
                 tempWidth += this.ICON_SIZE;

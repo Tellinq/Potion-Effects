@@ -37,7 +37,7 @@ public class InventoryEffectRendererMixin {
             if (PotionEffectsConfig.INSTANCE.overwriteIER && potionHUD.isEnabled()) {
                 cancel = true;
 
-                potionHUD.drawAll(new UMatrixStack(), false);
+                potionHUD.renderFromInventory();
             }
         }
 

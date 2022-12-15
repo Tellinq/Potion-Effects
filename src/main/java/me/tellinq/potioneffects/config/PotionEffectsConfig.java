@@ -274,13 +274,6 @@ public class PotionEffectsConfig extends Config {
     )
     public boolean overwriteIER = false;
 
-    @Info(
-            text = "Icons may not appear properly in inventory!",
-            type = InfoType.WARNING,
-            subcategory = "Misc"
-    )
-    public String overwriteWarning;
-
     @HUD(name = "General HUD")
     public static PotionEffects hud = new PotionEffects();
 
