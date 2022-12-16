@@ -254,32 +254,27 @@ public class PotionEffectsConfig extends Config {
     public boolean verticalSorting = false;
 
     @Switch(
-            name = "Show Excluded Effects in HUD Editor",
-            description = "Show potion effects that are excluded in the HUD editor",
-            subcategory = "Misc"
-    )
-    public boolean showExcludedEffects = true;
-
-    @Info(
-            text = "Not recommended to disable if all effects are excluded!",
-            type = InfoType.WARNING,
-            subcategory = "Misc"
-    )
-    public String excludedAllWarning;
-
-    @Switch(
-            name = "Show Inventory Potion Info",
+            name = "Show Vanilla Inventory Potion Info",
             description = "Show the vanilla potion info",
-            subcategory = "Misc"
+            subcategory = "Inventory"
     )
     public boolean showPotionInfo = false;
 
     @Switch(
             name = "Show HUD in Foreground",
             description = "Show the HUD element in foreground",
-            subcategory = "Misc"
+            subcategory = "Inventory"
     )
     public boolean showHudInForeground = false;
+
+    @Dropdown(
+            name = "Show Excluded Effects in HUD Editor",
+            options = {"Never", "When Not Overflowing", "Always"},
+            description = "Show potion effects that are excluded in the HUD editor",
+            size = 2,
+            subcategory = "Exclusion"
+    )
+    public int showExcludedEffects = 1;
 
     @HUD(name = "General HUD")
     public static PotionEffects hud = new PotionEffects();

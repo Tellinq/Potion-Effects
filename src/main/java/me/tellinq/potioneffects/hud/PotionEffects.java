@@ -22,6 +22,7 @@ import me.tellinq.potioneffects.util.RomanNumeral;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.InventoryEffectRenderer;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.potion.Potion;
@@ -220,7 +221,13 @@ public class PotionEffects extends BasicHud {
 
             boolean excluded = false;
             if (this.excludePotions(exclusionConfig, effect)) {
-                if (example && PotionEffectsConfig.INSTANCE.showExcludedEffects) {
+                if (example && PotionEffectsConfig.INSTANCE.showExcludedEffects == 2) {
+                    excluded = true;
+                } else if (example && PotionEffectsConfig.INSTANCE.showExcludedEffects == 1) {
+                    if (this.mc.displayHeight < this.height * scale * new ScaledResolution(this.mc).getScaleFactor()) {
+                        this.height -= yAmount;
+                        continue;
+                    }
                     excluded = true;
                 } else {
                     this.height -= yAmount;
@@ -234,8 +241,9 @@ public class PotionEffects extends BasicHud {
             }
 
             UGraphics.GL.pushMatrix();
-            if (componentConfig.icon.toggle) {
-                UGraphics.GL.translate((29.5317 * Math.sin(2.57693 - (2.37913 * actualHorizontal)) + 4.19663) / scale, 0, 0);
+            boolean showIcon = componentConfig.statusIcon.toggle && potion.hasStatusIcon();
+            if (showIcon) {
+                UGraphics.GL.translate(29.5317 * Math.sin(2.57693 - (2.37913 * actualHorizontal)) + 4.19663, 0, 0);
             }
 
             this.componentAmount = 0;
@@ -281,7 +289,7 @@ public class PotionEffects extends BasicHud {
                 tempTempWidth = Math.max(tempTempWidth, this.textBuilder(durationText, componentConfig.duration, blinkingConfig, effect.getDuration(), yOffset, example, excluded));
             }
             UGraphics.GL.popMatrix();
-            if (componentConfig.icon.toggle) {
+            if (showIcon) {
                 UGraphics.color4f(1f, 1f, 1f, excluded ? 0.5f : 1f);
                 this.mc.getTextureManager().bindTexture(this.EFFECTS_RESOURCE);
                 float iconX = 0;
@@ -293,7 +301,7 @@ public class PotionEffects extends BasicHud {
                         iconX = this.width - this.ICON_SIZE;
                 }
 
-                if (showDuringBlink(blinkingConfig, blinkingConfig.icon.blink, effect.getDuration(), example)) {
+                if (showDuringBlink(blinkingConfig, blinkingConfig.statusIcon.blink, effect.getDuration(), example)) {
                     float zLevel = ((GuiAccessor) this.mc.ingameGUI).getZLevel();
                     ((GuiAccessor) this.mc.ingameGUI).setZLevel(999);
                     this.mc.ingameGUI.drawTexturedModalRect(iconX, yOffset, potion.getStatusIconIndex() % 8 * 18, 198 + potion.getStatusIconIndex() / 8 * 18, 18, 18);
@@ -640,12 +648,12 @@ public class PotionEffects extends BasicHud {
         public boolean overrideExclusion = true;
 
         @Page(
-                name = "Icon",
+                name = "Status Icon",
                 location = PageLocation.TOP,
                 description = "Show the effect icon",
                 subcategory = "Component"
         )
-        public Component icon = new Component();
+        public Component statusIcon = new Component();
 
         @Page(
                 name = "Effect Name",
