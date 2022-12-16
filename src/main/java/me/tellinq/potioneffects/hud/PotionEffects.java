@@ -117,7 +117,7 @@ public class PotionEffects extends BasicHud {
      * Padding is set to 0 by default
      */
     public PotionEffects() {
-        super(true, 0, 0, 1, false, false, 0, 0, 0, new OneColor(0, 0, 0, 120), false, 2, new OneColor(0, 0, 0));
+        super(true, 2f, 1080f / 2f, 1, false, false, 0, 0, 0, new OneColor(0, 0, 0, 120), false, 2, new OneColor(0, 0, 0));
         EventManager.INSTANCE.register(this);
     }
 
