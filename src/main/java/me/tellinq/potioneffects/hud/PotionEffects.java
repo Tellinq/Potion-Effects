@@ -333,7 +333,7 @@ public class PotionEffects extends BasicHud {
         int width = this.fontRenderer.getStringWidth(builtTime);
 
         float x = 0;
-        float timeY = yOffset + this.fontRenderer.FONT_HEIGHT * (componentAmount - 1) + 1;
+        float timeY = yOffset + (this.fontRenderer.FONT_HEIGHT + 1) * (componentAmount - 1);
 
         if (this.oneComponentActive) {
             timeY = yOffset + this.fontRenderer.FONT_HEIGHT / 2f + 0.5f;
