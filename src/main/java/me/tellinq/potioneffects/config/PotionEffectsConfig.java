@@ -15,7 +15,7 @@ import net.minecraft.potion.Potion;
 import java.util.*;
 
 public class PotionEffectsConfig extends Config {
-    public static List<String> effectNames = new ArrayList<>();
+    @Exclude public static List<String> effectNames = new ArrayList<>();
     @Exclude public static PotionEffectsConfig INSTANCE;
 
     @Page(
