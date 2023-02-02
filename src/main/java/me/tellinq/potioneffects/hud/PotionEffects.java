@@ -247,8 +247,8 @@ public class PotionEffects extends BasicHud {
             }
 
             this.componentAmount = 0;
-            this.oneComponentActive = !componentConfig.effectName.toggle || !componentConfig.duration.toggle;
-            if (componentConfig.effectName.toggle) {
+            this.oneComponentActive = !componentConfig.effectName.textComponent.component.toggle || !componentConfig.duration.textComponent.component.toggle;
+            if (componentConfig.effectName.textComponent.component.toggle) {
                 StringBuilder titleBuilder = new StringBuilder();
 
                 titleBuilder.append(formattingConfig.effectName.customName.isEmpty() ? I18n.format(potion.getName()) : formattingConfig.effectName.customName);
@@ -265,10 +265,10 @@ public class PotionEffects extends BasicHud {
                 }
 
                 ++this.componentAmount;
-                tempTempWidth = Math.max(tempTempWidth, this.textBuilder(titleBuilder.toString(), componentConfig.effectName, blinkingConfig, effect.getDuration(), yOffset, example, excluded));
+                tempTempWidth = Math.max(tempTempWidth, this.textBuilder(titleBuilder.toString(), componentConfig.effectName.textComponent, blinkingConfig, effect.getDuration(), yOffset, example, excluded));
             }
 
-            if (componentConfig.duration.toggle) {
+            if (componentConfig.duration.textComponent.component.toggle) {
                 String durationText = "";
                 if (effect.getIsPotionDurationMax()) {
                     durationText = formattingConfig.duration.maxDurationString;
@@ -286,7 +286,7 @@ public class PotionEffects extends BasicHud {
                 }
 
                 ++this.componentAmount;
-                tempTempWidth = Math.max(tempTempWidth, this.textBuilder(durationText, componentConfig.duration, blinkingConfig, effect.getDuration(), yOffset, example, excluded));
+                tempTempWidth = Math.max(tempTempWidth, this.textBuilder(durationText, componentConfig.duration.textComponent, blinkingConfig, effect.getDuration(), yOffset, example, excluded));
             }
             UGraphics.GL.popMatrix();
             if (showIcon) {
@@ -347,7 +347,7 @@ public class PotionEffects extends BasicHud {
             timeY = yOffset + this.fontRenderer.FONT_HEIGHT / 2f + 0.5f;
         }
 
-        if (showDuringBlink(blinkingConfig, component.blink, value, example)) {
+        if (showDuringBlink(blinkingConfig, component.component.blink, value, example)) {
             switch (this.getHorizontalAlignment()) {
                 case 1:
                     x = this.width / 2f - (float) width / 2;
@@ -822,7 +822,14 @@ public class PotionEffects extends BasicHud {
         }
     }
 
-    public static class EffectNameComponent extends TextComponent {
+    public static class EffectNameComponent {
+
+        @Page(
+                name = "Text Component Options",
+                location = PageLocation.BOTTOM
+        )
+        public TextComponent textComponent = new TextComponent();
+
 
         @Text(
                 name = "Custom Name",
@@ -858,7 +865,12 @@ public class PotionEffects extends BasicHud {
         public EffectNameComponent() {}
     }
 
-    public static class DurationComponent extends TextComponent {
+    public static class DurationComponent {
+        @Page(
+                name = "Text Component Options",
+                location = PageLocation.BOTTOM
+        )
+        public TextComponent textComponent = new TextComponent();
 
         @Text(
                 name = "Max Duration String",
@@ -880,7 +892,13 @@ public class PotionEffects extends BasicHud {
         public DurationComponent() {}
     }
 
-    public static class TextComponent extends Component {
+    public static class TextComponent {
+        @Page(
+                name = "Component Options",
+                location = PageLocation.BOTTOM
+        )
+        public Component component = new Component();
+
         @Checkbox(
                 name = "Bold Text",
                 description = "Bold the component text",
