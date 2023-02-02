@@ -795,7 +795,7 @@ public class PotionEffects extends BasicHud {
                 description = "The value(s) that will be excluded based off the duration rule",
                 subcategory = "Exclusion",
                 min = 2,
-                max = 90,
+                max = 500,
                 step = 1
         )
         public float excludedDurationThreshold = 30f;
