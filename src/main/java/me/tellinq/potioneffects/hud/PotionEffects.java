@@ -14,6 +14,7 @@ import cc.polyfrost.oneconfig.libs.universal.UMatrixStack;
 import cc.polyfrost.oneconfig.libs.universal.UMinecraft;
 import cc.polyfrost.oneconfig.renderer.NanoVGHelper;
 
+import cc.polyfrost.oneconfig.renderer.TextRenderer;
 import com.google.common.collect.ImmutableMap;
 
 import me.tellinq.potioneffects.config.PotionEffectsConfig;
@@ -35,7 +36,7 @@ import java.util.*;
 public class PotionEffects extends BasicHud {
 
     /** Each effect's icon texture size is 18 pixels. */
-    @Exclude public final int ICON_SIZE = 18;
+    @Exclude public static final int ICON_SIZE = 18;
 
     @Exclude public int componentAmount = 0;
     @Exclude public boolean oneComponentActive = false;
@@ -46,10 +47,10 @@ public class PotionEffects extends BasicHud {
             new ResourceLocation("textures/gui/container/inventory.png");
 
     /** Gets OneConfig's Universal Minecraft instance. */
-    @Exclude public final Minecraft mc = UMinecraft.getMinecraft();
+    @Exclude public static final Minecraft mc = UMinecraft.getMinecraft();
 
     /** Gets OneConfig's Universal Minecraft fontRenderer. */
-    @Exclude public final FontRenderer fontRenderer = UMinecraft.getFontRenderer();
+    @Exclude public static final FontRenderer fontRenderer = UMinecraft.getFontRenderer();
 
     /**
      * Map of all of Minecraft's effect IDs, to the mod's config potion type respectively. <br>
@@ -170,14 +171,14 @@ public class PotionEffects extends BasicHud {
      */
     @Override
     protected boolean shouldShow() {
-        if (this.mc.thePlayer != null) {
-            this.activeEffects = new ArrayList<>(this.mc.thePlayer.getActivePotionEffects());
+        if (mc.thePlayer != null) {
+            this.activeEffects = new ArrayList<>(mc.thePlayer.getActivePotionEffects());
             this.currentEffects = this.activeEffects.isEmpty() ? this.dummyEffects : this.activeEffects;
             this.sortEffects(this.currentEffects);
         }
 
         // Prevent from rendering twice when in inventory
-        if (!this.fromInventory && PotionEffectsConfig.INSTANCE.showHudInForeground && this.mc.currentScreen instanceof InventoryEffectRenderer) {
+        if (!this.fromInventory && PotionEffectsConfig.INSTANCE.showHudInForeground && mc.currentScreen instanceof InventoryEffectRenderer) {
             return false;
         }
 
@@ -201,7 +202,7 @@ public class PotionEffects extends BasicHud {
 
         float yOffset = 0;
         float tempWidth = 0;
-        float yAmount = this.ICON_SIZE + PotionEffectsConfig.INSTANCE.verticalSpacing;
+        float yAmount = ICON_SIZE + PotionEffectsConfig.INSTANCE.verticalSpacing;
 
         this.height = (this.currentEffects.size() * yAmount) - PotionEffectsConfig.INSTANCE.verticalSpacing;
 
@@ -224,7 +225,7 @@ public class PotionEffects extends BasicHud {
                 if (example && PotionEffectsConfig.INSTANCE.showExcludedEffects == 2) {
                     excluded = true;
                 } else if (example && PotionEffectsConfig.INSTANCE.showExcludedEffects == 1) {
-                    if (this.mc.displayHeight < this.height * scale * new ScaledResolution(this.mc).getScaleFactor()) {
+                    if (mc.displayHeight < this.height * scale * new ScaledResolution(mc).getScaleFactor()) {
                         this.height -= yAmount;
                         continue;
                     }
@@ -241,9 +242,20 @@ public class PotionEffects extends BasicHud {
             }
 
             UGraphics.GL.pushMatrix();
-            boolean showIcon = componentConfig.statusIcon.toggle && potion.hasStatusIcon();
+            boolean showIcon = componentConfig.statusIcon.component.toggle && potion.hasStatusIcon();
+
+            float iconSpacing = ICON_SIZE + componentConfig.statusIcon.spacing;
             if (showIcon) {
-                UGraphics.GL.translate(29.5317 * Math.sin(2.57693 - (2.37913 * actualHorizontal)) + 4.19663, 0, 0);
+                float iconTranslation = iconSpacing;
+                switch (actualHorizontal) {
+                    case 1:
+                        iconTranslation /= 2;
+                        break;
+                    case 2:
+                        iconTranslation = -iconTranslation;
+                }
+
+                UGraphics.GL.translate(iconTranslation, 0, 0);
             }
 
             this.componentAmount = 0;
@@ -265,7 +277,7 @@ public class PotionEffects extends BasicHud {
                 }
 
                 ++this.componentAmount;
-                tempTempWidth = Math.max(tempTempWidth, this.textBuilder(titleBuilder.toString(), componentConfig.effectName.textComponent, blinkingConfig, effect.getDuration(), yOffset, example, excluded));
+                tempTempWidth = Math.max(tempTempWidth, this.textBuilder(titleBuilder.toString(), componentConfig.effectName.textComponent, blinkingConfig, colorConfig.effectName.textComponent, effect.getDuration(), yOffset, example, excluded));
             }
 
             if (componentConfig.duration.textComponent.component.toggle) {
@@ -286,29 +298,29 @@ public class PotionEffects extends BasicHud {
                 }
 
                 ++this.componentAmount;
-                tempTempWidth = Math.max(tempTempWidth, this.textBuilder(durationText, componentConfig.duration.textComponent, blinkingConfig, effect.getDuration(), yOffset, example, excluded));
+                tempTempWidth = Math.max(tempTempWidth, this.textBuilder(durationText, componentConfig.duration.textComponent, blinkingConfig, colorConfig.duration.textComponent, effect.getDuration(), yOffset, example, excluded));
             }
             UGraphics.GL.popMatrix();
             if (showIcon) {
                 UGraphics.color4f(1f, 1f, 1f, excluded ? 0.5f : 1f);
-                this.mc.getTextureManager().bindTexture(this.EFFECTS_RESOURCE);
+                mc.getTextureManager().bindTexture(this.EFFECTS_RESOURCE);
                 float iconX = 0;
                 switch (actualHorizontal) {
                     case 1:
-                        iconX = this.width / 2f - (tempTempWidth - 20.0f) / 2 - 20.0f;
+                        iconX = this.width / 2f - (tempTempWidth - iconSpacing) / 2 - iconSpacing;
                         break;
                     case 2:
-                        iconX = this.width - this.ICON_SIZE;
+                        iconX = this.width - ICON_SIZE;
                 }
 
-                if (showDuringBlink(blinkingConfig, blinkingConfig.statusIcon.blink, effect.getDuration(), example)) {
-                    float zLevel = ((GuiAccessor) this.mc.ingameGUI).getZLevel();
-                    ((GuiAccessor) this.mc.ingameGUI).setZLevel(999);
-                    this.mc.ingameGUI.drawTexturedModalRect(iconX, yOffset, potion.getStatusIconIndex() % 8 * 18, 198 + potion.getStatusIconIndex() / 8 * 18, 18, 18);
-                    ((GuiAccessor) this.mc.ingameGUI).setZLevel(zLevel);
+                if (showDuringBlink(blinkingConfig, blinkingConfig.statusIcon.component.blink, effect.getDuration(), example)) {
+                    float zLevel = ((GuiAccessor) mc.ingameGUI).getZLevel();
+                    ((GuiAccessor) mc.ingameGUI).setZLevel(999);
+                    mc.ingameGUI.drawTexturedModalRect(iconX, yOffset, potion.getStatusIconIndex() % 8 * 18, 198 + potion.getStatusIconIndex() / 8 * 18, 18, 18);
+                    ((GuiAccessor) mc.ingameGUI).setZLevel(zLevel);
                 }
 
-                tempTempWidth += this.ICON_SIZE + 2;
+                tempTempWidth += iconSpacing;
             }
 
             yOffset += yAmount;
@@ -319,7 +331,7 @@ public class PotionEffects extends BasicHud {
         UGraphics.GL.popMatrix();
     }
 
-    public float textBuilder(String text, TextComponent component, Effect blinkingConfig, float value, float yOffset, boolean example, boolean excluded) {
+    public float textBuilder(String text, TextComponent component, Effect blinkingConfig, TextComponent color, float value, float yOffset, boolean example, boolean excluded) {
         StringBuilder builder = new StringBuilder();
         // I really hope there's a more efficient way of setting this up...
         if (component.boldText) {
@@ -338,13 +350,13 @@ public class PotionEffects extends BasicHud {
 
         String builtTime = builder.toString();
 
-        int width = this.fontRenderer.getStringWidth(builtTime);
+        int width = fontRenderer.getStringWidth(builtTime);
 
         float x = 0;
-        float timeY = yOffset + (this.fontRenderer.FONT_HEIGHT + 1) * (componentAmount - 1);
+        float timeY = yOffset + (fontRenderer.FONT_HEIGHT + 1) * (componentAmount - 1);
 
         if (this.oneComponentActive) {
-            timeY = yOffset + this.fontRenderer.FONT_HEIGHT / 2f + 0.5f;
+            timeY = yOffset + fontRenderer.FONT_HEIGHT / 2f + 0.5f;
         }
 
         if (showDuringBlink(blinkingConfig, component.component.blink, value, example)) {
@@ -355,7 +367,7 @@ public class PotionEffects extends BasicHud {
                 case 2:
                     x = this.width - width;
             }
-            NanoVGHelper.INSTANCE.drawScaledString(builtTime, x, timeY, getColor(component.color.getRGB(), excluded), NanoVGHelper.TextType.toType(component.textType), 1);
+            TextRenderer.drawScaledString(builtTime, x, timeY, getColor(color.color.getRGB(), excluded), TextRenderer.TextType.toType(component.textType), 1);
         }
 
         return width;
@@ -653,7 +665,7 @@ public class PotionEffects extends BasicHud {
                 description = "Show the effect icon",
                 subcategory = "Component"
         )
-        public Component statusIcon = new Component();
+        public IconComponent statusIcon = new IconComponent();
 
         @Page(
                 name = "Effect Name",
@@ -820,6 +832,25 @@ public class PotionEffects extends BasicHud {
             this(name);
             this.id = id;
         }
+    }
+
+    public static class IconComponent {
+        @Page(
+                name = "Component Options",
+                location = PageLocation.BOTTOM
+        )
+        public Component component = new Component();
+
+        @Slider(
+                name = "Icon Spacing",
+                description = "Adjust the spacing between the text and icon",
+                min = 0,
+                max = 10,
+                subcategory = "Dimensions"
+        )
+        public float spacing = 2f;
+
+        public IconComponent() {}
     }
 
     public static class EffectNameComponent {
