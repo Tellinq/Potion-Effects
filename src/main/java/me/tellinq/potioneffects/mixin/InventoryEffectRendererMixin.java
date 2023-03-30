@@ -29,12 +29,9 @@ public class InventoryEffectRendererMixin {
     @Inject(method = "drawActivePotionEffects", at = @At("HEAD"), cancellable = true)
     private void injectDrawActivePotionEffects(CallbackInfo ci) {
         for (PotionEffects potionHUD : PotionEffects.PotionHUDTracker.INSTANCE.instances) {
-            if (PotionEffectsConfig.INSTANCE.showHudInForeground && potionHUD.isEnabled()) {
-                if (PotionEffectsConfig.INSTANCE.showHudInForeground) {
-                    potionHUD.renderFromInventory();
-                }
+            if (potionHUD.isEnabled() && PotionEffectsConfig.INSTANCE.showHudInForeground) {
+                potionHUD.renderFromInventory();
             }
-
         }
 
         if (!PotionEffectsConfig.INSTANCE.showPotionInfo && PotionEffectsMod.INSTANCE.config.enabled) {
