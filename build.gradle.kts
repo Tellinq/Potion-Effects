@@ -1,14 +1,13 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
-import gg.essential.gradle.util.noServerRunConfigs
+import cc.polyfrost.gradle.util.noServerRunConfigs
 
 plugins {
-    id("gg.essential.multi-version")
-    id("gg.essential.defaults.repo")
-    id("gg.essential.defaults.java")
-    id("gg.essential.defaults.loom")
+    id("cc.polyfrost.multi-version")
+    id("cc.polyfrost.defaults.repo")
+    id("cc.polyfrost.defaults.java")
+    id("cc.polyfrost.defaults.loom")
     id("com.github.johnrengelman.shadow")
     id("net.kyori.blossom") version "1.3.0"
-    id("io.github.juuxel.loom-quiltflower-mini")
     id("signing")
     java
 }
