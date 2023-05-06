@@ -835,11 +835,11 @@ public class PotionEffects extends BasicHud {
     }
 
     public static class IconComponent extends Component {
-        @Page(
+        /*@Page(
                 name = "Component Options",
                 location = PageLocation.BOTTOM
         )
-        public Component component = new Component();
+        public Component component = new Component();*/
 
         @Slider(
                 name = "Icon Spacing",
@@ -855,11 +855,11 @@ public class PotionEffects extends BasicHud {
 
     public static class EffectNameComponent extends TextComponent {
 
-        @Page(
+        /*@Page(
                 name = "Text Component Options",
                 location = PageLocation.BOTTOM
         )
-        public TextComponent textComponent = new TextComponent();
+        public TextComponent textComponent = new TextComponent();*/
 
 
         @Text(
@@ -897,11 +897,11 @@ public class PotionEffects extends BasicHud {
     }
 
     public static class DurationComponent extends TextComponent {
-        @Page(
+        /*@Page(
                 name = "Text Component Options",
                 location = PageLocation.BOTTOM
         )
-        public TextComponent textComponent = new TextComponent();
+        public TextComponent textComponent = new TextComponent();*/
 
         @Text(
                 name = "Max Duration String",
@@ -924,11 +924,11 @@ public class PotionEffects extends BasicHud {
     }
 
     public static class TextComponent extends Component {
-        @Page(
+        /*@Page(
                 name = "Component Options",
                 location = PageLocation.BOTTOM
         )
-        public Component component = new Component();
+        public Component component = new Component();*/
 
         @Checkbox(
                 name = "Bold Text",
