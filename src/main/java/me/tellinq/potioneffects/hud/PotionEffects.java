@@ -242,7 +242,7 @@ public class PotionEffects extends BasicHud {
             }
 
             UGraphics.GL.pushMatrix();
-            boolean showIcon = componentConfig.statusIcon/*.component*/.toggle && potion.hasStatusIcon();
+            boolean showIcon = componentConfig.statusIcon.toggle && potion.hasStatusIcon();
 
             float iconSpacing = ICON_SIZE + componentConfig.statusIcon.spacing;
             if (showIcon) {
@@ -259,8 +259,8 @@ public class PotionEffects extends BasicHud {
             }
 
             this.componentAmount = 0;
-            this.oneComponentActive = !componentConfig.effectName/*.textComponent.component*/.toggle || !componentConfig.duration/*.textComponent.component*/.toggle;
-            if (componentConfig.effectName/*.textComponent.component*/.toggle) {
+            this.oneComponentActive = !componentConfig.effectName.toggle || !componentConfig.duration.toggle;
+            if (componentConfig.effectName.toggle) {
                 StringBuilder titleBuilder = new StringBuilder();
 
                 titleBuilder.append(formattingConfig.effectName.customName.isEmpty() ? I18n.format(potion.getName()) : formattingConfig.effectName.customName);
@@ -277,10 +277,10 @@ public class PotionEffects extends BasicHud {
                 }
 
                 ++this.componentAmount;
-                tempTempWidth = Math.max(tempTempWidth, this.textBuilder(titleBuilder.toString(), componentConfig.effectName/*.textComponent*/, blinkingConfig, colorConfig.effectName/*.textComponent*/, effect.getDuration(), yOffset, example, excluded));
+                tempTempWidth = Math.max(tempTempWidth, this.textBuilder(titleBuilder.toString(), componentConfig.effectName, blinkingConfig, colorConfig.effectName, effect.getDuration(), yOffset, example, excluded));
             }
 
-            if (componentConfig.duration/*.textComponent.component*/.toggle) {
+            if (componentConfig.duration.toggle) {
                 String durationText = "";
                 if (effect.getIsPotionDurationMax()) {
                     durationText = formattingConfig.duration.maxDurationString;
@@ -298,7 +298,7 @@ public class PotionEffects extends BasicHud {
                 }
 
                 ++this.componentAmount;
-                tempTempWidth = Math.max(tempTempWidth, this.textBuilder(durationText, componentConfig.duration/*.textComponent*/, blinkingConfig, colorConfig.duration/*.textComponent*/, effect.getDuration(), yOffset, example, excluded));
+                tempTempWidth = Math.max(tempTempWidth, this.textBuilder(durationText, componentConfig.duration, blinkingConfig, colorConfig.duration, effect.getDuration(), yOffset, example, excluded));
             }
             UGraphics.GL.popMatrix();
             if (showIcon) {
@@ -313,7 +313,7 @@ public class PotionEffects extends BasicHud {
                         iconX = this.width - ICON_SIZE;
                 }
 
-                if (showDuringBlink(blinkingConfig, blinkingConfig.statusIcon/*.component*/.blink, effect.getDuration(), example)) {
+                if (showDuringBlink(blinkingConfig, blinkingConfig.statusIcon.blink, effect.getDuration(), example)) {
                     float zLevel = ((GuiAccessor) mc.ingameGUI).getZLevel();
                     ((GuiAccessor) mc.ingameGUI).setZLevel(999);
                     mc.ingameGUI.drawTexturedModalRect(iconX, yOffset, potion.getStatusIconIndex() % 8 * 18, 198 + potion.getStatusIconIndex() / 8 * 18, 18, 18);
@@ -359,7 +359,7 @@ public class PotionEffects extends BasicHud {
             timeY = yOffset + fontRenderer.FONT_HEIGHT / 2f + 0.5f;
         }
 
-        if (showDuringBlink(blinkingConfig, component/*.component*/.blink, value, example)) {
+        if (showDuringBlink(blinkingConfig, component.blink, value, example)) {
             switch (this.getHorizontalAlignment()) {
                 case 1:
                     x = this.width / 2f - (float) width / 2;
