@@ -242,7 +242,7 @@ public class PotionEffects extends BasicHud {
             }
 
             UGraphics.GL.pushMatrix();
-            boolean showIcon = componentConfig.statusIcon.toggle && potion.hasStatusIcon();
+            boolean showIcon = componentConfig.statusIcon.toggle/* && potion.hasStatusIcon()*/;
 
             float iconSpacing = ICON_SIZE + componentConfig.statusIcon.spacing;
             if (showIcon) {
