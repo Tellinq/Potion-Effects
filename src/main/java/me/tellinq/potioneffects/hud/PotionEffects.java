@@ -12,7 +12,6 @@ import cc.polyfrost.oneconfig.libs.eventbus.Subscribe;
 import cc.polyfrost.oneconfig.libs.universal.UGraphics;
 import cc.polyfrost.oneconfig.libs.universal.UMatrixStack;
 import cc.polyfrost.oneconfig.libs.universal.UMinecraft;
-import cc.polyfrost.oneconfig.renderer.NanoVGHelper;
 
 import cc.polyfrost.oneconfig.renderer.TextRenderer;
 import com.google.common.collect.ImmutableMap;
@@ -242,7 +241,9 @@ public class PotionEffects extends BasicHud {
             }
 
             UGraphics.GL.pushMatrix();
-            boolean showIcon = componentConfig.statusIcon.toggle/* && potion.hasStatusIcon()*/;
+            boolean showIcon = this.showComponent(componentConfig.statusIcon, effect);
+            boolean showEffectName = this.showComponent(componentConfig.effectName, effect);
+            boolean showDuration = this.showComponent(componentConfig.duration, effect);
 
             float iconSpacing = ICON_SIZE + componentConfig.statusIcon.spacing;
             if (showIcon) {
@@ -259,8 +260,8 @@ public class PotionEffects extends BasicHud {
             }
 
             this.componentAmount = 0;
-            this.oneComponentActive = !componentConfig.effectName.toggle || !componentConfig.duration.toggle;
-            if (componentConfig.effectName.toggle) {
+            this.oneComponentActive = !showEffectName || !showDuration;
+            if (showEffectName) {
                 StringBuilder titleBuilder = new StringBuilder();
 
                 titleBuilder.append(formattingConfig.effectName.customName.isEmpty() ? I18n.format(potion.getName()) : formattingConfig.effectName.customName);
@@ -280,7 +281,7 @@ public class PotionEffects extends BasicHud {
                 tempTempWidth = Math.max(tempTempWidth, this.textBuilder(titleBuilder.toString(), componentConfig.effectName, blinkingConfig, colorConfig.effectName, effect.getDuration(), yOffset, example, excluded));
             }
 
-            if (componentConfig.duration.toggle) {
+            if (showDuration) {
                 String durationText = "";
                 if (effect.getIsPotionDurationMax()) {
                     durationText = formattingConfig.duration.maxDurationString;
@@ -329,6 +330,16 @@ public class PotionEffects extends BasicHud {
 
         this.width = tempWidth;
         UGraphics.GL.popMatrix();
+    }
+
+    public boolean showComponent(Component component, PotionEffect effect) {
+        return component.toggle &&
+                !this.excludeCondition(component.permanentEffectsRule, effect.getIsPotionDurationMax()) &&
+                !this.excludeCondition(component.ambientEffectsRule, effect.getIsAmbient()) &&
+                !this.excludeCondition(component.emittingParticlesRule, effect.getIsShowParticles()) &&
+                !this.excludeCondition(component.badEffectsRule, Potion.potionTypes[effect.getPotionID()].isBadEffect()) &&
+                !this.excludeAmount(component.durationAmountRule, effect.getDuration(), component.excludedDurationThreshold * 20.0F) && !effect.getIsPotionDurationMax() &&
+                !this.excludeAmount(component.amplifierAmountRule, effect.getAmplifier(), component.excludedAmplifierValues - 1);
     }
 
     public float textBuilder(String text, TextComponent component, Effect blinkingConfig, TextComponent color, float value, float yOffset, boolean example, boolean excluded) {
@@ -897,11 +908,6 @@ public class PotionEffects extends BasicHud {
     }
 
     public static class DurationComponent extends TextComponent {
-        /*@Page(
-                name = "Text Component Options",
-                location = PageLocation.BOTTOM
-        )
-        public TextComponent textComponent = new TextComponent();*/
 
         @Text(
                 name = "Max Duration String",
@@ -974,6 +980,96 @@ public class PotionEffects extends BasicHud {
 
         @Switch(name = "Blink")
         public boolean blink = true;
+
+
+        @Dropdown(
+                name = "Duration Amount Rule",
+                description = "Exclude effects that are either above, below, at, or not at a certain duration threshold",
+                options = {
+                        "None",
+                        "Exclude All Above",
+                        "Exclude All Below",
+                        "Exclude All At",
+                        "Exclude All Not At"
+                },
+                subcategory = "Exclusion"
+        )
+        public int durationAmountRule = 0;
+
+        @Dropdown(
+                name = "Amplifier Amount Rule",
+                description = "Exclude effects that are either above, below, at, or not at a certain amplifier amount",
+                options = {
+                        "None",
+                        "Exclude All Above",
+                        "Exclude All Below",
+                        "Exclude All At",
+                        "Exclude All Not At"
+                },
+                subcategory = "Exclusion"
+        )
+        public int amplifierAmountRule = 0;
+
+        @Dropdown(
+                name = "Permanent Effects Rule",
+                description = "Decide if permanent or temporary effects should be excluded.",
+                subcategory = "Exclusion",
+                options = {
+                        "None",
+                        "Exclude All Permanent Effects",
+                        "Exclude All Temporary Effects"
+                })
+        public int permanentEffectsRule = 0;
+
+        @Dropdown(
+                name = "Ambient Effects Rule",
+                description = "Decide if effects from or not from a beacon should be excluded.",
+                subcategory = "Exclusion",
+                options = {
+                        "None",
+                        "Exclude All Ambient Effects",
+                        "Exclude All Non Ambient Effects"
+                })
+        public int ambientEffectsRule = 0;
+
+        @Dropdown(
+                name = "Emitting Particles Rule",
+                description = "Decide if emitting/disallowing particle effects should be excluded.",
+                subcategory = "Exclusion",
+                options = {
+                        "None",
+                        "Exclude All Emitting Particles",
+                        "Exclude All Disallowing Particles"
+                })
+        public int emittingParticlesRule = 0;
+
+        @Dropdown(
+                name = "Bad Effects Rule",
+                description = "Decide if good or bad effects should be excluded.",
+                subcategory = "Exclusion",
+                options = {"None", "Exclude All Bad Effects", "Exclude All Good Effects"}
+        )
+        public int badEffectsRule = 0;
+
+        @Slider(
+                name = "Excluded Duration Threshold",
+                description = "The value(s) that will be excluded based off the duration rule",
+                subcategory = "Exclusion",
+                min = 2,
+                max = 500,
+                step = 1
+        )
+        public float excludedDurationThreshold = 30f;
+
+        @Slider(
+                name = "Excluded Amplifier Value(s)",
+                description = "The value(s) that will be excluded based off the amplifier rule",
+                subcategory = "Exclusion",
+                min = 0,
+                max = 20,
+                step = 1
+        )
+        public int excludedAmplifierValues = 10;
 
         public Component() {}
     }
