@@ -333,12 +333,22 @@ public class PotionEffects extends BasicHud {
     }
 
     public boolean showComponent(Component component, PotionEffect effect) {
+        if (!effect.getIsPotionDurationMax()) {
+            if (this.excludeAmount(component.durationAmountRule, effect.getDuration(), component.excludedDurationThreshold * 20.0F)) {
+                return false;
+            }
+
+        }
+
+        if (this.excludeCondition(component.permanentEffectsRule, effect.getIsPotionDurationMax())) {
+            return false;
+        }
+
+
         return component.toggle &&
-                !this.excludeCondition(component.permanentEffectsRule, effect.getIsPotionDurationMax()) &&
                 !this.excludeCondition(component.ambientEffectsRule, effect.getIsAmbient()) &&
                 !this.excludeCondition(component.emittingParticlesRule, effect.getIsShowParticles()) &&
                 !this.excludeCondition(component.badEffectsRule, Potion.potionTypes[effect.getPotionID()].isBadEffect()) &&
-                !(this.excludeAmount(component.durationAmountRule, effect.getDuration(), component.excludedDurationThreshold * 20.0F) || !effect.getIsPotionDurationMax()) &&
                 !this.excludeAmount(component.amplifierAmountRule, effect.getAmplifier(), component.excludedAmplifierValues - 1);
     }
 
