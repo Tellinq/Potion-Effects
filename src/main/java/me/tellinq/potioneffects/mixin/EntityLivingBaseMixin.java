@@ -13,9 +13,23 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(EntityLivingBase.class)
 public class EntityLivingBaseMixin {
-    /** Makes UpdatePotionEffectsEvent run right before potionsNeedUpdate is set to false. */
-    @Inject(method = "updatePotionEffects", at = @At(value = "HEAD"))
-    private void injectUpdatePotionEffects(CallbackInfo ci) {
+    @Inject(method = "readEntityFromNBT", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/EntityLivingBase;activePotionsMap:Ljava/util/Map;", shift = At.Shift.AFTER))
+    private void inject$readEntityFromNBT(CallbackInfo ci) {
+        EventManager.INSTANCE.post(new UpdatePotionEffectsEvent());
+    }
+
+    @Inject(method = "addPotionEffect", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLivingBase;onNewPotionEffect(Lnet/minecraft/potion/PotionEffect;)V", shift = At.Shift.AFTER))
+    private void inject$addPotionEffect(CallbackInfo ci) {
+        EventManager.INSTANCE.post(new UpdatePotionEffectsEvent());
+    }
+
+    @Inject(method = "removePotionEffect", at = @At(value = "TAIL"))
+    public void inject$removePotionEffect(int potionId, CallbackInfo ci) {
+        EventManager.INSTANCE.post(new UpdatePotionEffectsEvent());
+    }
+
+    @Inject(method = "removePotionEffectClient", at = @At(value = "TAIL"))
+    public void inject$removePotionEffectClient(int potionId, CallbackInfo ci) {
         EventManager.INSTANCE.post(new UpdatePotionEffectsEvent());
     }
 }
