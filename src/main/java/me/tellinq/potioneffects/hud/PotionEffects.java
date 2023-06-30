@@ -17,6 +17,7 @@ import cc.polyfrost.oneconfig.renderer.TextRenderer;
 import com.google.common.collect.ImmutableMap;
 
 import me.tellinq.potioneffects.config.PotionEffectsConfig;
+import me.tellinq.potioneffects.event.UpdatePotionEffectsEvent;
 import me.tellinq.potioneffects.mixin.GuiAccessor;
 import me.tellinq.potioneffects.util.RomanNumeral;
 
@@ -145,19 +146,19 @@ public class PotionEffects extends BasicHud {
         PotionHUDTracker.INSTANCE.instances.add(this);
     }
 
-//    /**
-//     * Gets the player's active effects and sets the current effect list to either: <br>
-//     * 1. The actual active effect list (if not empty) <br>
-//     * 2. The dummy list (if there are no active effects)
-//     */
-//    @Subscribe
-//    private void onUpdatePotionEffects(UpdatePotionEffectsEvent event) {
-//        if (this.mc.thePlayer != null) {
-//            this.activeEffects = new ArrayList<>(this.mc.thePlayer.getActivePotionEffects());
-//            this.currentEffects = this.activeEffects.isEmpty() ? this.dummyEffects : this.activeEffects;
-//            this.sortEffects(this.currentEffects);
-//        }
-//    }
+    /**
+     * Gets the player's active effects and sets the current effect list to either: <br>
+     * 1. The actual active effect list (if not empty) <br>
+     * 2. The dummy list (if there are no active effects)
+     */
+    @Subscribe
+    private void onUpdatePotionEffects(UpdatePotionEffectsEvent event) {
+        if (this.mc.thePlayer != null) {
+            this.activeEffects = new ArrayList<>(this.mc.thePlayer.getActivePotionEffects());
+            this.currentEffects = this.activeEffects.isEmpty() ? this.dummyEffects : this.activeEffects;
+            this.sortEffects(this.currentEffects);
+        }
+    }
 
     public void renderFromInventory() {
         this.fromInventory = true;
@@ -170,12 +171,6 @@ public class PotionEffects extends BasicHud {
      */
     @Override
     protected boolean shouldShow() {
-        if (mc.thePlayer != null) {
-            this.activeEffects = new ArrayList<>(mc.thePlayer.getActivePotionEffects());
-            this.currentEffects = this.activeEffects.isEmpty() ? this.dummyEffects : this.activeEffects;
-            this.sortEffects(this.currentEffects);
-        }
-
         // Prevent from rendering twice when in inventory
         if (!this.fromInventory && PotionEffectsConfig.INSTANCE.showHudInForeground && mc.currentScreen instanceof InventoryEffectRenderer) {
             return false;

@@ -7,7 +7,9 @@ import cc.polyfrost.oneconfig.config.data.Mod;
 import cc.polyfrost.oneconfig.config.data.ModType;
 import cc.polyfrost.oneconfig.config.data.PageLocation;
 
+import cc.polyfrost.oneconfig.events.EventManager;
 import me.tellinq.potioneffects.PotionEffectsMod;
+import me.tellinq.potioneffects.event.UpdatePotionEffectsEvent;
 import me.tellinq.potioneffects.hud.PotionEffects;
 
 import net.minecraft.potion.Potion;
@@ -299,5 +301,8 @@ public class PotionEffectsConfig extends Config {
             this.addDependency(effectName + ".overrideColor", effectName + ".override");
             this.addDependency(effectName + ".overrideExclusion", effectName + ".override");
         }
+
+        this.addListener("sortingMethod", () -> EventManager.INSTANCE.post(new UpdatePotionEffectsEvent()));
+        this.addListener("verticalSorting", () -> EventManager.INSTANCE.post(new UpdatePotionEffectsEvent()));
     }
 }
