@@ -3,6 +3,15 @@ Display your active potion effects from a glance! **Powered by [OneConfig](https
 
 ***
 
+### Where are the releases?
+The latest version of Potion Effects requires OneConfig Pre-release. This is so recursive options will be visible in the GUI. You can, however, go back to normal releases when finished editing.
+
+Once recursive options are available in the release build, I will add Potion Effects to the Releases tab. If you want to try it early, go to the Actions page and download the latest artifacts.
+
+**You will need to log in to GitHub to download Actions artifacts.**
+
+***
+
 ## Main Features
 
 - Unlike most potion effects mods, this potion effects mod allows you to customize effects on a global *and* individual basis.
