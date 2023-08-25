@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(Minecraft.class)
 public class MinecraftMixin {
     @Inject(method = "loadWorld(Lnet/minecraft/client/multiplayer/WorldClient;Ljava/lang/String;)V", at = @At(value = "TAIL"))
-    private void inject$loadWolEnd(CallbackInfo ci) {
+    private void inject$loadWorldEnd(CallbackInfo ci) {
         EventManager.INSTANCE.post(new UpdatePotionEffectsEvent());
     }
 }
