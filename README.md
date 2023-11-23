@@ -22,12 +22,8 @@ Display your active potion effects from a glance! **Powered by [OneConfig](https
 More customization options can be found when using the mod!
 
 ## Credits
-I originally made improvements from the original Potion Effects mod in [CheatBreaker 2](https://cheatbreaker2.com). Most options such as excluding options have been ported to this. However, CheatBreaker 2 nor myself are the original creators of this mod hence why the following are listed below:
+I originally made improvements from the original Potion Effects mod in [CheatBreaker](https://cheatbreaker.net). Most options such as excluding options have been ported to this. However, CheatBreaker nor myself are the original creators of this mod hence why the following are listed below:
 
 - Mojang themselves actually display Potion Effects in your inventory
 - [bsprks and jadedcat](https://www.curseforge.com/minecraft/mc-mods/statuseffecthud) for making the original StatusEffectsHUD mod, allowing you to see effects active outside of your inventory.
 - [powns](https://www.youtube.com/c/pownsdev) for originally making a potion effects mod that allowed individual potion effects customization and allowing name formatting
-
-***
-
-This project follows the [Google Java Style Guide](http://google.github.io/styleguide/javaguide.html).
