@@ -32,6 +32,9 @@ import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.ResourceLocation;
 
 import java.util.*;
+import java.util.function.BiFunction;
+import java.util.function.BiPredicate;
+import java.util.function.Predicate;
 
 public class PotionEffects extends BasicHud {
 
@@ -81,6 +84,52 @@ public class PotionEffects extends BasicHud {
                     .put(Potion.absorption.id, PotionEffectsConfig.absorption)
                     .put(Potion.saturation.id, PotionEffectsConfig.saturation)
                     .build();
+
+    @Exclude private static final List<Comparator<PotionEffect>> sortingMethods = Arrays.asList(
+            Comparator.comparingInt(PotionEffect::getPotionID),
+            Comparator.comparing(effect -> I18n.format(effect.getEffectName())),
+            Comparator.comparingInt(PotionEffect::getDuration),
+            Comparator.comparingInt(PotionEffect::getAmplifier).reversed(),
+            Comparator.comparing(PotionEffect::getIsAmbient),
+            Comparator.comparing(PotionEffect::getIsShowParticles),
+            Comparator.comparing(effect -> Potion.potionTypes[effect.getPotionID()].isBadEffect())
+    );
+
+    @Exclude private final List<BiPredicate<Component, PotionEffect>> componentConditions = Arrays.asList(
+            (c, e) -> excludeCondition(c.permanentEffectsRule, e.getIsPotionDurationMax()),
+            (c, e) -> excludeCondition(c.ambientEffectsRule, e.getIsAmbient()),
+            (c, e) -> excludeCondition(c.emittingParticlesRule, e.getIsShowParticles()),
+            (c, e) -> excludeCondition(c.badEffectsRule, Potion.potionTypes[e.getPotionID()].isBadEffect()),
+            (c, e) -> excludeAmount(c.durationAmountRule, e.getDuration(), c.excludedDurationThreshold * 20.0F) && !e.getIsPotionDurationMax(),
+            (c, e) -> excludeAmount(c.amplifierAmountRule, e.getAmplifier(), c.excludedAmplifierValues - 1)
+    );
+
+    @Exclude
+    private final List<BiPredicate<Effect, PotionEffect>> conditions = Arrays.asList(
+            (s, e) -> excludeCondition(s.permanentEffectsRule, e.getIsPotionDurationMax()),
+            (s, e) -> excludeCondition(s.ambientEffectsRule, e.getIsAmbient()),
+            (s, e) -> excludeCondition(s.emittingParticlesRule, e.getIsShowParticles()),
+            (s, e) -> excludeCondition(s.badEffectsRule, Potion.potionTypes[e.getPotionID()].isBadEffect()),
+            (s, e) -> excludeAmount(s.excludeSetDuration, e.getDuration(), s.excludedDurationThreshold * 20.0F) && !e.getIsPotionDurationMax(),
+            (s, e) -> excludeAmount(s.excludeSetAmplifier, e.getAmplifier(), s.excludedAmplifierValues - 1)
+    );
+
+    @Exclude
+    private static final List<Predicate<Boolean>> conditionRules = Arrays.asList(
+            value -> false,
+            value -> value,
+            value -> !value
+    );
+
+
+    @Exclude
+    private static final List<BiFunction<Integer, Float, Boolean>> amountRules = Arrays.asList(
+            (Integer value, Float threshold) -> false,
+            (Integer value, Float threshold) -> value > threshold,
+            (Integer value, Float threshold) -> value < threshold,
+            (Integer value, Float threshold) -> Objects.equals(value.floatValue(), threshold),
+            (Integer value, Float threshold) -> !Objects.equals(value.floatValue(), threshold)
+    );
 
     /** Determines the mod's dimensional width. */
     private float width = 0f;
@@ -153,8 +202,8 @@ public class PotionEffects extends BasicHud {
      */
     @Subscribe
     private void onUpdatePotionEffects(UpdatePotionEffectsEvent event) {
-        if (this.mc.thePlayer != null) {
-            this.activeEffects = new ArrayList<>(this.mc.thePlayer.getActivePotionEffects());
+        if (mc.thePlayer != null) {
+            this.activeEffects = new ArrayList<>(mc.thePlayer.getActivePotionEffects());
             this.currentEffects = this.activeEffects.isEmpty() ? this.dummyEffects : this.activeEffects;
             this.sortEffects(this.currentEffects);
         }
@@ -219,7 +268,7 @@ public class PotionEffects extends BasicHud {
                 if (example && PotionEffectsConfig.INSTANCE.showExcludedEffects == 2) {
                     excluded = true;
                 } else if (example && PotionEffectsConfig.INSTANCE.showExcludedEffects == 1) {
-                    if (mc.displayHeight < this.height * scale * new ScaledResolution(mc).getScaleFactor()) {
+                    if (mc.displayHeight < this.getHeight(scale, example) * new ScaledResolution(mc).getScaleFactor()) {
                         this.height -= yAmount;
                         continue;
                     }
@@ -327,26 +376,6 @@ public class PotionEffects extends BasicHud {
         UGraphics.GL.popMatrix();
     }
 
-    public boolean showComponent(Component component, PotionEffect effect) {
-        if (!effect.getIsPotionDurationMax()) {
-            if (this.excludeAmount(component.durationAmountRule, effect.getDuration(), component.excludedDurationThreshold * 20.0F)) {
-                return false;
-            }
-
-        }
-
-        if (this.excludeCondition(component.permanentEffectsRule, effect.getIsPotionDurationMax())) {
-            return false;
-        }
-
-
-        return component.toggle &&
-                !this.excludeCondition(component.ambientEffectsRule, effect.getIsAmbient()) &&
-                !this.excludeCondition(component.emittingParticlesRule, effect.getIsShowParticles()) &&
-                !this.excludeCondition(component.badEffectsRule, Potion.potionTypes[effect.getPotionID()].isBadEffect()) &&
-                !this.excludeAmount(component.amplifierAmountRule, effect.getAmplifier(), component.excludedAmplifierValues - 1);
-    }
-
     public float textBuilder(String text, TextComponent component, Effect blinkingConfig, TextComponent color, float value, float yOffset, boolean example, boolean excluded) {
         StringBuilder builder = new StringBuilder();
         // I really hope there's a more efficient way of setting this up...
@@ -430,29 +459,7 @@ public class PotionEffects extends BasicHud {
      * @param effects {@link #currentEffects}
      */
     public void sortEffects(List<PotionEffect> effects) {
-        switch (PotionEffectsConfig.INSTANCE.sortingMethod) {
-            case 0:
-                effects.sort(Comparator.comparingInt(PotionEffect::getPotionID));
-                break;
-            case 1:
-                effects.sort(Comparator.comparing(effect -> I18n.format(effect.getEffectName())));
-                break;
-            case 2:
-                effects.sort(Comparator.comparingInt(PotionEffect::getDuration));
-                break;
-            case 3:
-                effects.sort(Comparator.comparingInt(PotionEffect::getAmplifier));
-                Collections.reverse(effects);
-                break;
-            case 4:
-                effects.sort(Comparator.comparing(PotionEffect::getIsAmbient));
-                break;
-            case 5:
-                effects.sort(Comparator.comparing(PotionEffect::getIsShowParticles));
-                break;
-            case 6:
-                effects.sort(Comparator.comparing(effect -> Potion.potionTypes[effect.getPotionID()].isBadEffect()));
-        }
+        effects.sort(sortingMethods.get(PotionEffectsConfig.INSTANCE.sortingMethod));
 
         effects.sort(Comparator.comparingDouble(effect -> -this.getEffectSetting(effect).orderPriority));
 
@@ -469,19 +476,18 @@ public class PotionEffects extends BasicHud {
      * @return False if the duration amount or tick counter is over the threshold.
      */
     private boolean showDuringBlink(Effect config, boolean blinkComponent, float duration, boolean example) {
-        if (config.blink && blinkComponent && duration <= config.blinkDuration * 20.0f) {
-            if (config.syncBlinking || (example && this.activeEffects.isEmpty())) {
-                float threshold = config.blinkSpeed / 3.0f;
-                if (this.ticks > threshold * 2) {
-                    this.ticks = 0;
-                }
-                return this.ticks <= threshold;
-            } else {
-                float threshold = 50 - config.blinkSpeed;
-                return duration % threshold <= threshold / 2.0f;
-            }
+        if (!(config.blink && blinkComponent && duration <= config.blinkDuration * 20.0F)) {
+            return true;
         }
-        return true;
+
+        if (config.syncBlinking || (example && this.activeEffects.isEmpty())) {
+            float threshold = config.blinkSpeed / 3.0F;
+            this.ticks %= (int) (threshold * 2);
+            return this.ticks <= threshold;
+        } else {
+            float threshold = 50 - config.blinkSpeed;
+            return duration % threshold <= threshold / 2.0F;
+        }
     }
 
     /**
@@ -489,13 +495,13 @@ public class PotionEffects extends BasicHud {
      * @return The specific effect config's based off the effectMap if overridden, or the global configuration if not overridden.
      */
     public Effect getEffectSetting(PotionEffect effect) {
-        for (Map.Entry<Integer, Effect> entry : effects.entrySet()) {
-            if (effect.getPotionID() == entry.getKey() && entry.getValue().override) {
-                return entry.getValue();
-            }
-        }
-        return PotionEffectsConfig.global;
+        return this.effects.entrySet().stream()
+                .filter(entry -> effect.getPotionID() == entry.getKey() && entry.getValue().override)
+                .map(Map.Entry::getValue)
+                .findFirst()
+                .orElse(PotionEffectsConfig.global);
     }
+
 
     /**
      * Checks if a certain category is overridden, or resorts to global.
@@ -516,74 +522,31 @@ public class PotionEffects extends BasicHud {
      * @return True if one of the exclusion conditions is set to true
      */
     private boolean excludePotions(Effect setting, PotionEffect effect) {
-        if (this.excludeCondition(setting.permanentEffectsRule, effect.getIsPotionDurationMax())) {
-            return true;
-        }
-
-        if (this.excludeCondition(setting.ambientEffectsRule, effect.getIsAmbient())) {
-            return true;
-        }
-
-        if (this.excludeCondition(setting.emittingParticlesRule, effect.getIsShowParticles())) {
-            return true;
-        }
-
-        if (this.excludeCondition(setting.badEffectsRule, Potion.potionTypes[effect.getPotionID()].isBadEffect())) {
-            return true;
-        }
-
-        if (this.excludeAmount(setting.excludeSetDuration, effect.getDuration(), setting.excludedDurationThreshold * 20.0F) && !effect.getIsPotionDurationMax()) {
-            return true;
-        }
-
-        if (this.excludeAmount(setting.excludeSetAmplifier, effect.getAmplifier(), setting.excludedAmplifierValues - 1)) {
-            return true;
-        }
-
-        return setting.exclude;
+        return setting.exclude || this.conditions.stream().anyMatch(condition -> condition.test(setting, effect));
     }
+
+    public boolean showComponent(Component component, PotionEffect effect) {
+        return component.toggle && this.componentConditions.stream().noneMatch(condition -> condition.test(component, effect));
+    }
+
 
     /**
      * @param rule The configuration rule
      * @param value The current effect's value
-     * @return True depending on if the current value satisfies the exclusion rule <br>
-     *     1: Matches the effect's value <br>
-     *     2: Does not match the effect's value
+     * @return True depending on if the current value satisfies the exclusion rule
      */
     protected boolean excludeCondition(int rule, boolean value) {
-        switch (rule) {
-            case 1:
-                return value;
-            case 2:
-                return !value;
-            default:
-                return false;
-        }
+        return conditionRules.get(rule).test(value);
     }
 
     /**
      * @param rule The configuration rule
      * @param value The current effect's value
      * @param threshold The threshold amount
-     * @return True depending on the rule number set <br>
-     *     1: Current value exceeds threshold <br>
-     *     2: Current value is below threshold <br>
-     *     3: Current value matches threshold <br>
-     *     4: Current value does not match threshold
+     * @return True depending on the rule number set
      */
     protected boolean excludeAmount(int rule, int value, float threshold) {
-        switch (rule) {
-            case 1:
-                return value > threshold;
-            case 2:
-                return value < threshold;
-            case 3:
-                return value == threshold;
-            case 4:
-                return value != threshold;
-            default:
-                return false;
-        }
+        return amountRules.get(rule).apply(value, threshold);
     }
 
     /**
