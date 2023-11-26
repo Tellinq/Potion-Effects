@@ -814,11 +814,6 @@ public class PotionEffects extends BasicHud {
     }
 
     public static class IconComponent extends Component {
-        /*@Page(
-                name = "Component Options",
-                location = PageLocation.BOTTOM
-        )
-        public Component component = new Component();*/
 
         @Slider(
                 name = "Icon Spacing",
@@ -833,13 +828,6 @@ public class PotionEffects extends BasicHud {
     }
 
     public static class EffectNameComponent extends TextComponent {
-
-        /*@Page(
-                name = "Text Component Options",
-                location = PageLocation.BOTTOM
-        )
-        public TextComponent textComponent = new TextComponent();*/
-
 
         @Text(
                 name = "Custom Name",
@@ -898,11 +886,6 @@ public class PotionEffects extends BasicHud {
     }
 
     public static class TextComponent extends Component {
-        /*@Page(
-                name = "Component Options",
-                location = PageLocation.BOTTOM
-        )
-        public Component component = new Component();*/
 
         @Checkbox(
                 name = "Bold Text",
