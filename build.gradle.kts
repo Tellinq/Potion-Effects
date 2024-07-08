@@ -65,7 +65,7 @@ dependencies {
     modCompileOnly("cc.polyfrost:oneconfig-$platform:0.2.0-alpha+")
 
     if (platform.isLegacyForge) {
-        compileOnly("org.spongepowered:mixin:0.8.5")
+        compileOnly("org.spongepowered:mixin:0.8.7")
         shade("cc.polyfrost:oneconfig-wrapper-launchwrapper:1.0.0-beta+")
     }
 }
