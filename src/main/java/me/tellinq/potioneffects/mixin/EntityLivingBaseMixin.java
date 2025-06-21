@@ -23,6 +23,11 @@ public class EntityLivingBaseMixin {
         EventManager.INSTANCE.post(new UpdatePotionEffectsEvent());
     }
 
+    @Inject(method = "addPotionEffect", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLivingBase;onChangedPotionEffect(Lnet/minecraft/potion/PotionEffect;Z)V", shift = At.Shift.AFTER))
+    private void inject$addPotionEffect2(CallbackInfo ci) {
+        EventManager.INSTANCE.post(new UpdatePotionEffectsEvent());
+    }
+
     @Inject(method = "removePotionEffect", at = @At(value = "TAIL"))
     public void inject$removePotionEffect(int potionId, CallbackInfo ci) {
         EventManager.INSTANCE.post(new UpdatePotionEffectsEvent());
