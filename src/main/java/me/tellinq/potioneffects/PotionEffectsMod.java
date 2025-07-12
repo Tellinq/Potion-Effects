@@ -2,7 +2,7 @@ package me.tellinq.potioneffects;
 
 import cc.polyfrost.oneconfig.utils.commands.CommandManager;
 
-import me.tellinq.potioneffects.command.ExampleCommand;
+import me.tellinq.potioneffects.command.PotionEffectsCommand;
 import me.tellinq.potioneffects.config.PotionEffectsConfig;
 
 @net.minecraftforge.fml.common.Mod(
@@ -23,6 +23,6 @@ public class PotionEffectsMod {
     public void onFMLInitialization(
             net.minecraftforge.fml.common.event.FMLInitializationEvent event) {
         config = new PotionEffectsConfig();
-        CommandManager.INSTANCE.registerCommand(ExampleCommand.class);
+        CommandManager.INSTANCE.registerCommand(PotionEffectsCommand.class);
     }
 }

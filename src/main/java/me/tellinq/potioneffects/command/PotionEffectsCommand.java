@@ -8,7 +8,7 @@ import me.tellinq.potioneffects.PotionEffectsMod;
 @Command(
         value = PotionEffectsMod.MODID,
         description = "Access the " + PotionEffectsMod.NAME + " GUI.")
-public class ExampleCommand {
+public class PotionEffectsCommand {
 
     /** Opens OneConfig's GUI when the user runs /potioneffects */
     @Main
