@@ -240,141 +240,65 @@ public class PotionEffects extends BasicHud {
     @Override
     protected void draw(UMatrixStack matrices, float x, float y, float scale, boolean example) {
         UGraphics.disableLighting();
-
         final int actualHorizontal = this.getHorizontalAlignment();
 
         float yOffset = 0;
         float tempWidth = 0;
         float yAmount = ICON_SIZE + PotionEffectsConfig.INSTANCE.verticalSpacing;
-
         this.height = (this.currentEffects.size() * yAmount) - PotionEffectsConfig.INSTANCE.verticalSpacing;
 
         UGraphics.GL.pushMatrix();
         UGraphics.GL.scale(scale, scale, 1);
         UGraphics.GL.translate(x / scale, y / scale, 0);
+
         for (PotionEffect effect : this.currentEffects) {
             float tempTempWidth = 0;
-            Effect effectSetting = this.getEffectSetting(effect);
-            // I wish there was a more efficient way of doing this...
-            Effect componentConfig = this.checkCategoryOverride(effectSetting, effectSetting.overrideComponent);
-            Effect amplifierConfig = this.checkCategoryOverride(effectSetting, effectSetting.overrideAmplifier);
-            Effect blinkingConfig = this.checkCategoryOverride(effectSetting, effectSetting.overrideBlinking);
-            Effect formattingConfig = this.checkCategoryOverride(effectSetting, effectSetting.overrideFormatting);
-            Effect colorConfig = this.checkCategoryOverride(effectSetting, effectSetting.overrideColor);
-            Effect exclusionConfig = this.checkCategoryOverride(effectSetting, effectSetting.overrideExclusion);
+            Effect[] configs = extractConfigs(effect);
+            boolean excluded = isEffectExcluded(effect, configs[5], example, yAmount, scale);
 
-            boolean excluded = false;
-            if (this.excludePotions(exclusionConfig, effect)) {
-                if (example && PotionEffectsConfig.INSTANCE.showExcludedEffects == 2) {
-                    excluded = true;
-                } else if (example && PotionEffectsConfig.INSTANCE.showExcludedEffects == 1) {
-                    if (mc.displayHeight < this.getHeight(scale, example) * new ScaledResolution(mc).getScaleFactor()) {
-                        this.height -= yAmount;
-                        continue;
-                    }
-                    excluded = true;
-                } else {
-                    this.height -= yAmount;
-                    continue;
-                }
-            }
+            if (excluded && !shouldRenderExcluded(example)) continue;
 
             Potion potion = Potion.potionTypes[effect.getPotionID()];
-            if (!potion.shouldRender(effect)) {
-                continue;
-            }
+            if (!potion.shouldRender(effect)) continue;
 
             UGraphics.GL.pushMatrix();
-            boolean showIcon = this.showComponent(componentConfig.statusIcon, effect);
-            boolean showEffectName = this.showComponent(componentConfig.effectName, effect);
-            boolean showDuration = this.showComponent(componentConfig.duration, effect);
+            boolean[] visibility = getComponentVisibility(configs[0], effect);
+            float iconSpacing = ICON_SIZE + configs[0].statusIcon.spacing;
 
-            float iconSpacing = ICON_SIZE + componentConfig.statusIcon.spacing;
-            if (showIcon) {
-                float iconTranslation = iconSpacing;
-                switch (actualHorizontal) {
-                    case 1:
-                        iconTranslation /= 2;
-                        break;
-                    case 2:
-                        iconTranslation = -iconTranslation;
-                }
-
-                UGraphics.GL.translate(iconTranslation, 0, 0);
+            if (visibility[0]) {
+                translateForIcon(actualHorizontal, iconSpacing);
             }
 
             this.componentAmount = 0;
-            this.oneComponentActive = !showEffectName || !showDuration;
-            if (showEffectName) {
-                StringBuilder titleBuilder = new StringBuilder();
+            this.oneComponentActive = !visibility[1] || !visibility[2];
 
-                titleBuilder.append(formattingConfig.effectName.customName.isEmpty() ? I18n.format(potion.getName()) : formattingConfig.effectName.customName);
-
-                int amplifier = Math.max(1, effect.getAmplifier() + 1);
-                if (amplifierConfig.effectName.amplifier
-                        && (amplifier != 1 || amplifierConfig.effectName.levelOne)) {
-                    titleBuilder.append(" ");
-                    if (!amplifierConfig.effectName.romanNumerals) {
-                        titleBuilder.append(RomanNumeral.INSTANCE.getCache(amplifier));
-                    } else {
-                        titleBuilder.append(amplifier);
-                    }
-                }
-
+            if (visibility[1]) {
+                String title = getEffectTitle(potion, effect, configs[3], configs[1]);
+                tempTempWidth = Math.max(tempTempWidth, this.textBuilder(title, configs[0].effectName, configs[2], configs[4].effectName, effect.getDuration(), yOffset, example, excluded));
                 ++this.componentAmount;
-                tempTempWidth = Math.max(tempTempWidth, this.textBuilder(titleBuilder.toString(), componentConfig.effectName, blinkingConfig, colorConfig.effectName, effect.getDuration(), yOffset, example, excluded));
             }
 
-            if (showDuration) {
-                String durationText = "";
-                if (effect.getIsPotionDurationMax()) {
-                    durationText = formattingConfig.duration.maxDurationString;
-                } else {
-                    switch (formattingConfig.duration.durationFormat) {
-                        case 0:
-                            durationText = Potion.getDurationString(effect);
-                            break;
-                        case 1:
-                            durationText = effect.getDuration() / 20 + "s";
-                            break;
-                        case 2:
-                            durationText = RomanNumeral.INSTANCE.getCache(effect.getDuration() / 20);
-                    }
-                }
-
+            if (visibility[2]) {
+                String duration = getDurationString(effect, configs[3]);
+                tempTempWidth = Math.max(tempTempWidth, this.textBuilder(duration, configs[0].duration, configs[2], configs[4].duration, effect.getDuration(), yOffset, example, excluded));
                 ++this.componentAmount;
-                tempTempWidth = Math.max(tempTempWidth, this.textBuilder(durationText, componentConfig.duration, blinkingConfig, colorConfig.duration, effect.getDuration(), yOffset, example, excluded));
             }
+
             UGraphics.GL.popMatrix();
-            if (showIcon) {
-                UGraphics.color4f(1f, 1f, 1f, excluded ? 0.5f : 1f);
-                mc.getTextureManager().bindTexture(this.EFFECTS_RESOURCE);
-                float iconX = 0;
-                switch (actualHorizontal) {
-                    case 1:
-                        iconX = this.width / 2f - (tempTempWidth - iconSpacing) / 2 - iconSpacing;
-                        break;
-                    case 2:
-                        iconX = this.width - ICON_SIZE;
-                }
 
-                if (showDuringBlink(blinkingConfig, blinkingConfig.statusIcon.blink, effect.getDuration(), example)) {
-                    float zLevel = ((GuiAccessor) mc.ingameGUI).getZLevel();
-                    ((GuiAccessor) mc.ingameGUI).setZLevel(999);
-                    mc.ingameGUI.drawTexturedModalRect(iconX, yOffset, potion.getStatusIconIndex() % 8 * 18, 198 + potion.getStatusIconIndex() / 8 * 18, 18, 18);
-                    ((GuiAccessor) mc.ingameGUI).setZLevel(zLevel);
-                }
-
+            if (visibility[0]) {
+                drawPotionIcon(potion, tempTempWidth, iconSpacing, actualHorizontal, yOffset, configs[2], effect, example, excluded);
                 tempTempWidth += iconSpacing;
             }
 
             yOffset += yAmount;
-            tempWidth = Math.max(tempTempWidth, tempWidth);
+            tempWidth = Math.max(tempWidth, tempTempWidth);
         }
 
         this.width = tempWidth;
         UGraphics.GL.popMatrix();
     }
+
 
     public float textBuilder(String text, TextComponent component, Effect blinkingConfig, TextComponent color, float value, float yOffset, boolean example, boolean excluded) {
         StringBuilder builder = new StringBuilder();
@@ -396,15 +320,14 @@ public class PotionEffects extends BasicHud {
         String builtTime = builder.toString();
 
         int width = fontRenderer.getStringWidth(builtTime);
-
-        float x = 0;
-        float timeY = yOffset + (fontRenderer.FONT_HEIGHT + 1) * (componentAmount - 1);
+        float timeY = yOffset + (fontRenderer.FONT_HEIGHT + 1) * componentAmount;
 
         if (this.oneComponentActive) {
             timeY = yOffset + fontRenderer.FONT_HEIGHT / 2f + 0.5f;
         }
 
         if (showDuringBlink(blinkingConfig, component.blink, value, example)) {
+            float x = 0;
             switch (this.getHorizontalAlignment()) {
                 case 1:
                     x = this.width / 2f - (float) width / 2;
@@ -417,6 +340,105 @@ public class PotionEffects extends BasicHud {
 
         return width;
     }
+
+    private Effect[] extractConfigs(PotionEffect effect) {
+        Effect setting = getEffectSetting(effect);
+        return new Effect[] {
+                checkCategoryOverride(setting, setting.overrideComponent),
+                checkCategoryOverride(setting, setting.overrideAmplifier),
+                checkCategoryOverride(setting, setting.overrideBlinking),
+                checkCategoryOverride(setting, setting.overrideFormatting),
+                checkCategoryOverride(setting, setting.overrideColor),
+                checkCategoryOverride(setting, setting.overrideExclusion)
+        };
+    }
+
+    private boolean isEffectExcluded(PotionEffect effect, Effect exclusionConfig, boolean example, float yAmount, float scale) {
+        if (!excludePotions(exclusionConfig, effect)) return false;
+
+        int mode = PotionEffectsConfig.INSTANCE.showExcludedEffects;
+        if (example) {
+            if (mode == 2) return true;
+            if (mode == 1) {
+                if (mc.displayHeight < getHeight(scale, example) * new ScaledResolution(mc).getScaleFactor()) {
+                    this.height -= yAmount;
+                    return true;
+                }
+                return true;
+            }
+        }
+
+        this.height -= yAmount;
+        return true;
+    }
+
+    private boolean shouldRenderExcluded(boolean example) {
+        return example && PotionEffectsConfig.INSTANCE.showExcludedEffects > 0;
+    }
+
+    private boolean[] getComponentVisibility(Effect componentConfig, PotionEffect effect) {
+        return new boolean[] {
+                showComponent(componentConfig.statusIcon, effect),
+                showComponent(componentConfig.effectName, effect),
+                showComponent(componentConfig.duration, effect)
+        };
+    }
+
+    private void translateForIcon(int actualHorizontal, float spacing) {
+        float translation = spacing;
+        if (actualHorizontal == 1) translation /= 2;
+        else if (actualHorizontal == 2) translation = -spacing;
+        UGraphics.GL.translate(translation, 0, 0);
+    }
+
+    private String getEffectTitle(Potion potion, PotionEffect effect, Effect formatting, Effect amplifierConfig) {
+        String base = formatting.effectName.customName.isEmpty()
+                ? I18n.format(potion.getName())
+                : formatting.effectName.customName;
+
+        int amp = Math.max(1, effect.getAmplifier() + 1);
+        if (amplifierConfig.effectName.amplifier && (amp != 1 || amplifierConfig.effectName.levelOne)) {
+            base += " ";
+            base += amplifierConfig.effectName.romanNumerals ? amp : RomanNumeral.INSTANCE.getCache(amp);
+        }
+
+        return base;
+    }
+
+    private String getDurationString(PotionEffect effect, Effect formatting) {
+        if (effect.getIsPotionDurationMax()) return formatting.duration.maxDurationString;
+        switch (formatting.duration.durationFormat) {
+            case 0: return Potion.getDurationString(effect);
+            case 1: return effect.getDuration() / 20 + "s";
+            case 2: return RomanNumeral.INSTANCE.getCache(effect.getDuration() / 20);
+            default: return "";
+        }
+    }
+
+    private void drawPotionIcon(Potion potion, float tempWidth, float spacing, int alignment, float yOffset, Effect blinkingConfig, PotionEffect effect, boolean example, boolean excluded) {
+        UGraphics.color4f(1f, 1f, 1f, excluded ? 0.5f : 1f);
+        mc.getTextureManager().bindTexture(this.EFFECTS_RESOURCE);
+
+        float iconX = 0;
+        switch (alignment) {
+            case 1:
+                iconX = this.width / 2f - (tempWidth - spacing) / 2 - spacing;
+                break;
+            case 2:
+                iconX = this.width - ICON_SIZE;
+        }
+
+        if (showDuringBlink(blinkingConfig, blinkingConfig.statusIcon.blink, effect.getDuration(), example)) {
+            float zLevel = ((GuiAccessor) mc.ingameGUI).getZLevel();
+            ((GuiAccessor) mc.ingameGUI).setZLevel(999);
+            mc.ingameGUI.drawTexturedModalRect(iconX, yOffset,
+                    potion.getStatusIconIndex() % 8 * 18,
+                    198 + potion.getStatusIconIndex() / 8 * 18,
+                    18, 18);
+            ((GuiAccessor) mc.ingameGUI).setZLevel(zLevel);
+        }
+    }
+
 
     /**
      * Gets the horizontal alignment based off the mod's {@link #position} anchor.
